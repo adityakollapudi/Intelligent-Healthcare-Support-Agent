@@ -13,6 +13,9 @@ ignore = ["B008"]
 "tests/**" = ["S101", "S105", "S106"]
 "migrations/versions/**" = ["E501"]
 "scripts/seed_data.py" = ["E501"]
+"data/evaluation/*.py" = ["E501"]
+"app/rag/intent.py" = ["E501"]  # long regular expressions read better unbroken
+"scripts/evaluate_rag.py" = ["E501"]  # markdown report table rows
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

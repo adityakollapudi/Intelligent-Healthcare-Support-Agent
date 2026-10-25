@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
-from app.models import Claim, Member, Organization, Plan, PlanBenefit, User
+from app.models import Claim, Member, Organization, PaRequirement, PaRequirementSet, Plan, PlanBenefit, User
 from scripts import seed_data
 
 MIN_SEED_PASSWORD_LENGTH = 12
@@ -98,6 +98,16 @@ def seed(session: Session, user_password: str) -> SeedSummary:
         _get_or_add(session, summary, "claims", Claim, {"claim_number": c["claim_number"]},
                     {**values, "member_id": member.id, "plan_id": member.plan_id,
                      "provider_organization_id": provider_org_id, "is_synthetic": True})
+
+    for s in seed_data.PA_REQUIREMENT_SETS:
+        values = {k: v for k, v in s.items() if k not in ("procedure_code", "version", "requirements")}
+        req_set = _get_or_add(session, summary, "pa_requirement_sets", PaRequirementSet,
+                              {"procedure_code": s["procedure_code"], "version": s["version"]},
+                              {**values, "is_synthetic": True})
+        for order, r in enumerate(s["requirements"], start=1):
+            _get_or_add(session, summary, "pa_requirements", PaRequirement,
+                        {"requirement_set_id": req_set.id, "requirement_code": r["requirement_code"]},
+                        {**{k: v for k, v in r.items() if k != "requirement_code"}, "display_order": order})
     return summary
 
 

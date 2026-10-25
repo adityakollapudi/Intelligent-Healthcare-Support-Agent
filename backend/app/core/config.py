@@ -39,6 +39,36 @@ class Settings(BaseSettings):
 
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
 
+    # --- RAG / AI (Phase 4; doc 07, ADR-12) ---------------------------------------------------
+    # "anthropic" calls Claude; "extractive" composes answers from retrieved sentences without an
+    # LLM (explicit, labeled mode for environments without an approved model). Never auto-switched.
+    llm_provider: Literal["anthropic", "extractive"] = "extractive"
+    llm_model: str = "claude-opus-5-5"
+    llm_effort: Literal["low", "medium", "high"] = "low"
+    llm_timeout_seconds: float = Field(default=30.0, ge=1, le=300)
+    llm_max_retries: int = Field(default=1, ge=0, le=3)
+    llm_max_output_tokens: int = Field(default=1500, ge=256, le=16000)
+    anthropic_api_key: SecretStr | None = None
+
+    # "fastembed" runs the model locally on CPU; "hash" is a deterministic test double (tests only).
+    embedding_provider: Literal["fastembed", "hash"] = "fastembed"
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_dim: int = Field(default=384, ge=8, le=4096)
+    embedding_cache_dir: str = ".local/models"
+
+    rag_knowledge_dir: str = "data/knowledge"
+    rag_chunk_words: int = Field(default=160, ge=40, le=1000)
+    rag_chunk_overlap_words: int = Field(default=30, ge=0, le=300)
+    rag_top_k: int = Field(default=5, ge=1, le=20)
+    rag_min_relevance: float = Field(default=0.70, ge=0.0, le=1.0)  # calibrated for bge-small; see eval report
+    rag_context_char_budget: int = Field(default=6000, ge=1000, le=50000)
+
+    chat_max_message_chars: int = Field(default=4000, ge=100, le=8000)
+    chat_history_messages: int = Field(default=6, ge=0, le=20)
+    chat_rate_limit_per_minute: int = Field(default=20, ge=1, le=600)
+    chat_session_retention_days: int = Field(default=30, ge=1, le=365)
+    tool_max_calls_per_message: int = Field(default=3, ge=1, le=10)
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
@@ -66,6 +96,18 @@ class Settings(BaseSettings):
         if not url.database:
             raise ValueError("DATABASE_URL must name a database")
         return value
+
+    @model_validator(mode="after")
+    def _ai_settings(self) -> Settings:
+        if self.llm_provider == "anthropic" and not (
+            self.anthropic_api_key and self.anthropic_api_key.get_secret_value().strip()
+        ):
+            raise ValueError("ANTHROPIC_API_KEY is required when LLM_PROVIDER=anthropic")
+        if self.rag_chunk_overlap_words >= self.rag_chunk_words:
+            raise ValueError("RAG_CHUNK_OVERLAP_WORDS must be smaller than RAG_CHUNK_WORDS")
+        if self.embedding_provider == "hash" and self.app_env != "test":
+            raise ValueError("EMBEDDING_PROVIDER=hash is a test double and is only allowed when APP_ENV=test")
+        return self
 
     @model_validator(mode="after")
     def _production_guards(self) -> Settings:

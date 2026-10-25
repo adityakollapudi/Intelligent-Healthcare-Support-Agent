@@ -72,6 +72,39 @@ export const authRoutes = (role: keyof typeof ME): Record<string, Handler> => ({
   "GET /auth/me": () => json(200, ME[role]),
   "POST /auth/logout": () => new Response(null, { status: 204 }),
   "GET /health": () => json(200, { status: "ok", checks: { api: "ok", database: "ok" }, time: "2026-10-25T12:00:00Z" }),
+  "GET /chat/sessions": () => json(200, { items: [], next_cursor: null }),
+});
+
+export const chatAnswer = (overrides: Record<string, unknown> = {}) => ({
+  session_id: "s-1",
+  message_id: `m-${Math.random().toString(36).slice(2)}`,
+  intent: "GENERAL_FAQ",
+  answer_type: "DOCUMENT_GROUNDED",
+  evidence_status: "SUPPORTED",
+  answer_text: "Physical therapy is limited to 20 visits per plan year [C1].",
+  citations: [
+    {
+      marker: "C1",
+      chunk_id: "c-1",
+      document_id: "d-1",
+      document_title: "Synthetic Gold Plan Benefit Guide",
+      document_type: "BENEFIT_GUIDE",
+      document_version: "1.0",
+      effective_date: "2026-01-01",
+      section_heading: "Physical therapy",
+      page_start: null,
+      page_end: null,
+      excerpt: "Coverage is limited to 20 visits per plan year.",
+    },
+  ],
+  tool_executions: [],
+  proposed_actions: [],
+  escalation: { offered: false, reason: null },
+  disclaimers: ["Information comes from synthetic prototype documents and is not a coverage or authorization decision."],
+  latency_ms: 50,
+  created_at: "2026-10-25T12:00:00Z",
+  data_environment: "SYNTHETIC_PROTOTYPE",
+  ...overrides,
 });
 
 export const CLAIM_101 = {

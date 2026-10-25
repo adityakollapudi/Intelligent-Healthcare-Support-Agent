@@ -15,6 +15,8 @@ export interface RequestOptions<T> {
   auth?: boolean;
   /** Return null on 2xx-with-no-body (204). */
   expectEmpty?: boolean;
+  /** Extra request headers (e.g. Idempotency-Key). Authorization and Content-Type are set here, not by callers. */
+  headers?: Record<string, string>;
 }
 
 interface SessionHooks {
@@ -62,7 +64,7 @@ async function readJson(response: Response): Promise<unknown> {
 
 export async function apiRequest<T>(path: string, options: RequestOptions<T> = {}): Promise<T> {
   const { method = "GET", query, body, signal, validate, auth = true, expectEmpty = false } = options;
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = { ...options.headers, Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const token = auth ? hooks.getToken() : null;
   if (token) headers.Authorization = `Bearer ${token}`;

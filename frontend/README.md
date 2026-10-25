@@ -1,4 +1,4 @@
-# IHSA Frontend (Phase 3)
+# IHSA Frontend (Phases 3–5)
 
 React + TypeScript + Vite user interface for the **Intelligent Healthcare Support Agent**, an internship prototype that uses **synthetic data only** and is not an Evernorth product. Architecture and decisions are in [`docs/phase-3/frontend-implementation.md`](../docs/phase-3/frontend-implementation.md).
 
@@ -40,9 +40,11 @@ Open **http://localhost:5173** (not 127.0.0.1): the backend's default `CORS_ORIG
 | Service status indicator | **Connected**: `GET /health`, checked every 60 s |
 | My claims (list, status filter, lookup) | **Connected**: `GET /claims`, `GET /claims/{claim_number}` |
 | Plan benefits (own plan; staff search; category filter) | **Connected**: `GET /benefits/{plan_code}` |
-| Assistant (chat) | UI ready. Sends nothing until `POST /chat` exists (Phase 4) |
+| Assistant (chat) | **Connected** (Phase 4): `POST /chat`, `GET /chat/sessions`, `GET /chat/sessions/{id}`. Shows answers, evidence status, citations, "Recent conversations", and actions. Actions whose backend isn't built yet appear disabled |
 | Documents | File selection and client checks work. Upload is disabled until Phase 6 |
-| PA readiness, support cases, case queue, admin dashboard | UI ready, showing an honest "not connected" state (Phases 5–7) |
+| Assistant tool results (Phase 5) | Claim, benefit and requirement records render as cards from the response `records`; each lookup shows a badge. A proposed support case opens a confirmation dialog and is created only on confirm (`POST /support-cases` with the server-issued `Idempotency-Key`); the case number appears only after the backend returns it |
+| Support cases | **Connected** (Phase 5): list with status filter, case detail with history, and a "New case" form with review and confirmation |
+| PA readiness, case queue, admin dashboard | UI ready, showing an honest "not connected" state (Phases 6–7) |
 
 ## Troubleshooting
 | Symptom | Fix |

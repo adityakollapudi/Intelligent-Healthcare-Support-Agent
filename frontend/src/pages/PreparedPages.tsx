@@ -3,7 +3,7 @@
 import { Link } from "react-router-dom";
 
 import { ChecklistLegend, READINESS_DISCLAIMER } from "../components/Checklist";
-import { Alert, Button, EmptyState, FeatureUnavailable, PageHeader } from "../components/ui";
+import { Alert, EmptyState, FeatureUnavailable, PageHeader } from "../components/ui";
 import { features } from "../lib/features";
 
 export function ReadinessPage() {
@@ -22,27 +22,6 @@ export function ReadinessPage() {
         <h2>Checklists</h2>
         <EmptyState title="No checklists yet">Checklists appear here after documents are analyzed and a readiness check is run.</EmptyState>
       </section>
-    </>
-  );
-}
-
-export function CasesPage() {
-  return (
-    <>
-      <PageHeader
-        title="Support cases"
-        description="Ask a support agent for help and track your requests."
-        actions={
-          <Button disabled aria-describedby="new-case-reason">
-            New case
-          </Button>
-        }
-      />
-      <p id="new-case-reason" className="muted small">
-        Creating cases is disabled until the support-case service is connected (Phase {features.supportCases.phase}).
-      </p>
-      <FeatureUnavailable feature={features.supportCases} />
-      <EmptyState title="No cases to show">Your cases will be listed here with their status and last update.</EmptyState>
     </>
   );
 }
@@ -79,7 +58,7 @@ export function ProviderWorkspacePage() {
         </Link>
         <Link className="tile" to="/chat">
           <span className="tile-title">Ask about requirements</span>
-          <span className="muted small">Assistant arrives in Phase {features.chat.phase}</span>
+          <span className="muted small">Available now</span>
         </Link>
         <Link className="tile" to="/documents">
           <span className="tile-title">Upload a document</span>

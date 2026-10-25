@@ -11,6 +11,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
   tone = "primary",
+  busy = false,
 }: {
   open: boolean;
   title: string;
@@ -19,6 +20,8 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
   tone?: "primary" | "danger";
+  /** While true the confirm button shows progress and can't be pressed again. */
+  busy?: boolean;
 }) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -63,7 +66,7 @@ export function ConfirmDialog({
           <Button variant="secondary" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant={tone} onClick={onConfirm}>
+          <Button variant={tone} onClick={onConfirm} busy={busy}>
             {confirmLabel}
           </Button>
         </div>

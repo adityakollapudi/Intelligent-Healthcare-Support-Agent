@@ -16,7 +16,7 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Local runtime data (private PostgreSQL cluster, logs, uploads)
+# Local runtime data (private PostgreSQL cluster, downloaded embedding model, logs, uploads)
 .local/
 *.log
 uploads/

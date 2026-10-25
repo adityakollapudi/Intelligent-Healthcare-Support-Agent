@@ -33,11 +33,14 @@ def test_all_routes_use_the_versioned_prefix(app):
     assert all(path.startswith("/api/v1/") for path, _ in _api_routes(app))
 
 
-def test_implemented_routes_match_the_phase2_contract(app):
+def test_implemented_routes_match_the_contract(app):
     implemented = {(m, path) for path, r in _api_routes(app) for m in r.methods}
     assert implemented == PUBLIC_ROUTES | {
         ("POST", "/api/v1/auth/logout"), ("GET", "/api/v1/auth/me"), ("GET", "/api/v1/claims"),
         ("GET", "/api/v1/claims/{claim_number}"), ("GET", "/api/v1/benefits/{plan_code}"),
+        ("POST", "/api/v1/chat"), ("GET", "/api/v1/chat/sessions"), ("GET", "/api/v1/chat/sessions/{session_id}"),
+        ("POST", "/api/v1/support-cases"), ("GET", "/api/v1/support-cases"),
+        ("GET", "/api/v1/support-cases/{case_id}"), ("GET", "/api/v1/authorization/requirements/{procedure_code}"),
     }
 
 
@@ -50,13 +53,13 @@ def test_every_non_public_route_requires_authentication(app):
                 continue
             assert get_current_principal in set(_flatten(route.dependant)), f"{method} {path} lacks auth"
             checked += 1
-    assert checked == 5
+    assert checked == 12
 
 
 def test_openapi_documents_the_response_schemas(client):
     spec = client.get("/api/v1/openapi.json").json()
     for name in ("HealthResponse", "LoginResponse", "MeResponse", "ClaimDetail", "ClaimPage",
-                 "BenefitsResponse", "ErrorResponse"):
+                 "BenefitsResponse", "ErrorResponse", "CaseDetail", "CasePage", "RequirementSetResponse"):
         assert name in spec["components"]["schemas"]
     assert "/api/v1/claims/{claim_number}" in spec["paths"]
 

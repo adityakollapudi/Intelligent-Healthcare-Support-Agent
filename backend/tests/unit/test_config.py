@@ -7,7 +7,9 @@ STRONG_SECRET = "x" * 48
 
 
 def _load(**overrides):
-    values = {"database_url": GOOD_URL, "jwt_secret": STRONG_SECRET, "_env_file": None}
+    # embedding_provider is explicit: the test environment sets the hash test double globally.
+    values = {"database_url": GOOD_URL, "jwt_secret": STRONG_SECRET, "_env_file": None,
+              "embedding_provider": "fastembed"}
     values.update(overrides)
     return load_settings(**values)
 

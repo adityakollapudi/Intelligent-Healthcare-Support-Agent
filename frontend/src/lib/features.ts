@@ -9,7 +9,12 @@ export interface FeatureInfo {
 export const features = {
   claims: { available: true, phase: 2, endpoints: ["GET /claims", "GET /claims/{claim_number}"], description: "Claim lookup" },
   benefits: { available: true, phase: 2, endpoints: ["GET /benefits/{plan_code}"], description: "Plan benefits" },
-  chat: { available: false, phase: 4, endpoints: ["POST /chat"], description: "AI assistant answers with citations" },
+  chat: {
+    available: true,
+    phase: 4,
+    endpoints: ["POST /chat", "GET /chat/sessions", "GET /chat/sessions/{id}"],
+    description: "Document-grounded answers with citations, plus claim, benefit and requirement lookups",
+  },
   documents: {
     available: false,
     phase: 6,
@@ -23,9 +28,9 @@ export const features = {
     description: "Prior authorization readiness checklists",
   },
   supportCases: {
-    available: false,
+    available: true,
     phase: 5,
-    endpoints: ["POST /support-cases", "GET /support-cases"],
+    endpoints: ["POST /support-cases", "GET /support-cases", "GET /support-cases/{id}"],
     description: "Support case creation and tracking",
   },
   agentWorkspace: {

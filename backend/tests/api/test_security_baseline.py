@@ -37,7 +37,7 @@ def test_sensitive_fields_never_serialized(client, auth):
 
 
 def test_production_app_hides_docs_and_openapi():
-    settings = load_settings(app_env="production", jwt_secret="p" * 48, _env_file=None,
+    settings = load_settings(app_env="production", jwt_secret="p" * 48, _env_file=None, embedding_provider="fastembed",
                              database_url="postgresql+psycopg://ihsa_app@db.example.test:5432/ihsa")
     prod_client = TestClient(create_app(settings), raise_server_exceptions=False)
     assert prod_client.get("/docs").status_code == 404
