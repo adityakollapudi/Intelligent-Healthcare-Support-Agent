@@ -33,6 +33,8 @@ ALLOWED_METADATA_KEYS = frozenset({
     # Phase 6 (documents, readiness): types, sizes, enums and counts only, never document content.
     "mime_type", "size_bytes", "declared_purpose", "job_status", "document_type", "readiness_status",
     "satisfied_count", "missing_count", "unreadable_count", "manual_review_count", "document_count",
+    # Phase 7 (case workflow): status values only; notes are never audited.
+    "from_status", "to_status",
 })
 
 

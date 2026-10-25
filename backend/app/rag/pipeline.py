@@ -20,6 +20,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.cases import escalation
 from app.core.config import Settings
 from app.models import DocumentChunk, KnowledgeDocument
 from app.rag import citations as citation_check
@@ -122,16 +123,18 @@ def _case_summary(question: str, history: list[tuple[str, str]]) -> str:
 
 def case_offer(ctx: TurnContext, reason: str, category: str) -> Action:
     """Escalation offer built by the server (not a tool call). Creating it still needs the user's
-    confirmed POST /support-cases with the server-issued idempotency key below."""
+    confirmed POST /support-cases with the server-issued idempotency key below. Category and reason
+    come from the central escalation policy (app.cases.escalation)."""
+    decision = escalation.decide(reason, category)
     return Action(
         "CREATE_SUPPORT_CASE",
         "Ask a support agent",
         requires_confirmation=True,
         available=ctx.can_create_cases,
         prefill={
-            "category": category,
+            "category": decision.category,
             "summary": _case_summary(ctx.question, ctx.history),
-            "escalation_reason": reason,
+            "escalation_reason": decision.escalation_reason,
             "related_session_id": str(ctx.session_id) if ctx.session_id else None,
             "idempotency_key": str(uuid4()),
         },

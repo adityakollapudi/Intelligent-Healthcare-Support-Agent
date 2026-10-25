@@ -75,6 +75,10 @@ class SupportCase(UUIDPrimaryKey, Timestamps, Base):
     summary: Mapped[str] = mapped_column(String(2000))
     related_session_id: Mapped[UUID | None] = mapped_column(ForeignKey("conversation_sessions.id", ondelete="SET NULL"))
     related_claim_id: Mapped[UUID | None] = mapped_column(ForeignKey("claims.id", ondelete="RESTRICT"))
+    # Phase 7: a readiness checklist sent for human review (must be the creator's own).
+    related_checklist_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("authorization_checklists.id", ondelete="RESTRICT"), index=True
+    )
     evidence_references: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
     resolution_note: Mapped[str | None] = mapped_column(String(2000))
     idempotency_key: Mapped[UUID]
@@ -86,6 +90,17 @@ class SupportCase(UUIDPrimaryKey, Timestamps, Base):
     events: Mapped[list["SupportCaseEvent"]] = relationship(
         cascade="all, delete-orphan", order_by="SupportCaseEvent.created_at"
     )
+    documents: Mapped[list["SupportCaseDocument"]] = relationship(cascade="all, delete-orphan")
+
+
+class SupportCaseDocument(Base):
+    """Uploaded documents linked to a case (doc 05 §2.19); owned by the case creator at link time."""
+
+    __tablename__ = "support_case_documents"
+
+    case_id: Mapped[UUID] = mapped_column(ForeignKey("support_cases.id", ondelete="CASCADE"), primary_key=True)
+    uploaded_document_id: Mapped[UUID] = mapped_column(ForeignKey("uploaded_documents.id"), primary_key=True)
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
 
 
 class SupportCaseEvent(UUIDPrimaryKey, CreatedAt, Base):

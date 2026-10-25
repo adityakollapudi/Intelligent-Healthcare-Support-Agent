@@ -1,4 +1,4 @@
-# IHSA Backend (Phases 2–6)
+# IHSA Backend (Phases 2–7)
 
 FastAPI + PostgreSQL backend for the **Intelligent Healthcare Support Agent**: an independent internship case-study prototype that uses **synthetic data only**. It is not an Evernorth product and connects to no real system.
 
@@ -70,7 +70,11 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 | `POST /chat` | any role (`chat:use`) | `{message, client_message_id, session_id?}` → a document-grounded answer with validated citations, or an explicit insufficient-evidence / clarification / not-supported response. Retrieval is filtered by role audience and (for members) own plan. A repeated `client_message_id` returns the stored answer. 503 `AI_SERVICE_UNAVAILABLE` on embedding/LLM failure (never reported as "no information"). See `docs/phase-4/rag-implementation.md` |
 | `GET /chat/sessions`, `GET /chat/sessions/{id}` | any role (own sessions only) | Recent conversations and their messages (including `tool_executions` and `records`). Another user's session returns 404 |
 | `POST /support-cases` | `MEMBER`, `PROVIDER` (`cases:create`) | Requires an `Idempotency-Key: <UUID>` header. `201` creates an `OPEN` case (`CASE-YYYY-NNNNNN`) with its event and audit row in one transaction; `200` is a replay of the same key and body; `409 IDEMPOTENCY_KEY_REUSED` means the same key was sent with a different body. Server-controlled fields are rejected (422). See `docs/phase-5/api-and-workflow-contracts.md` |
-| `GET /support-cases`, `GET /support-cases/{id}` | `MEMBER`, `PROVIDER` (own cases only) | `?status=` (repeatable), `?limit=` 1–100. Another user's case returns 404 |
+| `GET /support-cases?scope=mine\|queue\|assigned\|all`, `GET /support-cases/{id}` | creator (`mine`), `SUPPORT_AGENT` (`queue` = unassigned OPEN, `assigned`), `ADMIN` (`all`, summary view) | Filters `status`, `category`, `case_number`, `created_from/to`; keyset `cursor`. Scope is enforced from the role; cases outside it return 404 |
+| `PATCH /support-cases/{id}` | creator, assigned agent, admin | Validated lifecycle change (doc 02 §3.1) or note: `{version, status?, note?, resolution_note?, assign_to_me?, release?, assigned_to_user_id?, unassign?, reason?}`. 409 `VERSION_CONFLICT` / `INVALID_STATUS_TRANSITION`, 422 `INVALID_ASSIGNEE`. History and audit are written in the same transaction. See `docs/phase-7/` |
+| `GET /admin/metrics`, `GET /admin/knowledge-gaps` | `ADMIN` | Aggregate counts for a UTC date range (≤366 days); definitions in `docs/phase-7/dashboard-metrics.md` |
+| `GET /admin/audit-events` | `ADMIN` | Read-only audit log with filters and cursor paging |
+| `GET /admin/support-agents` | `ADMIN` | Active agents for assignment |
 | `GET /authorization/requirements/{procedure_code}` | any role with `requirements:read` | Configured documentation requirements for a fictional procedure (e.g. `SYN-PROC-MRI-LUMBAR`), each with its verified source passage. Not an approval |
 
 | `POST /documents` (multipart) | `MEMBER`, `PROVIDER` | Upload a synthetic PDF/PNG/JPEG (≤10 MB, ≤20 pages). Validated by extension, declared type, file signature and content. Stored privately (`.local/uploads`); `201` means stored, **not analyzed** |

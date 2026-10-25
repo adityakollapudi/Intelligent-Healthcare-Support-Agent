@@ -34,13 +34,13 @@ export const features = {
     description: "Support case creation and tracking",
   },
   agentWorkspace: {
-    available: false,
+    available: true,
     phase: 7,
     endpoints: ["GET /support-cases?scope=queue", "PATCH /support-cases/{id}"],
     description: "Assigned-case review",
   },
   adminDashboard: {
-    available: false,
+    available: true,
     phase: 7,
     endpoints: ["GET /admin/metrics", "GET /admin/audit-events"],
     description: "Aggregate metrics and audit events",

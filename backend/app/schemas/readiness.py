@@ -77,6 +77,17 @@ class ChecklistSummary(ApiModel):
     created_at: UtcDatetime
 
 
+class EscalationOffer(ApiModel):
+    """Server-decided offer to send the checklist to a support agent (app.cases.escalation).
+    Nothing is created until the user confirms POST /support-cases with this prefill."""
+
+    category: str
+    escalation_reason: str
+    summary: str
+    related_checklist_id: UUID
+    document_ids: list[UUID]
+
+
 class ChecklistDetail(ChecklistSummary):
     display_name: str
     requirement_set_version: str
@@ -87,6 +98,7 @@ class ChecklistDetail(ChecklistSummary):
     warnings: list[str]
     provider_note: str | None
     reviewer_summary: str
+    escalation_offer: EscalationOffer | None = None
     disclaimer: str = DISCLAIMER
     data_environment: DataEnvironment = DATA_ENVIRONMENT
 

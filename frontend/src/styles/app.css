@@ -214,3 +214,15 @@ tbody tr:last-child td { border-bottom: 0; }
 .check-row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: 4px 0; }
 fieldset.field { border: 0; padding: 0; margin: 0 0 var(--space-3); }
 fieldset.field legend { font-weight: 600; margin-bottom: var(--space-1); }
+
+/* Phase 7: agent workspace and admin dashboard */
+.filters { align-items: flex-end; gap: var(--space-2); flex-wrap: wrap; margin: var(--space-2) 0; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3); margin: var(--space-3) 0; }
+.stat-value { font-size: 1.8rem; font-weight: 700; margin: 0; }
+.stat-label { font-weight: 600; margin: 0; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-3); margin: var(--space-3) 0; }
+table.bars { width: 100%; border-collapse: collapse; }
+table.bars th { text-align: left; font-weight: 400; padding: 2px var(--space-2) 2px 0; white-space: nowrap; width: 1%; }
+table.bars td { padding: 2px 0; }
+table.bars .bar { display: block; height: 12px; background: var(--teal-700); border-radius: 3px; min-width: 2px; }
+.num { text-align: right; font-variant-numeric: tabular-nums; padding-left: var(--space-2); }

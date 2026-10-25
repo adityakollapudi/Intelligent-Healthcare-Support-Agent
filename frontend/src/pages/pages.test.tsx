@@ -373,30 +373,12 @@ describe("chat rendering safety and unavailable mode", () => {
   });
 });
 
-describe("prepared screens never show fabricated data", () => {
-  it.each([
-    ["SUPPORT_AGENT", "/agent", "Assigned-case review: not available in this build"],
-    ["ADMIN", "/admin", "Aggregate metrics and audit events: not available in this build"],
-  ] as const)("%s %s states the feature is not connected", async (role, path, text) => {
-    const { calls } = mockApi(authRoutes(role));
-    const { navigate } = await renderSignedIn();
-    navigate(path);
-    expect(await screen.findByText(text)).toBeInTheDocument();
-    // Only identity, health and (on the member's home chat) the conversation list are called.
-    expect(calls.every((c) => ["/auth/login", "/auth/me", "/health", "/chat/sessions"].includes(c.path))).toBe(true);
-  });
-
-  it("readiness explains it is not an approval and uses the four Phase 1 statuses", async () => {
+describe("readiness screen basics", () => {
+  it("explains readiness is not an approval and uses the four Phase 1 statuses", async () => {
     mockApi(authRoutes("PROVIDER"));
     const { navigate } = await renderSignedIn();
     navigate("/readiness");
     expect(await screen.findByText(/not an authorization approval, denial/)).toBeInTheDocument();
-    for (const label of ["Satisfied", "Missing", "Unreadable", "Needs manual review"]) expect(screen.getByText(label)).toBeInTheDocument();
-  });
-
-  it("admin dashboard shows no numbers", async () => {
-    mockApi(authRoutes("ADMIN"));
-    await renderSignedIn();
-    expect(screen.getByRole("main").textContent).not.toMatch(/\d{2,}/);
+    for (const label of ["Satisfied", "Missing", "Unreadable", "Needs manual review"]) expect(screen.getAllByText(label).length).toBeGreaterThan(0);
   });
 });
