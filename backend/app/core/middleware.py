@@ -55,3 +55,31 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             return response
         finally:
             request_id_var.reset(token)
+
+
+class UploadSizeLimitMiddleware:
+    """Rejects oversized document uploads before the multipart body is read or spooled (TH-13).
+    FastAPI parses form bodies before route dependencies run, so this can't live in the route.
+    Uploads must declare Content-Length (browsers always do); the route re-checks the actual size."""
+
+    MULTIPART_OVERHEAD = 64 * 1024
+
+    def __init__(self, app, *, path: str, max_bytes: int) -> None:
+        self.app, self.path, self.limit = app, path, max_bytes + self.MULTIPART_OVERHEAD
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope["method"] == "POST" and scope["path"] == self.path:
+            headers = dict(scope["headers"])
+            length = headers.get(b"content-length")
+            status, code, message = None, None, None
+            if length is None or not length.isdigit():
+                status, code, message = 411, "LENGTH_REQUIRED", "Uploads must include a Content-Length header."
+            elif int(length) > self.limit:
+                status, code, message = 413, "FILE_TOO_LARGE", "The file is larger than the upload limit."
+            if status:
+                # RequestContextMiddleware (outer) has set the request ID and adds the header.
+                response = JSONResponse(status_code=status, content=error_body(code, message),
+                                        headers={"Connection": "close"})
+                await response(scope, receive, send)
+                return
+        await self.app(scope, receive, send)

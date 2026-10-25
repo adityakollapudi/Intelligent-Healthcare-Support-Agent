@@ -1,5 +1,14 @@
 // Lightweight runtime guards for backend responses (no schema library needed for this scope).
 import {
+  CHECKLIST_STATUSES,
+  FIELD_STATUSES,
+  JOB_STATUSES,
+  READINESS_STATUSES,
+  type ChecklistDetail,
+  type ChecklistSummary,
+  type DocumentDetail,
+  type DocumentSummary,
+  type RequirementSetSummary,
   CASE_CATEGORIES,
   CASE_STATUSES,
   CLAIM_STATUSES,
@@ -123,3 +132,47 @@ export const isCaseDetail = (v: unknown): v is CaseDetail =>
 
 export const isCasePage = (v: unknown): v is CasePage =>
   isObj(v) && Array.isArray(v.items) && v.items.every(isCaseSummary) && isStrOrNull(v.next_cursor ?? null);
+
+// --- Phase 6 documents and readiness ---------------------------------------------------------
+const inList = (list: readonly string[], v: unknown) => list.includes(v as string);
+const isJob = (v: unknown) =>
+  isObj(v) && isStr(v.job_id) && inList(JOB_STATUSES, v.status) && isStrOrNull(v.error_code) && isStrOrNull(v.error_detail);
+const isField = (v: unknown) =>
+  isObj(v) && isStr(v.field_name) && inList(FIELD_STATUSES, v.validation_status) && isStrOrNull(v.raw_value) && isStrOrNull(v.normalized_value);
+const isJobDetail = (v: unknown) =>
+  isJob(v) && isObj(v) && Array.isArray(v.fields) && v.fields.every(isField) && Array.isArray(v.pages) && Array.isArray(v.warnings);
+
+export const isDocumentSummary = (v: unknown): v is DocumentSummary =>
+  isObj(v) && isStr(v.document_id) && isStr(v.original_filename) && typeof v.page_count === "number" &&
+  (v.latest_job === null || isJob(v.latest_job));
+
+export const isDocumentDetail = (v: unknown): v is DocumentDetail =>
+  isObj(v) && isStr(v.document_id) && isStr(v.original_filename) && (v.latest_job === null || isJobDetail(v.latest_job));
+
+export const isDocumentPage = (v: unknown): v is { items: DocumentSummary[] } =>
+  isObj(v) && Array.isArray(v.items) && v.items.every(isDocumentSummary);
+
+export const isAnalyzeResponse = (v: unknown): v is { job_id: string; status: string } =>
+  isObj(v) && isStr(v.job_id) && inList(JOB_STATUSES, v.status);
+
+const isCounts = (v: unknown) => isObj(v) && CHECKLIST_STATUSES.every((s) => typeof v[s] === "number");
+
+const isChecklistSummary = (v: unknown): v is ChecklistSummary =>
+  isObj(v) && isStr(v.checklist_id) && isStr(v.procedure_code) && inList(READINESS_STATUSES, v.readiness_status) && isCounts(v.counts);
+
+export const isChecklistDetail = (v: unknown): v is ChecklistDetail => {
+  if (!isChecklistSummary(v) || !isObj(v) || !Array.isArray(v.items) || !isStr(v.reviewer_summary) || !isStr(v.disclaimer)) return false;
+  const items = v.items as unknown[];
+  if (!items.every((i) => isObj(i) && isStr(i.requirement_code) && inList(CHECKLIST_STATUSES, i.item_status) && isStr(i.explanation))) {
+    return false;
+  }
+  // The displayed counts must agree with the items they summarize; a mismatch is rejected, not shown.
+  const counts = v.counts as Record<string, number>;
+  return CHECKLIST_STATUSES.every((s) => items.filter((i) => (i as Obj).item_status === s).length === counts[s]);
+};
+
+export const isChecklistPage = (v: unknown): v is { items: ChecklistSummary[] } =>
+  isObj(v) && Array.isArray(v.items) && v.items.every(isChecklistSummary);
+
+export const isRequirementSets = (v: unknown): v is RequirementSetSummary[] =>
+  Array.isArray(v) && v.every((s) => isObj(s) && isStr(s.procedure_code) && isStr(s.display_name) && isStr(s.version));

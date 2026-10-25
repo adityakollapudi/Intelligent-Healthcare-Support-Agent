@@ -85,6 +85,7 @@ class TurnContext:
     can_view_claims: bool
     can_create_cases: bool
     can_read_cases: bool
+    can_check_readiness: bool = False
 
 
 _ID_LIKE = re.compile(r"\b[A-Z]{2,}-[A-Z0-9-]{3,}\b|\d{4,}|\S+@\S+")
@@ -439,7 +440,7 @@ def _requirements_turn(db: Session, ctx: TurnContext, intent: str, procedure_cod
                 "START_READINESS_CHECK",
                 "Check my documents against these",
                 False,
-                False,
+                ctx.can_check_readiness,
                 {"procedure_code": data["procedure_code"]},
             )
         ],
@@ -510,6 +511,7 @@ def _with_question(ctx: TurnContext, question: str) -> TurnContext:
         ctx.can_view_claims,
         ctx.can_create_cases,
         ctx.can_read_cases,
+        ctx.can_check_readiness,
     )
 
 

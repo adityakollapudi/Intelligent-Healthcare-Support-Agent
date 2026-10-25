@@ -1,0 +1,1911 @@
+{
+  "summary": {
+    "run_at": "2026-10-25T17:54:45+00:00",
+    "ocr_engine": "tesseract",
+    "ocr_available": false,
+    "documents": 13,
+    "scenarios": 10,
+    "document_type_accuracy": [
+      10,
+      10
+    ],
+    "field_status_accuracy": [
+      65,
+      65
+    ],
+    "field_exact_match": [
+      65,
+      65
+    ],
+    "valid_field_precision": [
+      53,
+      53
+    ],
+    "valid_field_recall": [
+      53,
+      53
+    ],
+    "missing_detection_precision": [
+      10,
+      10
+    ],
+    "missing_detection_recall": [
+      10,
+      10
+    ],
+    "checklist_item_accuracy": [
+      48,
+      48
+    ],
+    "overall_status_accuracy": [
+      9,
+      9
+    ],
+    "per_status": {
+      "SATISFIED": [
+        25,
+        25
+      ],
+      "MISSING": [
+        9,
+        9
+      ],
+      "UNREADABLE": [
+        1,
+        1
+      ],
+      "NEEDS_MANUAL_REVIEW": [
+        13,
+        13
+      ]
+    }
+  },
+  "fields": [
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000001",
+      "actual_value": "SYN-M-000001",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "procedure_code",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": "SYN-PROC-MRI-LUMBAR",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "procedure_description",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": "Lumbar spine MRI without contrast",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "requested_service_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-11-04",
+      "actual_value": "2026-11-04",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "ordering_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": "Dr. Jordan Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "ordering_provider_npi",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "1234567890",
+      "actual_value": "1234567890",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "facility_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": "Maplestone Imaging Center (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "8 weeks",
+      "actual_value": "8 weeks",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "supporting_rationale",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "request_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-20",
+      "actual_value": "2026-10-20",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "PA_REQUEST_FORM",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "referral_letter_mri.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000001",
+      "actual_value": "SYN-M-000001",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "referral_letter_mri.pdf",
+      "field": "referring_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Robin Example (fictional)",
+      "actual_value": "Dr. Robin Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "referral_letter_mri.pdf",
+      "field": "referral_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-10",
+      "actual_value": "2026-10-10",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "referral_letter_mri.pdf",
+      "field": "referred_service",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Lumbar spine MRI",
+      "actual_value": "Lumbar spine MRI",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "referral_letter_mri.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "REFERRAL_LETTER",
+      "actual_status": "REFERRAL_LETTER",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000001",
+      "actual_value": "SYN-M-000001",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "procedure_code",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": "SYN-PROC-MRI-LUMBAR",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "procedure_description",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": "Lumbar spine MRI without contrast",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "requested_service_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-11-04",
+      "actual_value": "2026-11-04",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "ordering_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": "Dr. Jordan Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "facility_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": "Maplestone Imaging Center (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "supporting_rationale",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "request_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-20",
+      "actual_value": "2026-10-20",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "ordering_provider_npi",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "PA_REQUEST_FORM",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "INCONSISTENT",
+      "actual_status": "INCONSISTENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "procedure_code",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": "SYN-PROC-MRI-LUMBAR",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "procedure_description",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": "Lumbar spine MRI without contrast",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "requested_service_date",
+      "scored": true,
+      "expected_status": "INVALID_FORMAT",
+      "actual_status": "INVALID_FORMAT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "ordering_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": "Dr. Jordan Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "ordering_provider_npi",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "1234567890",
+      "actual_value": "1234567890",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "facility_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": "Maplestone Imaging Center (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "8 weeks",
+      "actual_value": "8 weeks",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "supporting_rationale",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "request_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-20",
+      "actual_value": "2026-10-20",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "PA_REQUEST_FORM",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "member_number",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "SYN-M-000001",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "procedure_code",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "procedure_description",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "requested_service_date",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "2026-11-04",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "ordering_provider_name",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "ordering_provider_npi",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "1234567890",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "facility_name",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "conservative_therapy_duration",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "8 weeks",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "supporting_rationale",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "request_date",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "2026-10-20",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "field": "(document type)",
+      "scored": false,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "UNRECOGNIZED",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "member_number",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "SYN-M-000001",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "procedure_code",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "procedure_description",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "requested_service_date",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "2026-11-04",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "ordering_provider_name",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "ordering_provider_npi",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "1234567890",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "facility_name",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "8 weeks",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "supporting_rationale",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "request_date",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "NOT_EXTRACTED",
+      "expected_value": "2026-10-20",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "field": "(document type)",
+      "scored": false,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "UNRECOGNIZED",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "member_number",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000001",
+      "actual_value": "SYN-M-000001",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "procedure_code",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": "SYN-PROC-MRI-LUMBAR",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "procedure_description",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": "Lumbar spine MRI without contrast",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "requested_service_date",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-11-04",
+      "actual_value": "2026-11-04",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "ordering_provider_name",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": "Dr. Jordan Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "ordering_provider_npi",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "ILLEGIBLE",
+      "expected_value": "1234567890",
+      "actual_value": null,
+      "status_ok": false,
+      "exact_ok": false
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "facility_name",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": "Maplestone Imaging Center (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "8 weeks",
+      "actual_value": "8 weeks",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "supporting_rationale",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "request_date",
+      "scored": false,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-20",
+      "actual_value": "2026-10-20",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "field": "(document type)",
+      "scored": false,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "PA_REQUEST_FORM",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000003",
+      "actual_value": "SYN-M-000003",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "procedure_code",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-PROC-PT-EXTENDED",
+      "actual_value": "SYN-PROC-PT-EXTENDED",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "procedure_description",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Extended outpatient physical therapy",
+      "actual_value": "Extended outpatient physical therapy",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "request_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-20",
+      "actual_value": "2026-10-20",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "requested_service_date",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "ordering_provider_name",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "ordering_provider_npi",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "facility_name",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "supporting_rationale",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "PA_REQUEST_FORM",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000003",
+      "actual_value": "SYN-M-000003",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter.pdf",
+      "field": "referring_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Robin Example (fictional)",
+      "actual_value": "Dr. Robin Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter.pdf",
+      "field": "referral_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-01",
+      "actual_value": "2026-10-01",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter.pdf",
+      "field": "referred_service",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Physical therapy extension",
+      "actual_value": "Physical therapy extension",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "REFERRAL_LETTER",
+      "actual_status": "REFERRAL_LETTER",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter_late.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000003",
+      "actual_value": "SYN-M-000003",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter_late.pdf",
+      "field": "referring_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Robin Example (fictional)",
+      "actual_value": "Dr. Robin Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter_late.pdf",
+      "field": "referral_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-08-15",
+      "actual_value": "2026-08-15",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter_late.pdf",
+      "field": "referred_service",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Physical therapy extension",
+      "actual_value": "Physical therapy extension",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pt_referral_letter_late.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "REFERRAL_LETTER",
+      "actual_status": "REFERRAL_LETTER",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "clinical_note_summary.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000003",
+      "actual_value": "SYN-M-000003",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "clinical_note_summary.pdf",
+      "field": "note_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-15",
+      "actual_value": "2026-10-15",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "clinical_note_summary.pdf",
+      "field": "author_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Sam Therapist (fictional)",
+      "actual_value": "Sam Therapist (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "clinical_note_summary.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "CLINICAL_NOTE_SUMMARY",
+      "actual_status": "CLINICAL_NOTE_SUMMARY",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "unrecognized_letter.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "UNRECOGNIZED",
+      "actual_status": "UNRECOGNIZED",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "member_number",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-M-000001",
+      "actual_value": "SYN-M-000001",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "procedure_code",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "SYN-PROC-MRI-LUMBAR",
+      "actual_value": "SYN-PROC-MRI-LUMBAR",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "procedure_description",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Lumbar spine MRI without contrast",
+      "actual_value": "Lumbar spine MRI without contrast",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "requested_service_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-11-04",
+      "actual_value": "2026-11-04",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "ordering_provider_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Dr. Jordan Example (fictional)",
+      "actual_value": "Dr. Jordan Example (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "facility_name",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Maplestone Imaging Center (fictional)",
+      "actual_value": "Maplestone Imaging Center (fictional)",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "supporting_rationale",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "actual_value": "Persistent low back pain after conservative therapy (synthetic text).",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "request_date",
+      "scored": true,
+      "expected_status": "VALID",
+      "actual_status": "VALID",
+      "expected_value": "2026-10-20",
+      "actual_value": "2026-10-20",
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "ordering_provider_npi",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "conservative_therapy_duration",
+      "scored": true,
+      "expected_status": "ABSENT",
+      "actual_status": "ABSENT",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "field": "(document type)",
+      "scored": true,
+      "expected_status": "PA_REQUEST_FORM",
+      "actual_status": "PA_REQUEST_FORM",
+      "expected_value": null,
+      "actual_value": null,
+      "status_ok": true,
+      "exact_ok": true
+    }
+  ],
+  "checklist": [
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "REQ-MRI-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "requested_service_date = 2026-11-04 (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "REQ-MRI-02",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "ordering_provider_npi = 1234567890 (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "REQ-MRI-03",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "conservative_therapy_duration = 8 weeks (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "REQ-MRI-04",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000001 (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "REQ-MRI-05",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "REFERRAL_LETTER detected: referral_letter_mri.pdf"
+    },
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "REQ-MRI-06",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_complete_with_referral",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "MANUAL_REVIEW_REQUIRED",
+      "actual": "MANUAL_REVIEW_REQUIRED",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "REQ-MRI-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "requested_service_date = 2026-11-04 (VALID) in pa_request_mri_incomplete.pdf p.1"
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "REQ-MRI-02",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "Field ordering_provider_npi ABSENT in all submitted documents"
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "REQ-MRI-03",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "Field conservative_therapy_duration ABSENT in all submitted documents"
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "REQ-MRI-04",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000001 (VALID) in pa_request_mri_incomplete.pdf p.1"
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "REQ-MRI-05",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "No REFERRAL_LETTER among the submitted documents"
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "REQ-MRI-06",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_incomplete_no_referral",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "DOCUMENTATION_INCOMPLETE",
+      "actual": "DOCUMENTATION_INCOMPLETE",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "REQ-MRI-01",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "requested_service_date: INVALID_FORMAT '2026-13-45' in pa_request_mri_conflict.pdf p.1"
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "REQ-MRI-02",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "ordering_provider_npi = 1234567890 (VALID) in pa_request_mri_conflict.pdf p.1"
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "REQ-MRI-03",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "conservative_therapy_duration = 8 weeks (VALID) in pa_request_mri_conflict.pdf p.1"
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "REQ-MRI-04",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "member_number: INCONSISTENT 'SYN-M-000001' in pa_request_mri_conflict.pdf p.1"
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "REQ-MRI-05",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "REFERRAL_LETTER detected: referral_letter_mri.pdf"
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "REQ-MRI-06",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_conflicting_form",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "MANUAL_REVIEW_REQUIRED",
+      "actual": "MANUAL_REVIEW_REQUIRED",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "REQ-MRI-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "requested_service_date = 2026-11-04 (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "REQ-MRI-02",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "ordering_provider_npi = 1234567890 (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "REQ-MRI-03",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "conservative_therapy_duration = 8 weeks (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "REQ-MRI-04",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000001 (VALID) in pa_request_mri_complete.pdf p.1"
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "REQ-MRI-05",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "No REFERRAL_LETTER detected, but 1 document(s) could not be classified: unrecognized_letter.pdf"
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "REQ-MRI-06",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_unrecognized_instead_of_referral",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "MANUAL_REVIEW_REQUIRED",
+      "actual": "MANUAL_REVIEW_REQUIRED",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "REQ-MRI-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "requested_service_date = 2026-11-04 (VALID) in pa_request_mri_injection.pdf p.1"
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "REQ-MRI-02",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "Field ordering_provider_npi ABSENT in all submitted documents"
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "REQ-MRI-03",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "Field conservative_therapy_duration ABSENT in all submitted documents"
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "REQ-MRI-04",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000001 (VALID) in pa_request_mri_injection.pdf p.1"
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "REQ-MRI-05",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "No REFERRAL_LETTER among the submitted documents"
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "REQ-MRI-06",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_injection_form",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "DOCUMENTATION_INCOMPLETE",
+      "actual": "DOCUMENTATION_INCOMPLETE",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "pt_complete",
+      "requirement": "REQ-PT-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000003 (VALID) in pt_request_form.pdf p.1"
+    },
+    {
+      "scenario": "pt_complete",
+      "requirement": "REQ-PT-02",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "referral_date 2026-10-01 is 19 day(s) before request_date 2026-10-20 (limit 30)"
+    },
+    {
+      "scenario": "pt_complete",
+      "requirement": "REQ-PT-03",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "CLINICAL_NOTE_SUMMARY detected: clinical_note_summary.pdf"
+    },
+    {
+      "scenario": "pt_complete",
+      "requirement": "REQ-PT-04",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "pt_complete",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "MANUAL_REVIEW_REQUIRED",
+      "actual": "MANUAL_REVIEW_REQUIRED",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "pt_late_referral_no_note",
+      "requirement": "REQ-PT-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000003 (VALID) in pt_request_form.pdf p.1"
+    },
+    {
+      "scenario": "pt_late_referral_no_note",
+      "requirement": "REQ-PT-02",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "referral_date 2026-08-15 is 66 day(s) before request_date 2026-10-20; outside the 30-day window"
+    },
+    {
+      "scenario": "pt_late_referral_no_note",
+      "requirement": "REQ-PT-03",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "No CLINICAL_NOTE_SUMMARY among the submitted documents"
+    },
+    {
+      "scenario": "pt_late_referral_no_note",
+      "requirement": "REQ-PT-04",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "pt_late_referral_no_note",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "DOCUMENTATION_INCOMPLETE",
+      "actual": "DOCUMENTATION_INCOMPLETE",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "pt_request_only",
+      "requirement": "REQ-PT-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000003 (VALID) in pt_request_form.pdf p.1"
+    },
+    {
+      "scenario": "pt_request_only",
+      "requirement": "REQ-PT-02",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "No submitted document contains the field referral_date"
+    },
+    {
+      "scenario": "pt_request_only",
+      "requirement": "REQ-PT-03",
+      "scored": true,
+      "expected": "MISSING",
+      "actual": "MISSING",
+      "ok": true,
+      "explanation": "No CLINICAL_NOTE_SUMMARY among the submitted documents"
+    },
+    {
+      "scenario": "pt_request_only",
+      "requirement": "REQ-PT-04",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "pt_request_only",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "DOCUMENTATION_INCOMPLETE",
+      "actual": "DOCUMENTATION_INCOMPLETE",
+      "ok": true,
+      "explanation": ""
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "REQ-MRI-01",
+      "scored": false,
+      "expected": "SATISFIED",
+      "actual": "MISSING",
+      "ok": false,
+      "explanation": "No submitted document contains the field requested_service_date"
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "REQ-MRI-02",
+      "scored": false,
+      "expected": "SATISFIED",
+      "actual": "MISSING",
+      "ok": false,
+      "explanation": "No submitted document contains the field ordering_provider_npi"
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "REQ-MRI-03",
+      "scored": false,
+      "expected": "SATISFIED",
+      "actual": "MISSING",
+      "ok": false,
+      "explanation": "No submitted document contains the field conservative_therapy_duration"
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "REQ-MRI-04",
+      "scored": false,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000001 (VALID) in referral_letter_mri.pdf p.1"
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "REQ-MRI-05",
+      "scored": false,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "REFERRAL_LETTER detected: referral_letter_mri.pdf"
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "REQ-MRI-06",
+      "scored": false,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_scanned_with_referral (needs OCR)",
+      "requirement": "(overall)",
+      "scored": false,
+      "expected": "MANUAL_REVIEW_REQUIRED",
+      "actual": "DOCUMENTATION_INCOMPLETE",
+      "ok": false,
+      "explanation": ""
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "REQ-MRI-01",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "requested_service_date = 2026-11-04 (VALID) in pa_request_mri_mixed.pdf p.1"
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "REQ-MRI-02",
+      "scored": true,
+      "expected": "UNREADABLE",
+      "actual": "UNREADABLE",
+      "ok": true,
+      "explanation": "ordering_provider_npi could not be read reliably (ILLEGIBLE in pa_request_mri_mixed.pdf)"
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "REQ-MRI-03",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "conservative_therapy_duration = 8 weeks (VALID) in pa_request_mri_mixed.pdf p.1"
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "REQ-MRI-04",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "member_number = SYN-M-000001 (VALID) in pa_request_mri_mixed.pdf p.1"
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "REQ-MRI-05",
+      "scored": true,
+      "expected": "SATISFIED",
+      "actual": "SATISFIED",
+      "ok": true,
+      "explanation": "REFERRAL_LETTER detected: referral_letter_mri.pdf"
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "REQ-MRI-06",
+      "scored": true,
+      "expected": "NEEDS_MANUAL_REVIEW",
+      "actual": "NEEDS_MANUAL_REVIEW",
+      "ok": true,
+      "explanation": "Rule type MANUAL_ONLY: requires human verification"
+    },
+    {
+      "scenario": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "requirement": "(overall)",
+      "scored": true,
+      "expected": "DOCUMENTATION_INCOMPLETE",
+      "actual": "DOCUMENTATION_INCOMPLETE",
+      "ok": true,
+      "explanation": ""
+    }
+  ],
+  "timings": [
+    {
+      "document": "pa_request_mri_complete.pdf",
+      "bytes": 3255,
+      "pages": 1,
+      "ms": 62.1
+    },
+    {
+      "document": "referral_letter_mri.pdf",
+      "bytes": 1889,
+      "pages": 1,
+      "ms": 9.4
+    },
+    {
+      "document": "pa_request_mri_incomplete.pdf",
+      "bytes": 2819,
+      "pages": 1,
+      "ms": 8.9
+    },
+    {
+      "document": "pa_request_mri_conflict.pdf",
+      "bytes": 4025,
+      "pages": 2,
+      "ms": 19.5
+    },
+    {
+      "document": "pa_request_mri_scanned.png",
+      "bytes": 116185,
+      "pages": 1,
+      "ms": 101.4
+    },
+    {
+      "document": "pa_request_mri_scanned.pdf",
+      "bytes": 113615,
+      "pages": 1,
+      "ms": 848.3
+    },
+    {
+      "document": "pa_request_mri_mixed.pdf",
+      "bytes": 43725,
+      "pages": 2,
+      "ms": 708.3
+    },
+    {
+      "document": "pt_request_form.pdf",
+      "bytes": 1919,
+      "pages": 1,
+      "ms": 8.3
+    },
+    {
+      "document": "pt_referral_letter.pdf",
+      "bytes": 1899,
+      "pages": 1,
+      "ms": 8.2
+    },
+    {
+      "document": "pt_referral_letter_late.pdf",
+      "bytes": 1902,
+      "pages": 1,
+      "ms": 9.1
+    },
+    {
+      "document": "clinical_note_summary.pdf",
+      "bytes": 1678,
+      "pages": 1,
+      "ms": 10.5
+    },
+    {
+      "document": "unrecognized_letter.pdf",
+      "bytes": 1320,
+      "pages": 1,
+      "ms": 8.8
+    },
+    {
+      "document": "pa_request_mri_injection.pdf",
+      "bytes": 3318,
+      "pages": 1,
+      "ms": 11.4
+    }
+  ]
+}

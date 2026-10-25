@@ -1,0 +1,632 @@
+{
+  "version": "1.0",
+  "documents": {
+    "pa_request_mri_complete.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "VALID",
+          "normalized": "2026-11-04"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "ordering_provider_npi": {
+          "status": "VALID",
+          "normalized": "1234567890"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "conservative_therapy_duration": {
+          "status": "VALID",
+          "normalized": "8 weeks"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        }
+      },
+      "needs_ocr": false,
+      "description": "All PA form fields present (text layer)"
+    },
+    "referral_letter_mri.pdf": {
+      "detected_document_type": "REFERRAL_LETTER",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "referring_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Robin Example (fictional)"
+        },
+        "referral_date": {
+          "status": "VALID",
+          "normalized": "2026-10-10"
+        },
+        "referred_service": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Referral letter for the MRI request"
+    },
+    "pa_request_mri_incomplete.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "VALID",
+          "normalized": "2026-11-04"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        },
+        "ordering_provider_npi": {
+          "status": "ABSENT"
+        },
+        "conservative_therapy_duration": {
+          "status": "ABSENT"
+        }
+      },
+      "needs_ocr": false,
+      "description": "NPI and conservative therapy duration omitted"
+    },
+    "pa_request_mri_conflict.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "INCONSISTENT"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "INVALID_FORMAT"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "ordering_provider_npi": {
+          "status": "VALID",
+          "normalized": "1234567890"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "conservative_therapy_duration": {
+          "status": "VALID",
+          "normalized": "8 weeks"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Two different member numbers; impossible service date"
+    },
+    "pa_request_mri_scanned.png": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "VALID",
+          "normalized": "2026-11-04"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "ordering_provider_npi": {
+          "status": "VALID",
+          "normalized": "1234567890"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "conservative_therapy_duration": {
+          "status": "VALID",
+          "normalized": "8 weeks"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        }
+      },
+      "needs_ocr": true,
+      "description": "Image of the complete form (needs OCR)"
+    },
+    "pa_request_mri_scanned.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "VALID",
+          "normalized": "2026-11-04"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "ordering_provider_npi": {
+          "status": "VALID",
+          "normalized": "1234567890"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "conservative_therapy_duration": {
+          "status": "VALID",
+          "normalized": "8 weeks"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        }
+      },
+      "needs_ocr": true,
+      "description": "Image-only PDF of the complete form (needs OCR)"
+    },
+    "pa_request_mri_mixed.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "VALID",
+          "normalized": "2026-11-04"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "ordering_provider_npi": {
+          "status": "VALID",
+          "normalized": "1234567890"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "conservative_therapy_duration": {
+          "status": "VALID",
+          "normalized": "8 weeks"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        }
+      },
+      "needs_ocr": true,
+      "description": "Page 1 text layer; page 2 scanned and holds the NPI"
+    },
+    "pt_request_form.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000003"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-PT-EXTENDED"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Extended outpatient physical therapy"
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        },
+        "requested_service_date": {
+          "status": "ABSENT"
+        },
+        "ordering_provider_name": {
+          "status": "ABSENT"
+        },
+        "ordering_provider_npi": {
+          "status": "ABSENT"
+        },
+        "facility_name": {
+          "status": "ABSENT"
+        },
+        "conservative_therapy_duration": {
+          "status": "ABSENT"
+        },
+        "supporting_rationale": {
+          "status": "ABSENT"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Extended PT request form"
+    },
+    "pt_referral_letter.pdf": {
+      "detected_document_type": "REFERRAL_LETTER",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000003"
+        },
+        "referring_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Robin Example (fictional)"
+        },
+        "referral_date": {
+          "status": "VALID",
+          "normalized": "2026-10-01"
+        },
+        "referred_service": {
+          "status": "VALID",
+          "normalized": "Physical therapy extension"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Referral 19 days before the request"
+    },
+    "pt_referral_letter_late.pdf": {
+      "detected_document_type": "REFERRAL_LETTER",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000003"
+        },
+        "referring_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Robin Example (fictional)"
+        },
+        "referral_date": {
+          "status": "VALID",
+          "normalized": "2026-08-15"
+        },
+        "referred_service": {
+          "status": "VALID",
+          "normalized": "Physical therapy extension"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Referral 66 days before the request"
+    },
+    "clinical_note_summary.pdf": {
+      "detected_document_type": "CLINICAL_NOTE_SUMMARY",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000003"
+        },
+        "note_date": {
+          "status": "VALID",
+          "normalized": "2026-10-15"
+        },
+        "author_name": {
+          "status": "VALID",
+          "normalized": "Sam Therapist (fictional)"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Clinical note summary for the PT request"
+    },
+    "unrecognized_letter.pdf": {
+      "detected_document_type": "UNRECOGNIZED",
+      "fields": {},
+      "needs_ocr": false,
+      "description": "Not one of the configured document types"
+    },
+    "pa_request_mri_injection.pdf": {
+      "detected_document_type": "PA_REQUEST_FORM",
+      "fields": {
+        "member_number": {
+          "status": "VALID",
+          "normalized": "SYN-M-000001"
+        },
+        "procedure_code": {
+          "status": "VALID",
+          "normalized": "SYN-PROC-MRI-LUMBAR"
+        },
+        "procedure_description": {
+          "status": "VALID",
+          "normalized": "Lumbar spine MRI without contrast"
+        },
+        "requested_service_date": {
+          "status": "VALID",
+          "normalized": "2026-11-04"
+        },
+        "ordering_provider_name": {
+          "status": "VALID",
+          "normalized": "Dr. Jordan Example (fictional)"
+        },
+        "facility_name": {
+          "status": "VALID",
+          "normalized": "Maplestone Imaging Center (fictional)"
+        },
+        "supporting_rationale": {
+          "status": "VALID",
+          "normalized": "Persistent low back pain after conservative therapy (synthetic text)."
+        },
+        "request_date": {
+          "status": "VALID",
+          "normalized": "2026-10-20"
+        },
+        "ordering_provider_npi": {
+          "status": "ABSENT"
+        },
+        "conservative_therapy_duration": {
+          "status": "ABSENT"
+        }
+      },
+      "needs_ocr": false,
+      "description": "Incomplete form with embedded instructions aimed at the AI"
+    }
+  },
+  "scenarios": [
+    {
+      "name": "mri_complete_with_referral",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_complete.pdf",
+        "referral_letter_mri.pdf"
+      ],
+      "expected": {
+        "REQ-MRI-01": "SATISFIED",
+        "REQ-MRI-02": "SATISFIED",
+        "REQ-MRI-03": "SATISFIED",
+        "REQ-MRI-04": "SATISFIED",
+        "REQ-MRI-05": "SATISFIED",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "name": "mri_incomplete_no_referral",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_incomplete.pdf"
+      ],
+      "expected": {
+        "REQ-MRI-01": "SATISFIED",
+        "REQ-MRI-02": "MISSING",
+        "REQ-MRI-03": "MISSING",
+        "REQ-MRI-04": "SATISFIED",
+        "REQ-MRI-05": "MISSING",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "DOCUMENTATION_INCOMPLETE"
+    },
+    {
+      "name": "mri_conflicting_form",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_conflict.pdf",
+        "referral_letter_mri.pdf"
+      ],
+      "expected": {
+        "REQ-MRI-01": "NEEDS_MANUAL_REVIEW",
+        "REQ-MRI-02": "SATISFIED",
+        "REQ-MRI-03": "SATISFIED",
+        "REQ-MRI-04": "NEEDS_MANUAL_REVIEW",
+        "REQ-MRI-05": "SATISFIED",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "name": "mri_unrecognized_instead_of_referral",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_complete.pdf",
+        "unrecognized_letter.pdf"
+      ],
+      "expected": {
+        "REQ-MRI-01": "SATISFIED",
+        "REQ-MRI-02": "SATISFIED",
+        "REQ-MRI-03": "SATISFIED",
+        "REQ-MRI-04": "SATISFIED",
+        "REQ-MRI-05": "NEEDS_MANUAL_REVIEW",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "name": "mri_injection_form",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_injection.pdf"
+      ],
+      "expected": {
+        "REQ-MRI-01": "SATISFIED",
+        "REQ-MRI-02": "MISSING",
+        "REQ-MRI-03": "MISSING",
+        "REQ-MRI-04": "SATISFIED",
+        "REQ-MRI-05": "MISSING",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "DOCUMENTATION_INCOMPLETE"
+    },
+    {
+      "name": "pt_complete",
+      "procedure_code": "SYN-PROC-PT-EXTENDED",
+      "documents": [
+        "pt_request_form.pdf",
+        "pt_referral_letter.pdf",
+        "clinical_note_summary.pdf"
+      ],
+      "expected": {
+        "REQ-PT-01": "SATISFIED",
+        "REQ-PT-02": "SATISFIED",
+        "REQ-PT-03": "SATISFIED",
+        "REQ-PT-04": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "name": "pt_late_referral_no_note",
+      "procedure_code": "SYN-PROC-PT-EXTENDED",
+      "documents": [
+        "pt_request_form.pdf",
+        "pt_referral_letter_late.pdf"
+      ],
+      "expected": {
+        "REQ-PT-01": "SATISFIED",
+        "REQ-PT-02": "NEEDS_MANUAL_REVIEW",
+        "REQ-PT-03": "MISSING",
+        "REQ-PT-04": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "DOCUMENTATION_INCOMPLETE"
+    },
+    {
+      "name": "pt_request_only",
+      "procedure_code": "SYN-PROC-PT-EXTENDED",
+      "documents": [
+        "pt_request_form.pdf"
+      ],
+      "expected": {
+        "REQ-PT-01": "SATISFIED",
+        "REQ-PT-02": "MISSING",
+        "REQ-PT-03": "MISSING",
+        "REQ-PT-04": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "DOCUMENTATION_INCOMPLETE"
+    },
+    {
+      "name": "mri_scanned_with_referral (needs OCR)",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_scanned.pdf",
+        "referral_letter_mri.pdf"
+      ],
+      "needs_ocr": true,
+      "expected": {
+        "REQ-MRI-01": "SATISFIED",
+        "REQ-MRI-02": "SATISFIED",
+        "REQ-MRI-03": "SATISFIED",
+        "REQ-MRI-04": "SATISFIED",
+        "REQ-MRI-05": "SATISFIED",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "readiness_status": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "name": "mri_mixed_pages_with_referral (needs OCR for p.2)",
+      "procedure_code": "SYN-PROC-MRI-LUMBAR",
+      "documents": [
+        "pa_request_mri_mixed.pdf",
+        "referral_letter_mri.pdf"
+      ],
+      "needs_ocr": true,
+      "expected": {
+        "REQ-MRI-01": "SATISFIED",
+        "REQ-MRI-02": "SATISFIED",
+        "REQ-MRI-03": "SATISFIED",
+        "REQ-MRI-04": "SATISFIED",
+        "REQ-MRI-05": "SATISFIED",
+        "REQ-MRI-06": "NEEDS_MANUAL_REVIEW"
+      },
+      "expected_without_ocr": {
+        "REQ-MRI-02": "UNREADABLE"
+      },
+      "readiness_status": "MANUAL_REVIEW_REQUIRED"
+    }
+  ]
+}

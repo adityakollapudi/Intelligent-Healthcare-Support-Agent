@@ -1,6 +1,13 @@
 // Typed service functions for implemented endpoints; see lib/features.ts for what exists.
 import { apiRequest } from "../lib/api-client";
 import {
+  isAnalyzeResponse,
+  isChecklistDetail,
+  isChecklistPage,
+  isDocumentDetail,
+  isDocumentPage,
+  isDocumentSummary,
+  isRequirementSets,
   isBenefits,
   isCaseDetail,
   isCasePage,
@@ -14,6 +21,12 @@ import {
   isSessionPage,
 } from "../lib/validators";
 import type {
+  ChecklistDetail,
+  ChecklistSummary,
+  DeclaredPurpose,
+  DocumentDetail,
+  DocumentSummary,
+  RequirementSetSummary,
   BenefitsResponse,
   CaseDetail,
   CasePage,
@@ -86,4 +99,36 @@ export const supportCasesService = {
     apiRequest<CasePage>("/support-cases", { query: { status: params.status, limit: 50 }, signal, validate: isCasePage }),
   get: (caseId: string, signal?: AbortSignal) =>
     apiRequest<CaseDetail>(`/support-cases/${encodeURIComponent(caseId)}`, { signal, validate: isCaseDetail }),
+};
+
+// Phase 6 documents (doc 06 §3.6). Upload stores the file only; analysis is a separate request
+// whose result is read back by polling GET /documents/{id}.
+export const documentsService = {
+  upload: (file: File, purpose?: DeclaredPurpose) => {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    if (purpose) form.append("declared_purpose", purpose);
+    return apiRequest<DocumentSummary>("/documents", { method: "POST", body: form, validate: isDocumentSummary });
+  },
+  list: (signal?: AbortSignal) => apiRequest<{ items: DocumentSummary[] }>("/documents", { signal, validate: isDocumentPage }),
+  get: (id: string, signal?: AbortSignal) =>
+    apiRequest<DocumentDetail>(`/documents/${encodeURIComponent(id)}`, { signal, validate: isDocumentDetail }),
+  analyze: (id: string) =>
+    apiRequest<{ job_id: string; status: string }>(`/documents/${encodeURIComponent(id)}/analyze`, {
+      method: "POST",
+      body: {},
+      validate: isAnalyzeResponse,
+    }),
+};
+
+// Phase 6 readiness (doc 06 §3.7). A checklist is documentation completeness only, never an approval.
+export const readinessService = {
+  requirementSets: (signal?: AbortSignal) =>
+    apiRequest<RequirementSetSummary[]>("/authorization/requirement-sets", { signal, validate: isRequirementSets }),
+  create: (body: { procedure_code: string; document_ids: string[]; provider_note?: string | null }) =>
+    apiRequest<ChecklistDetail>("/authorization/readiness", { method: "POST", body, validate: isChecklistDetail }),
+  list: (signal?: AbortSignal) =>
+    apiRequest<{ items: ChecklistSummary[] }>("/authorization/checklists", { signal, validate: isChecklistPage }),
+  get: (id: string, signal?: AbortSignal) =>
+    apiRequest<ChecklistDetail>(`/authorization/checklists/${encodeURIComponent(id)}`, { signal, validate: isChecklistDetail }),
 };

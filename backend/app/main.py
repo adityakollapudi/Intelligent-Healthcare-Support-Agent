@@ -15,7 +15,7 @@ from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging
-from app.core.middleware import RequestContextMiddleware
+from app.core.middleware import RequestContextMiddleware, UploadSizeLimitMiddleware
 from app.db.session import build_engine, ping
 
 logger = logging.getLogger(__name__)
@@ -53,6 +53,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url=f"{settings.api_v1_prefix}/openapi.json" if settings.docs_enabled else None,
     )
     register_exception_handlers(app)
+    # Innermost of the three, so rejections still carry CORS headers and the request ID.
+    app.add_middleware(
+        UploadSizeLimitMiddleware, path=f"{settings.api_v1_prefix}/documents", max_bytes=settings.max_upload_bytes
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,

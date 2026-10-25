@@ -16,15 +16,15 @@ export const features = {
     description: "Document-grounded answers with citations, plus claim, benefit and requirement lookups",
   },
   documents: {
-    available: false,
+    available: true,
     phase: 6,
-    endpoints: ["POST /documents", "POST /documents/{id}/analyze"],
+    endpoints: ["POST /documents", "GET /documents", "GET /documents/{id}", "POST /documents/{id}/analyze"],
     description: "Document upload and analysis",
   },
   readiness: {
-    available: false,
+    available: true,
     phase: 6,
-    endpoints: ["POST /authorization/readiness"],
+    endpoints: ["POST /authorization/readiness", "GET /authorization/checklists"],
     description: "Prior authorization readiness checklists",
   },
   supportCases: {

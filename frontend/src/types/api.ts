@@ -289,15 +289,127 @@ export interface ChatResponse {
   data_environment: DataEnvironment;
 }
 
-// --- Planned (Phase 1 contract; endpoints not implemented yet) ---------------
+// --- Documents and readiness (Phase 6, backend/app/schemas/document.py, readiness.py) ---------
 
-export type ChecklistItemStatus = "SATISFIED" | "MISSING" | "UNREADABLE" | "NEEDS_MANUAL_REVIEW";
+export const JOB_STATUSES = ["QUEUED", "RUNNING", "COMPLETED", "COMPLETED_WITH_WARNINGS", "FAILED"] as const;
+export type JobStatus = (typeof JOB_STATUSES)[number];
+export const FIELD_STATUSES = ["VALID", "ABSENT", "ILLEGIBLE", "INVALID_FORMAT", "INCONSISTENT", "LOW_CONFIDENCE"] as const;
+export type FieldValidationStatus = (typeof FIELD_STATUSES)[number];
+export const CHECKLIST_STATUSES = ["SATISFIED", "MISSING", "UNREADABLE", "NEEDS_MANUAL_REVIEW"] as const;
+export type ChecklistItemStatus = (typeof CHECKLIST_STATUSES)[number];
+export const READINESS_STATUSES = ["DOCUMENTATION_APPEARS_COMPLETE", "DOCUMENTATION_INCOMPLETE", "MANUAL_REVIEW_REQUIRED"] as const;
+export type ReadinessStatus = (typeof READINESS_STATUSES)[number];
+export type DeclaredPurpose = "PA_REQUEST" | "SUPPORTING_DOCUMENT" | "OTHER";
+
+export interface PageDetail {
+  page_number: number;
+  method: "TEXT_LAYER" | "OCR" | null;
+  status: "OK" | "EMPTY" | "PARTIAL" | "LOW_QUALITY" | "UNREADABLE";
+  char_count: number;
+  ocr_confidence: number | null;
+  warning: string | null;
+}
+
+export interface DocumentField {
+  field_id: string;
+  field_name: string;
+  raw_value: string | null;
+  normalized_value: string | null;
+  validation_status: FieldValidationStatus;
+  validation_message: string | null;
+  source_page: number | null;
+  extraction_method: "TEXT_LAYER" | "OCR" | null;
+  /** OCR word confidence 0–1; not a calibrated probability. null for text-layer values. */
+  confidence: number | null;
+}
+
+export interface JobSummary {
+  job_id: string;
+  status: JobStatus;
+  detected_document_type: string | null;
+  pages_text_layer: number;
+  pages_ocr: number;
+  ocr_mean_confidence: number | null;
+  warning_count: number;
+  error_code: string | null;
+  error_detail: string | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface JobDetail extends JobSummary {
+  extraction_schema_version: string | null;
+  pipeline_version: string | null;
+  warnings: string[];
+  pages: PageDetail[];
+  fields: DocumentField[];
+}
+
+export interface DocumentSummary {
+  document_id: string;
+  original_filename: string;
+  mime_type: string;
+  size_bytes: number;
+  page_count: number;
+  declared_purpose: DeclaredPurpose | null;
+  created_at: string;
+  expires_at: string;
+  latest_job: JobSummary | null;
+  data_environment: DataEnvironment;
+}
+
+export interface DocumentDetail extends Omit<DocumentSummary, "latest_job"> {
+  latest_job: JobDetail | null;
+}
+
+export interface ItemEvidence {
+  field_id: string;
+  document_id: string;
+  field_name: string;
+  validation_status: string;
+  normalized_value: string | null;
+  source_page: number | null;
+}
 
 export interface ChecklistItem {
   requirement_code: string;
   description: string;
+  rule_type: string;
+  is_mandatory: boolean;
   item_status: ChecklistItemStatus;
   explanation: string;
+  evidence: ItemEvidence[];
+  requirement_source: RequirementSource | null;
 }
 
-export type FieldValidationStatus = "VALID" | "ABSENT" | "ILLEGIBLE" | "INVALID_FORMAT" | "INCONSISTENT" | "LOW_CONFIDENCE";
+export type ChecklistCounts = Record<ChecklistItemStatus, number>;
+
+export interface ChecklistSummary {
+  checklist_id: string;
+  procedure_code: string;
+  readiness_status: ReadinessStatus;
+  review_state: string;
+  counts: ChecklistCounts;
+  created_at: string;
+}
+
+export interface ChecklistDetail extends ChecklistSummary {
+  display_name: string;
+  requirement_set_version: string;
+  requirement_source_document: string | null;
+  rules_version: string;
+  documents: { document_id: string; original_filename: string; job_id: string; detected_document_type: string | null }[];
+  items: ChecklistItem[];
+  warnings: string[];
+  provider_note: string | null;
+  reviewer_summary: string;
+  disclaimer: string;
+  data_environment: DataEnvironment;
+}
+
+export interface RequirementSetSummary {
+  procedure_code: string;
+  display_name: string;
+  version: string;
+}

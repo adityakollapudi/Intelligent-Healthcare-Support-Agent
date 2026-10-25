@@ -13,13 +13,15 @@ pytestmark = pytest.mark.postgres
 EXPECTED_TABLES = {"organizations", "users", "members", "plans", "plan_benefits", "claims", "audit_logs",
                    "revoked_tokens", "knowledge_documents", "document_chunks", "conversation_sessions",
                    "conversation_messages", "message_citations", "pa_requirement_sets", "pa_requirements",
-                   "support_cases", "support_case_events", "tool_invocations", "alembic_version"}
+                   "support_cases", "support_case_events", "tool_invocations", "uploaded_documents",
+                   "document_processing_jobs", "extracted_fields", "authorization_checklists",
+                   "authorization_checklist_items", "checklist_documents", "alembic_version"}
 
 
 def test_fresh_migration_creates_expected_tables(database, db_session):
     tables = set(inspect(db_session.get_bind()).get_table_names())
     assert tables == EXPECTED_TABLES
-    assert db_session.scalar(text("SELECT version_num FROM alembic_version")) == "0003"
+    assert db_session.scalar(text("SELECT version_num FROM alembic_version")) == "0004"
 
 
 def test_models_and_migrated_schema_do_not_drift(database, db_session):
