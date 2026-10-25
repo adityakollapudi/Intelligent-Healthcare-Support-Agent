@@ -1,0 +1,52 @@
+:root {
+  /* Color */
+  --navy-900: #0b2340;
+  --navy-700: #1c3a5e;
+  --teal-700: #0b6e6e;
+  --teal-600: #0f8282;
+  --teal-50: #e6f4f3;
+  --gray-900: #1d2430;
+  --gray-700: #48505e;
+  --gray-500: #6b7280;
+  --gray-300: #d4d8de;
+  --gray-100: #f1f3f6;
+  --white: #ffffff;
+  --green-700: #1b6b3a;
+  --green-50: #e7f4ec;
+  --amber-800: #7a4b00;
+  --amber-50: #fdf3e1;
+  --red-700: #b42318;
+  --red-50: #fdecea;
+  --blue-700: #1d4f91;
+  --blue-50: #e8f0fb;
+
+  --color-text: var(--gray-900);
+  --color-muted: var(--gray-700);
+  --color-surface: var(--white);
+  --color-bg: var(--gray-100);
+  --color-border: var(--gray-300);
+  --color-primary: var(--teal-700);
+  --color-primary-hover: #095a5a;
+  --color-focus: #2563eb;
+
+  /* Type */
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+
+  /* Space & shape */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius: 6px;
+  --shadow: 0 1px 2px rgba(11, 35, 64, 0.08), 0 1px 1px rgba(11, 35, 64, 0.04);
+  --sidebar-w: 232px;
+  --topbar-h: 56px;
+}
