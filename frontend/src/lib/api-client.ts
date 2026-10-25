@@ -65,7 +65,9 @@ async function readJson(response: Response): Promise<unknown> {
 export async function apiRequest<T>(path: string, options: RequestOptions<T> = {}): Promise<T> {
   const { method = "GET", query, body, signal, validate, auth = true, expectEmpty = false } = options;
   const headers: Record<string, string> = { ...options.headers, Accept: "application/json" };
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  // Multipart bodies get their boundary header from the browser; never set it by hand.
+  if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
   const token = auth ? hooks.getToken() : null;
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -83,7 +85,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions<T> = {
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
       signal: controller.signal,
       credentials: "omit",
     });

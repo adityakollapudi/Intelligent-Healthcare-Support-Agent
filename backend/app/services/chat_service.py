@@ -188,6 +188,7 @@ def handle_message(
         can_view_claims=principal.has(Permission.CLAIMS_READ_OWN),
         can_create_cases=principal.has(Permission.CASES_CREATE),
         can_read_cases=principal.has(Permission.CASES_READ_OWN),
+        can_check_readiness=principal.has(Permission.READINESS_CREATE),
     )
     try:
         result = pipeline.run(db, settings, embedder, generator, ctx)

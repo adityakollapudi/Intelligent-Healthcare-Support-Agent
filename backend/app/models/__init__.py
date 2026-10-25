@@ -3,6 +3,14 @@
 from app.models.audit_log import AuditLog, RevokedToken
 from app.models.claim import Claim
 from app.models.conversation import ConversationMessage, ConversationSession, MessageCitation
+from app.models.document import (
+    AuthorizationChecklist,
+    AuthorizationChecklistItem,
+    ChecklistDocument,
+    DocumentProcessingJob,
+    ExtractedField,
+    UploadedDocument,
+)
 from app.models.knowledge import DocumentChunk, KnowledgeDocument
 from app.models.member import Member
 from app.models.organization import Organization
@@ -11,7 +19,8 @@ from app.models.support import PaRequirement, PaRequirementSet, SupportCase, Sup
 from app.models.user import User
 
 __all__ = [
-    "AuditLog", "Claim", "ConversationMessage", "ConversationSession", "DocumentChunk", "KnowledgeDocument",
-    "Member", "MessageCitation", "Organization", "PaRequirement", "PaRequirementSet", "Plan", "PlanBenefit",
-    "RevokedToken", "SupportCase", "SupportCaseEvent", "ToolInvocation", "User",
+    "AuditLog", "AuthorizationChecklist", "AuthorizationChecklistItem", "ChecklistDocument", "Claim",
+    "ConversationMessage", "ConversationSession", "DocumentChunk", "DocumentProcessingJob", "ExtractedField",
+    "KnowledgeDocument", "Member", "MessageCitation", "Organization", "PaRequirement", "PaRequirementSet", "Plan",
+    "PlanBenefit", "RevokedToken", "SupportCase", "SupportCaseEvent", "ToolInvocation", "UploadedDocument", "User",
 ]

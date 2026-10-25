@@ -375,8 +375,6 @@ describe("chat rendering safety and unavailable mode", () => {
 
 describe("prepared screens never show fabricated data", () => {
   it.each([
-    ["PROVIDER", "/documents", "Document upload and analysis: not available in this build"],
-    ["PROVIDER", "/readiness", "Prior authorization readiness checklists: not available in this build"],
     ["SUPPORT_AGENT", "/agent", "Assigned-case review: not available in this build"],
     ["ADMIN", "/admin", "Aggregate metrics and audit events: not available in this build"],
   ] as const)("%s %s states the feature is not connected", async (role, path, text) => {

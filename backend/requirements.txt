@@ -14,3 +14,6 @@ fastembed==0.9.1
 pymupdf==2.0
 numpy==2.5.4
 anthropic==2.3.0
+# Phase 6 (documents): multipart uploads, image validation (OCR uses the Tesseract CLI, configured via OCR_TESSERACT_PATH)
+python-multipart==0.0.32
+pillow==13.0.0

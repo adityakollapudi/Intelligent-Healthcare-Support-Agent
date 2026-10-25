@@ -1,4 +1,4 @@
-# IHSA Backend (Phases 2–5)
+# IHSA Backend (Phases 2–6)
 
 FastAPI + PostgreSQL backend for the **Intelligent Healthcare Support Agent**: an independent internship case-study prototype that uses **synthetic data only**. It is not an Evernorth product and connects to no real system.
 
@@ -72,6 +72,14 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 | `POST /support-cases` | `MEMBER`, `PROVIDER` (`cases:create`) | Requires an `Idempotency-Key: <UUID>` header. `201` creates an `OPEN` case (`CASE-YYYY-NNNNNN`) with its event and audit row in one transaction; `200` is a replay of the same key and body; `409 IDEMPOTENCY_KEY_REUSED` means the same key was sent with a different body. Server-controlled fields are rejected (422). See `docs/phase-5/api-and-workflow-contracts.md` |
 | `GET /support-cases`, `GET /support-cases/{id}` | `MEMBER`, `PROVIDER` (own cases only) | `?status=` (repeatable), `?limit=` 1–100. Another user's case returns 404 |
 | `GET /authorization/requirements/{procedure_code}` | any role with `requirements:read` | Configured documentation requirements for a fictional procedure (e.g. `SYN-PROC-MRI-LUMBAR`), each with its verified source passage. Not an approval |
+
+| `POST /documents` (multipart) | `MEMBER`, `PROVIDER` | Upload a synthetic PDF/PNG/JPEG (≤10 MB, ≤20 pages). Validated by extension, declared type, file signature and content. Stored privately (`.local/uploads`); `201` means stored, **not analyzed** |
+| `GET /documents`, `GET /documents/{id}` | owner only | Documents with the latest analysis job: page details, warnings, extracted fields with validation status and source page |
+| `POST /documents/{id}/analyze` | owner (`documents:upload`) | `202` + job; poll `GET /documents/{id}`. `409 JOB_ALREADY_RUNNING` |
+| `GET /authorization/requirement-sets` | `requirements:read` | Active fictional requirement sets |
+| `POST /authorization/readiness`, `GET /authorization/checklists[/{id}]` | `PROVIDER` | Deterministic documentation-readiness checklist (SATISFIED / MISSING / UNREADABLE / NEEDS_MANUAL_REVIEW) with evidence, sources and a reviewer summary. **Not an approval or denial.** See `docs/phase-6/` |
+
+**Documents (Phase 6).** Text comes from the PDF text layer. OCR (Tesseract, configured via `OCR_TESSERACT_PATH`) is used only for scanned pages and images, and it is **not installed in the development environment**, so scanned pages are reported as unreadable rather than guessed. Samples: `python -m scripts.build_sample_documents`. Evaluation: `python -m scripts.evaluate_documents`. Guide: `docs/phase-6/document-processing-guide.md`.
 
 **Chat tools (Phase 5).** `POST /chat` can call four allowlisted tools (`get_claim_status`, `get_plan_benefits`, `get_required_documents`, `create_support_case`) through one executor that validates arguments, checks permissions, reuses the services above and audits every call (`TOOL_INVOKED`, plus a `tool_invocations` row). `create_support_case` only proposes a case; the user creates it by confirming, which sends `POST /support-cases`. Answers report `tool_executions` and structured `records` next to `citations`. Details: `docs/phase-5/tool-integration.md`.
 

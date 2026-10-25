@@ -2,29 +2,8 @@
 // availability, never sample records or metrics.
 import { Link } from "react-router-dom";
 
-import { ChecklistLegend, READINESS_DISCLAIMER } from "../components/Checklist";
-import { Alert, EmptyState, FeatureUnavailable, PageHeader } from "../components/ui";
+import { EmptyState, FeatureUnavailable, PageHeader } from "../components/ui";
 import { features } from "../lib/features";
-
-export function ReadinessPage() {
-  return (
-    <>
-      <PageHeader title="Prior authorization readiness" description="Check whether a document packet appears complete against a configured requirement set." />
-      <Alert tone="info" title="Readiness is not approval">
-        {READINESS_DISCLAIMER}
-      </Alert>
-      <FeatureUnavailable feature={features.readiness} />
-      <section className="section card" aria-labelledby="legend-heading">
-        <h2 id="legend-heading">What checklist statuses mean</h2>
-        <ChecklistLegend />
-      </section>
-      <section className="section">
-        <h2>Checklists</h2>
-        <EmptyState title="No checklists yet">Checklists appear here after documents are analyzed and a readiness check is run.</EmptyState>
-      </section>
-    </>
-  );
-}
 
 export function AgentPage() {
   return (
@@ -62,11 +41,11 @@ export function ProviderWorkspacePage() {
         </Link>
         <Link className="tile" to="/documents">
           <span className="tile-title">Upload a document</span>
-          <span className="muted small">Analysis arrives in Phase {features.documents.phase}</span>
+          <span className="muted small">Available now</span>
         </Link>
         <Link className="tile" to="/readiness">
           <span className="tile-title">Check readiness</span>
-          <span className="muted small">Arrives in Phase {features.readiness.phase}</span>
+          <span className="muted small">Available now</span>
         </Link>
       </div>
     </>

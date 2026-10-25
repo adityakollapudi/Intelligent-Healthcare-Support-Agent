@@ -40,6 +40,10 @@ os.environ.update({
     "EMBEDDING_PROVIDER": "hash",
     "LLM_PROVIDER": "extractive",
     "ANTHROPIC_API_KEY": "",
+    # Uploads go to a private test directory (wiped per session). OCR is off by default so results
+    # don't depend on whether Tesseract is installed; OCR paths use an explicit fake engine.
+    "DOCUMENT_STORAGE_DIR": ".local/test-uploads",
+    "OCR_ENGINE": "disabled",
 })
 
 
@@ -86,6 +90,9 @@ def database() -> Iterator[None]:
         conn.execute(text("CREATE SCHEMA public"))
     engine.dispose()
     run_migrations(TEST_DATABASE_URL)
+    import shutil
+
+    shutil.rmtree(".local/test-uploads", ignore_errors=True)
 
     from app.db.session import get_session_factory
     from scripts.seed_demo_data import seed

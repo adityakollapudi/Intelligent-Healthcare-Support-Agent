@@ -152,7 +152,7 @@ def test_requirements_include_verified_sources(client, auth, knowledge):
 
 def test_unknown_or_malformed_procedure(client, auth, knowledge):
     assert_error(client.get("/api/v1/authorization/requirements/SYN-PROC-NOPE", headers=auth(MEMBER_A)),
-                 404, "RESOURCE_NOT_FOUND")
+                 404, "REQUIREMENT_SET_NOT_FOUND")  # doc 06 §3.7 error code
     assert client.get("/api/v1/authorization/requirements/DROP-TABLE", headers=auth(MEMBER_A)).status_code == 422
 
 

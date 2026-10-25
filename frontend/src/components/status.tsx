@@ -1,5 +1,5 @@
 // Domain status → badge mappings (values from doc 02 §3).
-import type { ChecklistItemStatus, ClaimStatus, EvidenceStatus, FieldValidationStatus } from "../types/api";
+import type { ChecklistItemStatus, ClaimStatus, EvidenceStatus, FieldValidationStatus, JobStatus, ReadinessStatus } from "../types/api";
 import { StatusBadge, type BadgeTone } from "./ui";
 
 type Meta = { label: string; tone: BadgeTone; icon: string; help?: string };
@@ -34,6 +34,20 @@ export const EVIDENCE_STATUS_META: Record<EvidenceStatus, Meta> = {
   INSUFFICIENT: { label: "Couldn't verify", tone: "warning", icon: "⚠" },
   CONFLICTING: { label: "Sources disagree", tone: "warning", icon: "≠" },
   NOT_APPLICABLE: { label: "General information", tone: "neutral", icon: "ⓘ" },
+};
+
+export const JOB_STATUS_META: Record<JobStatus, Meta> = {
+  QUEUED: { label: "Queued", tone: "info", icon: "◷", help: "Waiting to be analyzed." },
+  RUNNING: { label: "Analyzing", tone: "info", icon: "◐", help: "Text extraction and field checks are running." },
+  COMPLETED: { label: "Analyzed", tone: "success", icon: "✔", help: "Finished; every field passed its checks." },
+  COMPLETED_WITH_WARNINGS: { label: "Analyzed with warnings", tone: "warning", icon: "⚠", help: "Finished; some fields need your attention." },
+  FAILED: { label: "Analysis failed", tone: "danger", icon: "✖", help: "The document could not be analyzed." },
+};
+
+export const READINESS_STATUS_META: Record<ReadinessStatus, Meta> = {
+  DOCUMENTATION_APPEARS_COMPLETE: { label: "Documentation appears complete", tone: "success", icon: "✔" },
+  DOCUMENTATION_INCOMPLETE: { label: "Documentation incomplete", tone: "danger", icon: "✖" },
+  MANUAL_REVIEW_REQUIRED: { label: "Manual review required", tone: "info", icon: "👤" },
 };
 
 export function MetaBadge({ meta }: { meta: Meta }) {

@@ -30,6 +30,9 @@ ALLOWED_METADATA_KEYS = frozenset({
     # Phase 5 (tools, cases): names, enums and public references only.
     "tool_name", "result_status", "requested_by", "category", "escalation_reason", "procedure_code",
     "idempotent_replay",
+    # Phase 6 (documents, readiness): types, sizes, enums and counts only, never document content.
+    "mime_type", "size_bytes", "declared_purpose", "job_status", "document_type", "readiness_status",
+    "satisfied_count", "missing_count", "unreadable_count", "manual_review_count", "document_count",
 })
 
 

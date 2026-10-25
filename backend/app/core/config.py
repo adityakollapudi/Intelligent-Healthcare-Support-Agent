@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Annotated, Literal
 
 from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
@@ -69,6 +70,27 @@ class Settings(BaseSettings):
     chat_session_retention_days: int = Field(default=30, ge=1, le=365)
     tool_max_calls_per_message: int = Field(default=3, ge=1, le=10)
 
+    # --- Documents and readiness (Phase 6; doc 07 §5.1, ADR-09) ---------------------------------
+    # Private local volume (never served by the frontend). Keys are opaque `uploads/{uuid}`.
+    document_storage_dir: str = ".local/uploads"
+    max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1024, le=50 * 1024 * 1024)
+    max_pdf_pages: int = Field(default=20, ge=1, le=200)
+    max_image_megapixels: float = Field(default=25.0, ge=0.1, le=100.0)
+    job_timeout_seconds: int = Field(default=120, ge=5, le=900)
+    max_concurrent_document_jobs: int = Field(default=1, ge=1, le=4)  # single in-process worker (TH-13)
+    document_uploads_per_hour: int = Field(default=30, ge=1, le=1000)
+    document_analyses_per_hour: int = Field(default=30, ge=1, le=1000)
+    # Provisional default (A-07 / NFR-021); no organizational retention policy was provided.
+    document_retention_days: int = Field(default=30, ge=1, le=365)
+    ocr_engine: Literal["tesseract", "disabled"] = "tesseract"
+    ocr_tesseract_path: str = "tesseract"  # executable name on PATH or an absolute path
+    ocr_languages: str = Field(default="eng", pattern=r"^[a-z]{3}(\+[a-z]{3})*$")
+    ocr_dpi: int = Field(default=300, ge=72, le=400)
+    ocr_page_timeout_seconds: float = Field(default=30.0, ge=1, le=300)
+    ocr_min_text_chars_per_page: int = Field(default=50, ge=0, le=5000)
+    ocr_min_word_confidence: float = Field(default=60.0, ge=0, le=100)  # provisional (doc 07 §5.2)
+    extraction_low_confidence: float = Field(default=0.70, ge=0, le=1)  # provisional (doc 07 §5.4)
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
@@ -107,6 +129,9 @@ class Settings(BaseSettings):
             raise ValueError("RAG_CHUNK_OVERLAP_WORDS must be smaller than RAG_CHUNK_WORDS")
         if self.embedding_provider == "hash" and self.app_env != "test":
             raise ValueError("EMBEDDING_PROVIDER=hash is a test double and is only allowed when APP_ENV=test")
+        parts = {p.lower() for p in Path(self.document_storage_dir).resolve().parts}
+        if parts & {"public", "static", "dist", "frontend"}:
+            raise ValueError("DOCUMENT_STORAGE_DIR must not be inside a publicly served directory")
         return self
 
     @model_validator(mode="after")
