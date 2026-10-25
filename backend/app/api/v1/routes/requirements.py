@@ -67,6 +67,8 @@ def create_readiness_checklist(
 
 
 Reader = Annotated[Principal, Depends(require_any_permission(Permission.READINESS_READ_OWN))]
+LinkedReader = Annotated[Principal, Depends(require_any_permission(
+    Permission.READINESS_READ_OWN, Permission.READINESS_READ_CASE_LINKED))]
 
 
 @router.get("/checklists", response_model=ChecklistPage, responses=_ERRORS, summary="My readiness checklists")
@@ -76,5 +78,5 @@ def list_checklists(db: Db, principal: Reader) -> ChecklistPage:
 
 @router.get("/checklists/{checklist_id}", response_model=ChecklistDetail, responses=_ERRORS,
             summary="One of my readiness checklists")
-def get_checklist(checklist_id: UUID, db: Db, audit: Audit, principal: Reader) -> ChecklistDetail:
+def get_checklist(checklist_id: UUID, db: Db, audit: Audit, principal: LinkedReader) -> ChecklistDetail:
     return readiness_service.get_checklist(db, audit, principal, checklist_id)

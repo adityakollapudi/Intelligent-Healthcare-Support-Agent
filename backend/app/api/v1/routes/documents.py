@@ -24,6 +24,8 @@ Config = Annotated[Settings, Depends(get_settings)]
 Storage = Annotated[FileStorage, Depends(get_storage)]
 Uploader = Annotated[Principal, Depends(require_any_permission(Permission.DOCUMENTS_UPLOAD))]
 Reader = Annotated[Principal, Depends(require_any_permission(Permission.DOCUMENTS_READ_OWN))]
+LinkedReader = Annotated[Principal, Depends(require_any_permission(
+    Permission.DOCUMENTS_READ_OWN, Permission.DOCUMENTS_READ_CASE_LINKED))]
 _ERRORS = {s: {"model": ErrorResponse} for s in (401, 403, 404, 409, 411, 413, 415, 422, 429, 500)}
 
 
@@ -63,7 +65,7 @@ def list_documents(db: Db, principal: Reader) -> DocumentPage:
     "/{document_id}", response_model=DocumentDetail, responses=_ERRORS,
     summary="One of my documents, with its latest analysis job, page details and extracted fields",
 )
-def get_document(document_id: UUID, db: Db, audit: Audit, principal: Reader) -> DocumentDetail:
+def get_document(document_id: UUID, db: Db, audit: Audit, principal: LinkedReader) -> DocumentDetail:
     return document_service.get_document(db, audit, principal, document_id)
 
 

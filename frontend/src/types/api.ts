@@ -199,6 +199,8 @@ export interface CreateCaseRequest {
   escalation_reason?: string;
   related_session_id?: string | null;
   related_claim_number?: string | null;
+  related_checklist_id?: string | null;
+  document_ids?: string[];
 }
 
 export interface CaseEvent {
@@ -210,6 +212,12 @@ export interface CaseEvent {
   created_at: string;
 }
 
+export interface CasePerson {
+  id?: string | null;
+  display_name: string;
+  role?: string | null;
+}
+
 export interface CaseSummary {
   case_id: string;
   case_number: string;
@@ -217,6 +225,7 @@ export interface CaseSummary {
   status: CaseStatus;
   escalation_reason: string;
   summary_preview: string;
+  assigned_to?: CasePerson | null;
   created_at: string;
   updated_at: string;
 }
@@ -236,6 +245,97 @@ export interface CaseDetail {
   created_at: string;
   updated_at: string;
   data_environment: DataEnvironment;
+  /** "full": creator / assigned agent; "summary": queue agent or admin (no linked content, no notes). */
+  view?: "full" | "summary";
+  created_by?: CasePerson | null;
+  assigned_to?: CasePerson | null;
+  related_checklist_id?: string | null;
+  related_claim_status?: string | null;
+  documents?: { document_id: string; original_filename: string }[];
+  conversation_excerpt?: { sender: string; content: string; created_at: string }[];
+  /** Actions the backend currently permits for the caller; the backend re-validates each request. */
+  allowed_actions?: CaseAction[];
+  resolved_at?: string | null;
+  closed_at?: string | null;
+}
+
+export type CaseAction =
+  | "assign_to_me" | "start" | "release" | "request_info" | "resume" | "resolve" | "reopen" | "close"
+  | "cancel" | "add_note" | "assign" | "unassign";
+
+export interface CaseUpdate {
+  version: number;
+  status?: CaseStatus;
+  note?: string;
+  resolution_note?: string;
+  assign_to_me?: boolean;
+  release?: boolean;
+  assigned_to_user_id?: string;
+  unassign?: boolean;
+  reason?: string;
+}
+
+export interface AgentSummary {
+  id: string;
+  display_name: string;
+  open_assigned_count: number;
+}
+
+export interface AuditEvent {
+  id: number;
+  occurred_at: string;
+  request_id: string | null;
+  actor: { id: string; display_name: string; role: string | null } | null;
+  action: string;
+  resource_type: string | null;
+  resource_ref: string | null;
+  outcome: "SUCCESS" | "DENIED" | "FAILURE";
+  reason_code: string | null;
+  metadata: Record<string, unknown>;
+}
+
+export type Counted = Record<string, number>;
+
+export interface AdminMetrics {
+  period: { from: string; to: string; timezone: string };
+  generated_at: string;
+  chat: {
+    user_messages: number;
+    assistant_messages: number;
+    by_intent: Counted;
+    by_evidence_status: Counted;
+    escalations_offered: number;
+    latency_ms: { p50: number | null; p95: number | null; sample_size: number };
+  };
+  tools: Record<string, Counted>;
+  cases: {
+    created: number;
+    created_by_status: Counted;
+    created_by_category: Counted;
+    created_by_escalation_reason: Counted;
+    escalated_from_chat: number;
+    resolved_in_period: number;
+    median_hours_to_resolution: number | null;
+    created_per_day: { date: string; count: number }[];
+    resolved_per_day: { date: string; count: number }[];
+    current_by_status: Counted;
+    current_open_workload: number;
+    current_unassigned_open: number;
+  };
+  documents: { jobs_by_status: Counted; failures_by_error_code: Counted; top_field_issues: { field_name: string; status: string; count: number | "<3" }[] };
+  readiness: { by_status: Counted; by_review_state: Counted };
+  security: { access_denied_events: number; rejected_case_updates: number };
+  unavailable: string[];
+}
+
+export interface KnowledgeGaps {
+  period: { from: string; to: string; timezone: string };
+  items: { gap_topic: string; evidence_status: string; occurrences: number; distinct_users: number; last_seen_at: string; example_intents: string[] }[];
+  suppressed_topics: number;
+  by_intent: { intent: string; evidence_status: string; occurrences: number }[];
+  requirement_set_misses: { requested_procedure_code: string; occurrences: number }[];
+  tool_failures: { tool_name: string; result_status: string; occurrences: number }[];
+  note: string;
 }
 
 export interface CasePage {
@@ -404,6 +504,8 @@ export interface ChecklistDetail extends ChecklistSummary {
   warnings: string[];
   provider_note: string | null;
   reviewer_summary: string;
+  /** Server-decided offer to send the checklist for human review (created only on confirmation). */
+  escalation_offer?: { category: CaseCategory; escalation_reason: string; summary: string; related_checklist_id: string; document_ids: string[] } | null;
   disclaimer: string;
   data_environment: DataEnvironment;
 }

@@ -4,16 +4,66 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { ChecklistLegend, READINESS_DISCLAIMER } from "../components/Checklist";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CHECKLIST_STATUS_META, JOB_STATUS_META, MetaBadge, READINESS_STATUS_META } from "../components/status";
 import { Alert, Button, EmptyState, ErrorState, LoadingState, PageHeader } from "../components/ui";
+import { useSession } from "../features/auth/session";
 import { useRequest } from "../hooks/useRequest";
 import { formatDateTime, humanize } from "../lib/format";
-import { documentsService, readinessService } from "../services";
-import type { ChecklistDetail } from "../types/api";
+import { documentsService, readinessService, supportCasesService } from "../services";
+import type { CaseDetail, ChecklistDetail } from "../types/api";
 
 const USABLE = new Set(["COMPLETED", "COMPLETED_WITH_WARNINGS"]);
 
+/** Sends the checklist to a support agent. The case is created only when the user confirms, with a
+ * per-attempt Idempotency-Key so a retry can't create a duplicate; the case number shown is the
+ * backend's. Creating a case doesn't mean anyone has reviewed it yet. */
+function SendForReview({ checklist }: { checklist: ChecklistDetail }) {
+  const offer = checklist.escalation_offer!;
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  const [created, setCreated] = useState<CaseDetail | null>(null);
+  const [key] = useState(() => crypto.randomUUID());
+
+  if (created) {
+    return (
+      <Alert tone="success" title={`Support case ${created.case_number} created`}>
+        It's waiting for a support agent; nobody has reviewed it yet. <Link to={`/cases?case=${encodeURIComponent(created.case_id)}`}>Track the case</Link>
+      </Alert>
+    );
+  }
+  const confirm = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      setCreated(await supportCasesService.create(
+        { category: offer.category, escalation_reason: offer.escalation_reason, summary: offer.summary, related_checklist_id: offer.related_checklist_id, document_ids: offer.document_ids },
+        key,
+      ));
+      setOpen(false);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        Send to a support agent for review
+      </Button>
+      <ConfirmDialog open={open} title="Send this checklist for human review?" confirmLabel={error ? "Try again" : "Create case"} busy={busy} onCancel={() => setOpen(false)} onConfirm={() => void confirm()}>
+        <p>A support case will be created. The assigned agent will be able to see this checklist and the {offer.document_ids.length} linked document(s).</p>
+        <p className="message-text small">{offer.summary}</p>
+        {Boolean(error) && <ErrorState error={error} />}
+      </ConfirmDialog>
+    </>
+  );
+}
+
 export function ChecklistReport({ checklist }: { checklist: ChecklistDetail }) {
+  const { can } = useSession();
   const docName = new Map(checklist.documents.map((d) => [d.document_id, d.original_filename]));
   return (
     <section className="card section" aria-label="Readiness checklist">
@@ -75,6 +125,10 @@ export function ChecklistReport({ checklist }: { checklist: ChecklistDetail }) {
           </li>
         ))}
       </ul>
+      {checklist.escalation_offer && can("cases:create") && <SendForReview checklist={checklist} />}
+      {checklist.review_state !== "NOT_SUBMITTED" && (
+        <p className="muted small">Review state: {humanize(checklist.review_state)} (a support case is linked; this is not an approval).</p>
+      )}
       <details open>
         <summary>Reviewer summary (draft)</summary>
         {/* Plain text: the summary contains document-derived values. */}

@@ -36,6 +36,28 @@ class CreateCaseRequest(RequestModel):
     escalation_reason: EscalationReason = "USER_INITIATED"
     related_session_id: UUID | None = None
     related_claim_number: str | None = Field(default=None, pattern=r"^SYN-CLM-\d{4}-\d{6}$")
+    related_checklist_id: UUID | None = None
+    document_ids: list[UUID] = Field(default_factory=list, max_length=10)
+
+
+class UpdateCaseRequest(RequestModel):
+    """doc 06 §3.8 PATCH. version is required (optimistic locking); everything else is optional."""
+
+    version: int = Field(ge=1)
+    status: CaseStatus | None = None
+    note: str | None = Field(default=None, min_length=1, max_length=2000)
+    resolution_note: str | None = Field(default=None, min_length=1, max_length=2000)
+    assign_to_me: bool = False
+    release: bool = False
+    assigned_to_user_id: UUID | None = None
+    unassign: bool = False
+    reason: str | None = Field(default=None, min_length=1, max_length=500)
+
+
+class Person(ApiModel):
+    id: UUID | None = None
+    display_name: str
+    role: str | None = None
 
 
 class CaseEvent(ApiModel):
@@ -54,8 +76,20 @@ class CaseSummary(ApiModel):
     status: CaseStatus
     escalation_reason: EscalationReason
     summary_preview: str
+    assigned_to: Person | None = None
     created_at: UtcDatetime
     updated_at: UtcDatetime
+
+
+class CaseDocument(ApiModel):
+    document_id: UUID
+    original_filename: str
+
+
+class ExcerptMessage(ApiModel):
+    sender: str
+    content: str
+    created_at: UtcDatetime
 
 
 class CaseDetail(ApiModel):
@@ -72,9 +106,26 @@ class CaseDetail(ApiModel):
     events: list[CaseEvent]
     created_at: UtcDatetime
     updated_at: UtcDatetime
+    # Phase 7. "full": creator / assigned agent. "summary": queue agent or admin (no linked content).
+    view: Literal["full", "summary"] = "full"
+    created_by: Person | None = None
+    assigned_to: Person | None = None
+    related_checklist_id: UUID | None = None
+    related_claim_status: str | None = None
+    documents: list[CaseDocument] = []
+    conversation_excerpt: list[ExcerptMessage] = []
+    allowed_actions: list[str] = []
+    resolved_at: UtcDatetime | None = None
+    closed_at: UtcDatetime | None = None
     data_environment: Literal["SYNTHETIC_PROTOTYPE"] = "SYNTHETIC_PROTOTYPE"
 
 
 class CasePage(ApiModel):
     items: list[CaseSummary]
     next_cursor: str | None = None
+
+
+class AgentSummary(ApiModel):
+    id: UUID
+    display_name: str
+    open_assigned_count: int

@@ -39,7 +39,7 @@ function FieldValue({ field }: { field: DocumentField }) {
   );
 }
 
-function FieldTable({ fields }: { fields: DocumentField[] }) {
+export function FieldTable({ fields }: { fields: DocumentField[] }) {
   if (fields.length === 0) {
     return <p className="muted">No fields are defined for this document type, so nothing was extracted.</p>;
   }

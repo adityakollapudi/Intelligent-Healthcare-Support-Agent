@@ -1,5 +1,9 @@
 // Lightweight runtime guards for backend responses (no schema library needed for this scope).
 import {
+  type AdminMetrics,
+  type AgentSummary,
+  type AuditEvent,
+  type KnowledgeGaps,
   CHECKLIST_STATUSES,
   FIELD_STATUSES,
   JOB_STATUSES,
@@ -176,3 +180,23 @@ export const isChecklistPage = (v: unknown): v is { items: ChecklistSummary[] } 
 
 export const isRequirementSets = (v: unknown): v is RequirementSetSummary[] =>
   Array.isArray(v) && v.every((s) => isObj(s) && isStr(s.procedure_code) && isStr(s.display_name) && isStr(s.version));
+
+// --- Phase 7 administration -------------------------------------------------------------------
+const isCounted = (v: unknown) => isObj(v) && Object.values(v).every((n) => typeof n === "number");
+
+export const isAdminMetrics = (v: unknown): v is AdminMetrics =>
+  isObj(v) && isObj(v.period) && isObj(v.cases) && isObj(v.chat) && isObj(v.documents) && isObj(v.readiness) &&
+  typeof v.cases.created === "number" && isCounted(v.cases.created_by_status) && isCounted(v.cases.current_by_status) &&
+  Array.isArray(v.cases.created_per_day) && isCounted(v.chat.by_evidence_status) && Array.isArray(v.unavailable);
+
+export const isKnowledgeGaps = (v: unknown): v is KnowledgeGaps =>
+  isObj(v) && Array.isArray(v.items) && Array.isArray(v.by_intent) && Array.isArray(v.tool_failures) &&
+  typeof v.suppressed_topics === "number";
+
+export const isAuditPage = (v: unknown): v is { items: AuditEvent[]; next_cursor: string | null } =>
+  isObj(v) && Array.isArray(v.items) &&
+  v.items.every((e) => isObj(e) && typeof e.id === "number" && isStr(e.action) && ["SUCCESS", "DENIED", "FAILURE"].includes(e.outcome as string)) &&
+  isStrOrNull(v.next_cursor ?? null);
+
+export const isAgents = (v: unknown): v is AgentSummary[] =>
+  Array.isArray(v) && v.every((a) => isObj(a) && isStr(a.id) && isStr(a.display_name) && typeof a.open_assigned_count === "number");

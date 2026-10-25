@@ -235,6 +235,15 @@ def list_documents(db: Session, principal: Principal, limit: int = 50) -> Docume
 
 
 def get_document(db: Session, audit: AuditService, principal: Principal, document_id: UUID) -> DocumentDetail:
+    from app.services import support_case_service  # local import: avoids a service import cycle
+
+    doc = db.get(UploadedDocument, document_id)
+    if (doc is not None and doc.owner_user_id != principal.user_id and _usable(doc, datetime.now(UTC))
+            and support_case_service.case_linked(db, principal, document_id=document_id)):
+        # The assigned agent of a case linking this document (documents:read:case_linked, doc 06 §3.6).
+        audit.record("DOCUMENT_VIEWED", AuditOutcome.SUCCESS, actor=principal, resource_type="uploaded_document",
+                     resource_ref=str(document_id))
+        return detail(db, doc)
     return detail(db, owned_document(db, audit, principal, document_id))
 
 

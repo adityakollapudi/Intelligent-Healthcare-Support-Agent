@@ -4,26 +4,13 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { Alert, Button, EmptyState, ErrorState, LoadingState, PageHeader, StatusBadge, type BadgeTone } from "../components/ui";
+import { CasePanel, CaseStatusBadge } from "../features/cases/CasePanel";
+import { Alert, Button, EmptyState, ErrorState, LoadingState, PageHeader } from "../components/ui";
 import { useSession } from "../features/auth/session";
 import { useRequest } from "../hooks/useRequest";
 import { formatDateTime, humanize } from "../lib/format";
 import { supportCasesService } from "../services";
 import { CASE_CATEGORIES, CASE_STATUSES, type CaseCategory, type CaseDetail, type CaseStatus } from "../types/api";
-
-const STATUS_TONE: Record<CaseStatus, BadgeTone> = {
-  OPEN: "info",
-  ASSIGNED: "info",
-  IN_PROGRESS: "info",
-  AWAITING_USER: "warning",
-  RESOLVED: "success",
-  CLOSED: "neutral",
-  CANCELLED: "neutral",
-};
-
-export function CaseStatusBadge({ status }: { status: CaseStatus }) {
-  return <StatusBadge label={humanize(status)} tone={STATUS_TONE[status]} icon={status === "AWAITING_USER" ? "⚠" : "●"} />;
-}
 
 const SUMMARY_MIN = 10;
 const SUMMARY_MAX = 2000;
@@ -130,69 +117,6 @@ function NewCaseForm({ onCreated, onCancel }: { onCreated: (c: CaseDetail) => vo
   );
 }
 
-function CaseDetailView({ caseId, onClose }: { caseId: string; onClose: () => void }) {
-  const detail = useRequest((signal) => supportCasesService.get(caseId, signal));
-  useEffect(() => {
-    void detail.run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when the selected case changes
-  }, [caseId]);
-  const { state } = detail;
-  return (
-    <section className="card section" aria-label="Case details">
-      {state.status === "loading" && <LoadingState label="Loading case…" />}
-      {state.status === "error" && <ErrorState error={state.error} onRetry={() => void detail.run()} />}
-      {state.status === "success" && (
-        <>
-          <div className="card-head">
-            <h2 className="mono">{state.data.case_number}</h2>
-            <CaseStatusBadge status={state.data.status} />
-          </div>
-          <dl className="facts">
-            <div>
-              <dt>Category</dt>
-              <dd>{humanize(state.data.category)}</dd>
-            </div>
-            <div>
-              <dt>Reason</dt>
-              <dd>{humanize(state.data.escalation_reason)}</dd>
-            </div>
-            <div>
-              <dt>Created</dt>
-              <dd>{formatDateTime(state.data.created_at)}</dd>
-            </div>
-            {state.data.related_claim_number && (
-              <div>
-                <dt>Related claim</dt>
-                <dd className="mono">{state.data.related_claim_number}</dd>
-              </div>
-            )}
-          </dl>
-          <p className="record-title">Summary</p>
-          <p className="message-text">{state.data.summary}</p>
-          {state.data.resolution_note && (
-            <Alert tone="success" title="Resolution">
-              {state.data.resolution_note}
-            </Alert>
-          )}
-          <p className="record-title">History</p>
-          <ol className="record-list">
-            {state.data.events.map((e, i) => (
-              <li key={i}>
-                {formatDateTime(e.created_at)}: {humanize(e.event_type)}
-                {e.to_status && ` (${humanize(e.to_status)})`} by {e.actor_display_name}
-                {e.note && <span className="muted"> · {e.note}</span>}
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
-      <Button variant="secondary" onClick={onClose}>
-        Close
-      </Button>
-    </section>
-  );
-}
-
 export function CasesPage() {
   const { can } = useSession();
   const canCreate = can("cases:create");
@@ -236,7 +160,7 @@ export function CasesPage() {
           }}
         />
       )}
-      {selected && <CaseDetailView caseId={selected} onClose={() => select(null)} />}
+      {selected && <CasePanel caseId={selected} onClose={() => select(null)} onChanged={() => void list.run()} />}
 
       <section className="section" aria-labelledby="cases-heading">
         <div className="card-head">

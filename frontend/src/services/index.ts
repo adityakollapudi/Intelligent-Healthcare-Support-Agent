@@ -1,6 +1,10 @@
 // Typed service functions for implemented endpoints; see lib/features.ts for what exists.
 import { apiRequest } from "../lib/api-client";
 import {
+  isAdminMetrics,
+  isAgents,
+  isAuditPage,
+  isKnowledgeGaps,
   isAnalyzeResponse,
   isChecklistDetail,
   isChecklistPage,
@@ -21,6 +25,11 @@ import {
   isSessionPage,
 } from "../lib/validators";
 import type {
+  AdminMetrics,
+  AgentSummary,
+  AuditEvent,
+  CaseUpdate,
+  KnowledgeGaps,
   ChecklistDetail,
   ChecklistSummary,
   DeclaredPurpose,
@@ -95,8 +104,32 @@ export const supportCasesService = {
       headers: { "Idempotency-Key": idempotencyKey },
       validate: isCaseDetail,
     }),
-  list: (params: { status?: CaseStatus[] }, signal?: AbortSignal) =>
-    apiRequest<CasePage>("/support-cases", { query: { status: params.status, limit: 50 }, signal, validate: isCasePage }),
+  list: (
+    params: {
+      scope?: "mine" | "queue" | "assigned" | "all";
+      status?: CaseStatus[];
+      category?: string;
+      case_number?: string;
+      cursor?: string | null;
+      limit?: number;
+    },
+    signal?: AbortSignal,
+  ) =>
+    apiRequest<CasePage>("/support-cases", {
+      query: {
+        scope: params.scope,
+        status: params.status,
+        category: params.category,
+        case_number: params.case_number,
+        cursor: params.cursor,
+        limit: params.limit ?? 20,
+      },
+      signal,
+      validate: isCasePage,
+    }),
+  /** Validated by the backend lifecycle rules; `version` makes a stale or repeated request fail with 409. */
+  update: (caseId: string, body: CaseUpdate) =>
+    apiRequest<CaseDetail>(`/support-cases/${encodeURIComponent(caseId)}`, { method: "PATCH", body, validate: isCaseDetail }),
   get: (caseId: string, signal?: AbortSignal) =>
     apiRequest<CaseDetail>(`/support-cases/${encodeURIComponent(caseId)}`, { signal, validate: isCaseDetail }),
 };
@@ -131,4 +164,22 @@ export const readinessService = {
     apiRequest<{ items: ChecklistSummary[] }>("/authorization/checklists", { signal, validate: isChecklistPage }),
   get: (id: string, signal?: AbortSignal) =>
     apiRequest<ChecklistDetail>(`/authorization/checklists/${encodeURIComponent(id)}`, { signal, validate: isChecklistDetail }),
+};
+
+// Phase 7 administration (doc 06 section 3.9). Read-only views of persisted data.
+export const adminService = {
+  metrics: (range: { from?: string; to?: string }, signal?: AbortSignal) =>
+    apiRequest<AdminMetrics>("/admin/metrics", { query: range, signal, validate: isAdminMetrics }),
+  knowledgeGaps: (range: { from?: string; to?: string }, signal?: AbortSignal) =>
+    apiRequest<KnowledgeGaps>("/admin/knowledge-gaps", { query: range, signal, validate: isKnowledgeGaps }),
+  auditEvents: (
+    params: { action?: string; outcome?: string; resource_type?: string; resource_ref?: string; cursor?: string | null },
+    signal?: AbortSignal,
+  ) =>
+    apiRequest<{ items: AuditEvent[]; next_cursor: string | null }>("/admin/audit-events", {
+      query: { ...params, limit: 25 },
+      signal,
+      validate: isAuditPage,
+    }),
+  agents: (signal?: AbortSignal) => apiRequest<AgentSummary[]>("/admin/support-agents", { signal, validate: isAgents }),
 };

@@ -1,4 +1,4 @@
-# IHSA Frontend (Phases 3–6)
+# IHSA Frontend (Phases 3–7)
 
 React + TypeScript + Vite user interface for the **Intelligent Healthcare Support Agent**, an internship prototype that uses **synthetic data only** and is not an Evernorth product. Architecture and decisions are in [`docs/phase-3/frontend-implementation.md`](../docs/phase-3/frontend-implementation.md).
 
@@ -45,7 +45,8 @@ Open **http://localhost:5173** (not 127.0.0.1): the backend's default `CORS_ORIG
 | PA readiness | **Connected** (Phase 6, providers): choose a requirement set and analyzed documents, then view the backend checklist (four statuses, evidence, requirement source, reviewer summary) with a prominent "not an authorization decision" notice |
 | Assistant tool results (Phase 5) | Claim, benefit and requirement records render as cards from the response `records`; each lookup shows a badge. A proposed support case opens a confirmation dialog and is created only on confirm (`POST /support-cases` with the server-issued `Idempotency-Key`); the case number appears only after the backend returns it |
 | Support cases | **Connected** (Phase 5): list with status filter, case detail with history, and a "New case" form with review and confirmation |
-| Case queue, admin dashboard | UI ready, showing an honest "not connected" state (Phase 7) |
+| Case queue (agents) | **Connected** (Phase 7): unassigned queue and "assigned to me" with server-side filters and paging; a case panel with history, linked checklist and documents, and only the actions the backend allows (each confirmed, version-checked) |
+| Admin dashboard | **Connected** (Phase 7): metrics from `GET /admin/metrics` for a UTC date range, knowledge gaps, a read-only audit log, and all cases with assign/cancel. Failed requests show errors, never zeros; missing data shows "—" |
 
 ## Troubleshooting
 | Symptom | Fix |

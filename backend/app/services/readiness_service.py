@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.authz.dependencies import Principal
+from app.cases import escalation
 from app.core.exceptions import AppError, ForbiddenError, NotFoundError
 from app.documents import readiness_rules as rules
 from app.models import (
@@ -37,6 +38,7 @@ from app.schemas.readiness import (
     ChecklistPage,
     ChecklistSummary,
     Counts,
+    EscalationOffer,
     ItemEvidence,
     ReadinessRequest,
     RequirementSetSummary,
@@ -225,6 +227,15 @@ def _detail(db: Session, c: AuthorizationChecklist) -> ChecklistDetail:
     )
     if not c.reviewer_summary:
         detail.reviewer_summary = reviewer_summary(detail, source_doc.effective_date if source_doc else None)
+    decision = escalation.readiness_decision(c.readiness_status)
+    if decision is not None and c.review_state == "NOT_SUBMITTED":
+        attention = [f"{i.requirement_code} {i.item_status}" for i in items if i.item_status != "SATISFIED"]
+        detail.escalation_offer = EscalationOffer(
+            category=decision.category, escalation_reason=decision.escalation_reason,
+            summary=escalation.readiness_summary(req_set.procedure_code, c.readiness_status,
+                                                 detail.counts.model_dump(), attention),
+            related_checklist_id=c.id, document_ids=[d.document_id for d in documents],
+        )
     return detail
 
 
@@ -271,6 +282,13 @@ def list_checklists(db: Session, principal: Principal, limit: int = 50) -> Check
 
 def get_checklist(db: Session, audit: AuditService, principal: Principal, checklist_id: UUID) -> ChecklistDetail:
     c = db.get(AuthorizationChecklist, checklist_id)
+    from app.services import support_case_service  # local import: avoids a service import cycle
+
+    if c is not None and c.created_by_user_id != principal.user_id and support_case_service.case_linked(
+            db, principal, checklist_id=checklist_id):
+        audit.record("READINESS_CHECKLIST_VIEWED", AuditOutcome.SUCCESS, actor=principal,
+                     resource_type="authorization_checklist", resource_ref=str(checklist_id))
+        return _detail(db, c)
     if c is None or c.created_by_user_id != principal.user_id:
         audit.record("ACCESS_DENIED", AuditOutcome.DENIED, actor=principal, resource_type="authorization_checklist",
                      resource_ref=str(checklist_id), reason_code="NOT_EXISTS" if c is None else "NOT_OWNER")
