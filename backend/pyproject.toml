@@ -1,0 +1,22 @@
+# Tool configuration only; dependencies are pinned in requirements*.txt.
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".local"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"migrations/versions/**" = ["E501"]
+"scripts/seed_data.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+markers = ["postgres: requires the PostgreSQL test database (TEST_DATABASE_URL)"]
+filterwarnings = ["error::DeprecationWarning:app.*"]

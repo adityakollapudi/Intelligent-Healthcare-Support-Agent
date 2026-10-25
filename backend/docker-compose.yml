@@ -1,0 +1,17 @@
+# Development-only PostgreSQL for machines with Docker (alternative to scripts/local_postgres.ps1).
+# Not verified in Phase 2: Docker was not installed on the development machine.
+# The pgvector image is used now so Phase 4 (vector search) needs no database change.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ihsa
+      POSTGRES_PASSWORD: ihsa-dev-only   # development placeholder; never reuse elsewhere
+      POSTGRES_DB: ihsa_dev
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - ihsa_pgdata:/var/lib/postgresql/data
+      - ./scripts/docker-init-test-db.sql:/docker-entrypoint-initdb.d/10-test-db.sql:ro
+volumes:
+  ihsa_pgdata:
