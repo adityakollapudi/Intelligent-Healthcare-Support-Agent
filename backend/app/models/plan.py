@@ -25,6 +25,10 @@ class Plan(UUIDPrimaryKey, Synthetic, Timestamps, Base):
     effective_end: Mapped[date | None]
     summary: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
+    # knowledge_documents.plan_id also references plans, so this side of the cycle uses ALTER TABLE.
+    source_document_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("knowledge_documents.id", ondelete="SET NULL", use_alter=True)
+    )
 
     benefits: Mapped[list["PlanBenefit"]] = relationship(
         back_populates="plan", order_by="(PlanBenefit.benefit_category, PlanBenefit.service_name)"

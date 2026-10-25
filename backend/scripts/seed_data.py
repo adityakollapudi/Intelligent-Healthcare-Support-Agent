@@ -159,3 +159,54 @@ CLAIMS = [
 ]
 
 NONEXISTENT_CLAIM_NUMBER = "SYN-CLM-2026-999999"
+
+
+def _req(code, description, rule_type, params, phrase, mandatory=True):
+    return {"requirement_code": code, "description": description, "rule_type": rule_type, "rule_params": params,
+            "source_phrase": phrase, "is_mandatory": mandatory}
+
+
+# Fictional documentation-requirement sets (doc 07 §6.2). `source_phrase` must appear verbatim in the
+# ACTIVE version of `source_document_key`; the requirements service verifies it at query time.
+PA_REQUIREMENT_SETS = [
+    {
+        "procedure_code": "SYN-PROC-MRI-LUMBAR",
+        "display_name": "Lumbar spine MRI (fictional requirement set)",
+        "aliases": ["lumbar mri", "lumbar spine mri", "back mri", "lumbar scan", "mri of the lower back", "spine mri"],
+        "version": "2.0",
+        "source_document_key": "pa-imaging-guide",
+        "requirements": [
+            _req("REQ-MRI-01", "Requested service date present", "FIELD_PRESENT",
+                 {"field": "requested_service_date"}, "The requested service date."),
+            _req("REQ-MRI-02", "Ordering provider identifier present in synthetic format", "FIELD_PATTERN",
+                 {"field": "ordering_provider_npi", "regex": "^\\d{10}$"}, "ordering provider's 10-digit identifier"),
+            _req("REQ-MRI-03", "Conservative therapy duration is documented", "FIELD_PRESENT",
+                 {"field": "conservative_therapy_duration"}, "Documentation of the duration of conservative therapy"),
+            _req("REQ-MRI-04", "Member number present in synthetic format", "FIELD_PATTERN",
+                 {"field": "member_number", "regex": "^SYN-M-\\d{6}$"}, "The member number in the format SYN-M-000000"),
+            _req("REQ-MRI-05", "Referral letter included", "DOCUMENT_TYPE_PRESENT",
+                 {"document_type": "REFERRAL_LETTER"}, "A referral letter from the referring provider"),
+            _req("REQ-MRI-06", "Supporting rationale reviewed by authorized staff", "MANUAL_ONLY", {},
+                 "A supporting rationale, which an authorized staff member reviews manually"),
+        ],
+    },
+    {
+        "procedure_code": "SYN-PROC-PT-EXTENDED",
+        "display_name": "Extended physical therapy (fictional requirement set)",
+        "aliases": ["extended physical therapy", "physical therapy extension", "more physical therapy visits",
+                    "additional physical therapy", "pt extension", "extra pt visits", "physical therapy beyond the limit"],
+        "version": "1.0",
+        "source_document_key": "pa-physical-therapy-guide",
+        "requirements": [
+            _req("REQ-PT-01", "Member number present", "FIELD_PATTERN",
+                 {"field": "member_number", "regex": "^SYN-M-\\d{6}$"}, "The member number."),
+            _req("REQ-PT-02", "Referral dated within 30 days before request", "DATE_WITHIN_DAYS",
+                 {"field": "referral_date", "reference_field": "request_date", "max_days_before": 30},
+                 "A referral dated within 30 days before the request date"),
+            _req("REQ-PT-03", "Clinical note summary included", "DOCUMENT_TYPE_PRESENT",
+                 {"document_type": "CLINICAL_NOTE_SUMMARY"}, "A clinical note summary describing progress so far"),
+            _req("REQ-PT-04", "Visit history reviewed by authorized staff", "MANUAL_ONLY", {},
+                 "The visit history for the current plan year"),
+        ],
+    },
+]

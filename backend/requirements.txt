@@ -9,3 +9,8 @@ alembic==1.20.1
 psycopg[binary]==3.3.6
 argon2-cffi==25.1.0
 PyJWT==2.15.1
+# Phase 4 (RAG): local CPU embeddings, PDF text extraction, vector math, Claude adapter
+fastembed==0.9.1
+pymupdf==2.0
+numpy==2.5.4
+anthropic==2.3.0

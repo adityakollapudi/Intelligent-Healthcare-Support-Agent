@@ -1,4 +1,4 @@
-# IHSA Backend (Phase 2)
+# IHSA Backend (Phases 2–5)
 
 FastAPI + PostgreSQL backend for the **Intelligent Healthcare Support Agent**: an independent internship case-study prototype that uses **synthetic data only**. It is not an Evernorth product and connects to no real system.
 
@@ -24,6 +24,7 @@ Copy-Item .env.example .env                      # then edit .env (see below)
 
 alembic upgrade head                              # apply migrations to DATABASE_URL
 python -m scripts.seed_demo_data                  # insert synthetic demo data (safe to re-run)
+python -m scripts.ingest_knowledge_base           # embed the synthetic knowledge corpus (first run downloads ~130 MB model)
 uvicorn app.main:app --reload                     # http://127.0.0.1:8000
 ```
 
@@ -64,8 +65,15 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 | `POST /auth/logout` | any role | Revokes the current token → `204` |
 | `GET /auth/me` | any role | Profile, member number and plan (members), organization (staff), permission list for UI use |
 | `GET /claims` | `MEMBER` | Your own claims, newest first. `?status=` (repeatable), `?limit=` 1–100, `?cursor=` |
-| `GET /claims/{claim_number}` | `MEMBER` (own), `SUPPORT_AGENT` (case-linked; no cases exist until Phase 5/7) | `claim_number` like `SYN-CLM-2026-000101`. Another member's claim and a nonexistent claim both return the same `404`. `PROVIDER` and `ADMIN` get `403` |
-| `GET /benefits/{plan_code}` | `MEMBER` (own plan), `PROVIDER`, `SUPPORT_AGENT`, `ADMIN` (any active plan) | `plan_code` like `SYN-PLAN-GOLD-01`. Optional `?benefit_category=IMAGING`. `source` is `null` until Phase 4 |
+| `GET /claims/{claim_number}` | `MEMBER` (own), `SUPPORT_AGENT` (case-linked; agent case linking arrives in Phase 7) | `claim_number` like `SYN-CLM-2026-000101`. Another member's claim and a nonexistent claim both return the same `404`. `PROVIDER` and `ADMIN` get `403` |
+| `GET /benefits/{plan_code}` | `MEMBER` (own plan), `PROVIDER`, `SUPPORT_AGENT`, `ADMIN` (any active plan) | `plan_code` like `SYN-PLAN-GOLD-01`. Optional `?benefit_category=IMAGING`. `source` is `null` (per-benefit passage links are not implemented; documentation requirements carry verified sources) |
+| `POST /chat` | any role (`chat:use`) | `{message, client_message_id, session_id?}` → a document-grounded answer with validated citations, or an explicit insufficient-evidence / clarification / not-supported response. Retrieval is filtered by role audience and (for members) own plan. A repeated `client_message_id` returns the stored answer. 503 `AI_SERVICE_UNAVAILABLE` on embedding/LLM failure (never reported as "no information"). See `docs/phase-4/rag-implementation.md` |
+| `GET /chat/sessions`, `GET /chat/sessions/{id}` | any role (own sessions only) | Recent conversations and their messages (including `tool_executions` and `records`). Another user's session returns 404 |
+| `POST /support-cases` | `MEMBER`, `PROVIDER` (`cases:create`) | Requires an `Idempotency-Key: <UUID>` header. `201` creates an `OPEN` case (`CASE-YYYY-NNNNNN`) with its event and audit row in one transaction; `200` is a replay of the same key and body; `409 IDEMPOTENCY_KEY_REUSED` means the same key was sent with a different body. Server-controlled fields are rejected (422). See `docs/phase-5/api-and-workflow-contracts.md` |
+| `GET /support-cases`, `GET /support-cases/{id}` | `MEMBER`, `PROVIDER` (own cases only) | `?status=` (repeatable), `?limit=` 1–100. Another user's case returns 404 |
+| `GET /authorization/requirements/{procedure_code}` | any role with `requirements:read` | Configured documentation requirements for a fictional procedure (e.g. `SYN-PROC-MRI-LUMBAR`), each with its verified source passage. Not an approval |
+
+**Chat tools (Phase 5).** `POST /chat` can call four allowlisted tools (`get_claim_status`, `get_plan_benefits`, `get_required_documents`, `create_support_case`) through one executor that validates arguments, checks permissions, reuses the services above and audits every call (`TOOL_INVOKED`, plus a `tool_invocations` row). `create_support_case` only proposes a case; the user creates it by confirming, which sends `POST /support-cases`. Answers report `tool_executions` and structured `records` next to `citations`. Details: `docs/phase-5/tool-integration.md`.
 
 **Errors** use one format everywhere:
 ```json
@@ -94,16 +102,25 @@ Invoke-RestMethod http://127.0.0.1:8000/api/v1/claims/SYN-CLM-2026-000101 -Heade
 
 Claim statuses: `RECEIVED`, `UNDER_PROCESSING`, `PENDING_INFORMATION`, `PROCESSED_PAID`, `PROCESSED_DENIED`.
 
+## AI / RAG (Phase 4)
+
+- **Knowledge corpus:** `data/knowledge/` (14 synthetic documents plus `manifest.json`). Manage it as described in `docs/phase-4/knowledge-base-guide.md`, then run `python -m scripts.ingest_knowledge_base`.
+- **Embeddings:** `BAAI/bge-small-en-v1.5`, run locally on CPU via fastembed. They are stored as `REAL[]` in PostgreSQL; pgvector isn't required (deviation D4-01).
+- **Answers:**
+  - `LLM_PROVIDER=extractive` (default): no LLM. Answers quote the retrieved source sentences, and every answer says so.
+  - `LLM_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`: Claude writes the answers. **This path is unit-tested with a mocked client but has not been run live.**
+- **Evaluation:** `python data/evaluation/build_eval_set.py`, then `python -m scripts.evaluate_rag`. This writes `data/evaluation/results/rag_eval_v1_<provider>.{md,json}`; see `docs/phase-4/rag-evaluation-report.md`.
+
 ## Migrations
 
 ```powershell
 alembic upgrade head                                   # apply
-alembic current                                        # show applied revision (0001)
+alembic current                                        # show applied revision (0002)
 alembic check                                          # fail if models and migrations drift
 alembic revision --autogenerate -m "describe_change"   # new revision: always review the file
 alembic downgrade -1                                   # dev/test databases only
 ```
-Each later phase adds its own tables in a new revision (for example `0002_knowledge_base` in Phase 4). Never run downgrades against a database you can't recreate.
+Each phase adds its own tables in a new revision: `0001` is the Phase 2 foundation, and `0002` adds the knowledge base and conversations in Phase 4. Never run downgrades against a database you can't recreate.
 
 ## Tests
 
@@ -143,4 +160,4 @@ docker compose down                     # option B (add -v to delete the volume)
 - Tokens live in memory on the client. There's no refresh token (D-09).
 - Support-agent claim access (`claims:read:case_linked`) always returns 404 until support cases exist (Phase 5/7).
 - Separate least-privilege DB roles (SEC-17) aren't set up yet. Append-only audit is enforced by a database trigger instead.
-- `benefits[].source` is always `null` until knowledge documents are ingested (Phase 4).
+- The Claude answer path has never been run against the live API. The extractive mode misses paraphrased questions and sometimes quotes related-but-not-answering sentences (see the evaluation report).
