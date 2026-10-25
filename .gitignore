@@ -1,0 +1,8 @@
+# Repository-wide ignores; backend/.gitignore covers Python and local data specifics.
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
