@@ -58,7 +58,7 @@ def run(session, directory):
 
 def test_ingest_idempotent_update_supersede_retire(tx, tmp_path):
     (tmp_path / "a.md").write_text("# A\n\n## Topic\nAlpha parking rules for synthetic clinics.", encoding="utf-8")
-    (tmp_path / "b1.md").write_text("# B\n\n## Rule\nBeta deadline is 10 days.", encoding="utf-8")
+    (tmp_path / "b1.md").write_text("# B\n\n## Rule\nBeta filing deadline is 10 days after service.", encoding="utf-8")
     _write(tmp_path, [_entry("a.md", "zz-alpha"), _entry("b1.md", "zz-beta")])
     first = run(tx, tmp_path)
     assert sorted(first.inserted) == ["zz-alpha@1.0", "zz-beta@1.0"] and not first.failed
@@ -67,7 +67,7 @@ def test_ingest_idempotent_update_supersede_retire(tx, tmp_path):
     assert sorted(again.skipped) == ["zz-alpha@1.0", "zz-beta@1.0"] and again.chunks_written == 0
 
     (tmp_path / "a.md").write_text("# A\n\n## Topic\nAlpha parking rules changed: parking costs $5.", encoding="utf-8")
-    (tmp_path / "b2.md").write_text("# B\n\n## Rule\nBeta deadline is 20 days.", encoding="utf-8")
+    (tmp_path / "b2.md").write_text("# B\n\n## Rule\nBeta filing deadline is 20 days after service.", encoding="utf-8")
     _write(tmp_path, [_entry("a.md", "zz-alpha"), _entry("b1.md", "zz-beta"), _entry("b2.md", "zz-beta", "2.0")])
     third = run(tx, tmp_path)
     assert third.updated == ["zz-alpha@1.0"] and third.inserted == ["zz-beta@2.0"]

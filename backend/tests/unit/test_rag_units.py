@@ -54,6 +54,24 @@ def test_extract_markdown_and_reject_empty(tmp_path):
         extract(empty)
 
 
+@pytest.mark.parametrize(
+    "text", ["# B\n\n## Rule\nBeta deadline is 10 days.", "# A\n\n## Topic\nAlpha parking rules apply."]
+)
+def test_empty_check_does_not_depend_on_line_endings(tmp_path, text):
+    # Regression (CI on Linux): the minimum-length check counted CR characters, so a short file
+    # passed with Windows CRLF endings and was rejected as EMPTY_DOCUMENT with LF endings.
+    outcomes = []
+    for name, newline in (("lf.md", "\n"), ("crlf.md", "\r\n")):
+        path = tmp_path / name
+        path.write_bytes(text.replace("\n", newline).encode("utf-8"))
+        try:
+            extract(path)
+            outcomes.append("ok")
+        except IngestionError as exc:
+            outcomes.append(exc.code)
+    assert outcomes[0] == outcomes[1]
+
+
 def test_extract_rejects_unsupported_and_non_utf8(tmp_path):
     with pytest.raises(IngestionError, match="UNSUPPORTED_FILE_TYPE"):
         extract(tmp_path / "x.docx")

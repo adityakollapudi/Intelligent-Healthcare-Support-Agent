@@ -88,13 +88,13 @@ All use the password you set as `SEED_USER_PASSWORD` in `backend/.env`.
 ## Tests and evaluation
 
 ```powershell
-cd backend;  .\.venv\Scripts\python -m pytest -ra    # 453 tests (needs the local PostgreSQL)
+cd backend;  .\.venv\Scripts\python -m pytest -ra    # 455 tests (needs the local PostgreSQL)
 cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 104 tests
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_rag         # RAG evaluation (131 items)
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_documents   # document AI evaluation
 ```
 
-Results recorded on 2026-10-27 (Phase 8): 453/453 backend tests (95% coverage), 104/104 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
+Results recorded on 2026-10-27 (Phase 8): 455/455 backend tests (95% coverage), 104/104 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
 
 ## Documentation
 

@@ -18,7 +18,7 @@ Final verification of the integrated IHSA prototype. All results below were prod
 | Suite | Command (from the folder shown) | Total | Passed | Failed | Skipped |
 |---|---|---|---|---|---|
 | Backend lint | `backend> .venv\Scripts\ruff check app tests scripts` | — | clean | 0 | — |
-| Backend tests (unit, API, integration, workflows, security) | `backend> .venv\Scripts\python -m pytest -ra` | **453** | **453** | 0 | 0 |
+| Backend tests (unit, API, integration, workflows, security) | `backend> .venv\Scripts\python -m pytest -ra` | **455** | **455** | 0 | 0 |
 | Backend coverage | `backend> .venv\Scripts\python -m pytest --cov=app` | — | 95% lines | — | — |
 | Migrations | `backend> .venv\Scripts\alembic check`; dev `downgrade 0005` → `upgrade head` | — | no drift; reversible | 0 | — |
 | Frontend lint | `frontend> npm run lint` | — | clean | 0 | — |
@@ -36,7 +36,7 @@ Final verification of the integrated IHSA prototype. All results below were prod
 
 **Skips are reported explicitly.** pytest runs with `-ra`, and with PostgreSQL available nothing was skipped. If the database is unreachable, the database-backed tests are *skipped* and listed, never counted as passed (`tests/conftest.py`).
 
-## 3. What the backend suite covers (453 tests)
+## 3. What the backend suite covers (455 tests)
 
 | Area | Main files | Notes |
 |---|---|---|
@@ -64,6 +64,8 @@ Final verification of the integrated IHSA prototype. All results below were prod
 | D8-08 | Low (usability) | Browser at 360 px | `<select>` width = longest option | `max-width: 100%` on controls | Re-measured, no overflow |
 | D8-01 | Low | Requirements trace | Upload limit 30/h vs 20/h | Default changed | Config |
 | D8-10 | Low (dev-only) | npm audit | vitest 3.2.7 advisories | vitest 4.1.12 | audit 0, tests pass |
+| D8-11 | Medium (portability) | First CI run on Linux | Knowledge-base minimum-length check counted line-break characters: a short file passed with Windows CRLF and was rejected as `EMPTY_DOCUMENT` with Linux LF | Whitespace collapsed before counting (`app/rag/extract.py`) | New regression test (fails before, passes after); suite passes |
+| D8-12 | Low (CI tooling) | First CI run | Secret scanner read the line after an empty `ANTHROPIC_API_KEY=` as its value, and flagged `replace-with-…` placeholders in the root `.env.example` | Same-line match only; documented placeholder prefix allowed | Scan clean; real-looking values still flagged |
 
 Contract tests that changed on purpose: the route inventory (+1 feedback route, 26 authenticated), the migration table list (+`user_feedback`, revision 0006), and the metrics test (`unavailable` is now `[]`, and `feedback` counts were added). No test was deleted or weakened.
 
@@ -87,6 +89,6 @@ The in-app browser automation could not drive clicks while emulating a phone vie
 | Real OCR (Tesseract) and the 3 scanned evaluation documents | Engine not installed |
 | Claude generation, tool use and extraction with a live model | No approved API key (mocked or scripted tests only) |
 | Docker image build and `docker compose up` | Docker not installed. Compose and CI YAML were validated, and the production configuration was verified natively |
-| CI workflow run | Not pushed or run on GitHub; it runs the same commands listed in §2 |
+| CI workflow run | First run on GitHub (Linux) failed one backend test and would have failed the secret scan; both fixed as D8-11 and D8-12. A successful run on GitHub is not yet confirmed |
 | Firefox / Edge | Only a Chromium engine was available |
 | mypy (NFR-011) | Not configured |
