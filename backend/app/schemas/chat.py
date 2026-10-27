@@ -115,3 +115,13 @@ class SessionDetail(ApiModel):
     session_id: UUID
     title: str
     messages: list[HistoryMessage]
+
+class FeedbackRequest(RequestModel):
+    rating: Literal["HELPFUL", "NOT_HELPFUL"]
+    comment: str | None = Field(default=None, max_length=500)
+
+
+class FeedbackResponse(ApiModel):
+    message_id: UUID
+    rating: Literal["HELPFUL", "NOT_HELPFUL"]
+    updated_at: UtcDatetime

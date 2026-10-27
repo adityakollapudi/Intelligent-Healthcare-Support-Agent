@@ -1,4 +1,4 @@
-# IHSA Backend (Phases 2–7)
+# IHSA Backend (Phases 2–8)
 
 FastAPI + PostgreSQL backend for the **Intelligent Healthcare Support Agent**: an independent internship case-study prototype that uses **synthetic data only**. It is not an Evernorth product and connects to no real system.
 
@@ -69,6 +69,7 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 | `GET /benefits/{plan_code}` | `MEMBER` (own plan), `PROVIDER`, `SUPPORT_AGENT`, `ADMIN` (any active plan) | `plan_code` like `SYN-PLAN-GOLD-01`. Optional `?benefit_category=IMAGING`. `source` is `null` (per-benefit passage links are not implemented; documentation requirements carry verified sources) |
 | `POST /chat` | any role (`chat:use`) | `{message, client_message_id, session_id?}` → a document-grounded answer with validated citations, or an explicit insufficient-evidence / clarification / not-supported response. Retrieval is filtered by role audience and (for members) own plan. A repeated `client_message_id` returns the stored answer. 503 `AI_SERVICE_UNAVAILABLE` on embedding/LLM failure (never reported as "no information"). See `docs/phase-4/rag-implementation.md` |
 | `GET /chat/sessions`, `GET /chat/sessions/{id}` | any role (own sessions only) | Recent conversations and their messages (including `tool_executions` and `records`). Another user's session returns 404 |
+| `POST /chat/messages/{message_id}/feedback` | any role (`feedback:create`) | `{rating: HELPFUL\|NOT_HELPFUL, comment?}` on an assistant answer in your own session. Re-rating replaces your earlier rating. Others' messages return 404. Audited as `FEEDBACK_SUBMITTED` (rating only, never the comment) |
 | `POST /support-cases` | `MEMBER`, `PROVIDER` (`cases:create`) | Requires an `Idempotency-Key: <UUID>` header. `201` creates an `OPEN` case (`CASE-YYYY-NNNNNN`) with its event and audit row in one transaction; `200` is a replay of the same key and body; `409 IDEMPOTENCY_KEY_REUSED` means the same key was sent with a different body. Server-controlled fields are rejected (422). See `docs/phase-5/api-and-workflow-contracts.md` |
 | `GET /support-cases?scope=mine\|queue\|assigned\|all`, `GET /support-cases/{id}` | creator (`mine`), `SUPPORT_AGENT` (`queue` = unassigned OPEN, `assigned`), `ADMIN` (`all`, summary view) | Filters `status`, `category`, `case_number`, `created_from/to`; keyset `cursor`. Scope is enforced from the role; cases outside it return 404 |
 | `PATCH /support-cases/{id}` | creator, assigned agent, admin | Validated lifecycle change (doc 02 §3.1) or note: `{version, status?, note?, resolution_note?, assign_to_me?, release?, assigned_to_user_id?, unassign?, reason?}`. 409 `VERSION_CONFLICT` / `INVALID_STATUS_TRANSITION`, 422 `INVALID_ASSIGNEE`. History and audit are written in the same transaction. See `docs/phase-7/` |
@@ -91,7 +92,7 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 ```json
 {"error": {"code": "RESOURCE_NOT_FOUND", "message": "The requested item was not found.", "details": [], "request_id": "…"}}
 ```
-Codes: `VALIDATION_ERROR` / `FIELD_NOT_ALLOWED` (422), `UNAUTHENTICATED` / `INVALID_CREDENTIALS` (401), `FORBIDDEN` (403), `RESOURCE_NOT_FOUND` (404), `METHOD_NOT_ALLOWED` (405), `RATE_LIMITED` (429), `INTERNAL_ERROR` (500), `SERVICE_UNAVAILABLE` (503, database unreachable). Error bodies never contain stack traces, SQL, connection details or submitted values. Every response carries `X-Request-ID`; send your own UUID in that header to correlate requests.
+Codes: `VALIDATION_ERROR` / `FIELD_NOT_ALLOWED` (422), `UNAUTHENTICATED` / `INVALID_CREDENTIALS` (401), `FORBIDDEN` (403), `RESOURCE_NOT_FOUND` (404), `METHOD_NOT_ALLOWED` (405), `RATE_LIMITED` (429), `INTERNAL_ERROR` (500), `SERVICE_UNAVAILABLE` (503, database unreachable or connection pool busy, with `Retry-After`). Error bodies never contain stack traces, SQL, connection details or submitted values. Every response carries `X-Request-ID`; send your own UUID in that header to correlate requests.
 
 Quick try (PowerShell, server running):
 ```powershell
@@ -127,12 +128,12 @@ Claim statuses: `RECEIVED`, `UNDER_PROCESSING`, `PENDING_INFORMATION`, `PROCESSE
 
 ```powershell
 alembic upgrade head                                   # apply
-alembic current                                        # show applied revision (0002)
+alembic current                                        # show applied revision (0006)
 alembic check                                          # fail if models and migrations drift
 alembic revision --autogenerate -m "describe_change"   # new revision: always review the file
 alembic downgrade -1                                   # dev/test databases only
 ```
-Each phase adds its own tables in a new revision: `0001` is the Phase 2 foundation, and `0002` adds the knowledge base and conversations in Phase 4. Never run downgrades against a database you can't recreate.
+Each phase adds its own tables in a new revision: `0001` is the Phase 2 foundation, `0002` adds the knowledge base and conversations (Phase 4), and later revisions add tools, documents, case review and `0006` answer feedback (Phase 8). Never run downgrades against a database you can't recreate.
 
 ## Tests
 
@@ -145,6 +146,17 @@ ruff check .
 ```
 
 The suite rebuilds the `*_test` database from migrations and seeds it. It covers config validation, security helpers, the permission map, migrations (including a downgrade/upgrade round trip in a scratch database), constraints, seed repeatability, every endpoint's success, validation, authentication, authorization, outage and unexpected-error paths, and a route inventory that fails if any non-public route lacks authentication. If PostgreSQL is unreachable, the DB-backed tests are **skipped** (reported by pytest), not passed.
+
+## Operations scripts (Phase 8)
+
+| Command | Purpose |
+|---|---|
+| `python -m scripts.cleanup_expired [--dry-run]` | Retention job: expired conversations, expired documents (file, row and extracted fields) not linked to an open case, expired revoked tokens. Audit rows are kept. Run daily |
+| `python -m scripts.create_app_role --role ihsa_app --database ihsa_dev` | Creates a DML-only database role for the API (no DDL, no audit UPDATE/DELETE) |
+| `python scripts/secret_scan.py` | Scans tracked files and git history for secrets; exits non-zero on findings |
+| `python -m scripts.perf_smoke [--users N --requests N]` | Bounded load test against a **local** API only; writes `data/evaluation/results/perf_smoke.json` |
+
+Deployment (native and Docker Compose), backup and troubleshooting: `docs/phase-8/deployment-guide.md`.
 
 ## Stopping local services
 
@@ -171,5 +183,5 @@ docker compose down                     # option B (add -v to delete the volume)
 - Login rate limiting is per email only. There's no per-IP limit yet (NFR-020 IP part → Phase 8).
 - Tokens live in memory on the client. There's no refresh token (D-09).
 - Support-agent claim access (`claims:read:case_linked`) always returns 404 until support cases exist (Phase 5/7).
-- Separate least-privilege DB roles (SEC-17) aren't set up yet. Append-only audit is enforced by a database trigger instead.
+- A DML-only application role can be created with `scripts.create_app_role` (Phase 8). Append-only audit is enforced by a database trigger, which a superuser can bypass.
 - The Claude answer path has never been run against the live API. The extractive mode misses paraphrased questions and sometimes quotes related-but-not-answering sentences (see the evaluation report).

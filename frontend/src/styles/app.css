@@ -226,3 +226,9 @@ table.bars th { text-align: left; font-weight: 400; padding: 2px var(--space-2) 
 table.bars td { padding: 2px 0; }
 table.bars .bar { display: block; height: 12px; background: var(--teal-700); border-radius: 3px; min-width: 2px; }
 .num { text-align: right; font-variant-numeric: tabular-nums; padding-left: var(--space-2); }
+.feedback { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
+.chip[aria-pressed="true"] { background: var(--teal-50); border-color: var(--teal-700); }
+
+/* Phase 8 (D8-08): a <select> sizes to its longest option; keep every control within its container (360 px). */
+select, input, textarea { max-width: 100%; }
+.field:not(.field-inline) select { width: 100%; }

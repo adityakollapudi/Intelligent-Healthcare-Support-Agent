@@ -405,6 +405,9 @@ def update_case(db: Session, audit: AuditService, principal: Principal, case_id:
         audit.record("SUPPORT_CASE_UPDATE_REJECTED", AuditOutcome.FAILURE, actor=principal,
                      resource_type="support_case", resource_ref=str(case_id), reason_code="DATABASE_ERROR")
         raise AppError("The case could not be updated. Nothing was changed.") from None
+    # Expire cached state first: otherwise the identity map returns the events collection loaded
+    # before this change, and the response would omit the history row just written (found in Phase 8).
+    db.expire_all()
     fresh = _load(db, case_id)
     return _detail(db, fresh, principal)
 

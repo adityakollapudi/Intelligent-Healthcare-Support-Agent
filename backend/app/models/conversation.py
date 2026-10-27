@@ -111,3 +111,19 @@ class MessageCitation(UUIDPrimaryKey, Base):
     page_start: Mapped[int | None]
     page_end: Mapped[int | None]
     excerpt: Mapped[str] = mapped_column(String(400))
+
+class UserFeedback(UUIDPrimaryKey, CreatedAt, Base):
+    """A user's rating of one of their own assistant messages (doc 05 §2.25, FR-034). One per
+    message per user; re-rating updates the row."""
+
+    __tablename__ = "user_feedback"
+    __table_args__ = (
+        UniqueConstraint("message_id", "user_id"),
+        CheckConstraint("rating IN ('HELPFUL', 'NOT_HELPFUL')", name="rating_valid"),
+    )
+
+    message_id: Mapped[UUID] = mapped_column(ForeignKey("conversation_messages.id", ondelete="CASCADE"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    rating: Mapped[str] = mapped_column(String(20))
+    comment: Mapped[str | None] = mapped_column(String(500))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))

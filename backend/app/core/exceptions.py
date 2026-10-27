@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
+from sqlalchemy.exc import TimeoutError as PoolTimeoutError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.request_context import current_request_id
@@ -127,6 +128,14 @@ def register_exception_handlers(app: FastAPI) -> None:
         # str(exc) can include host names and SQL; log the type only, never return it.
         logger.error("database_unavailable", extra={"error_type": type(exc.orig).__name__})
         return _response(503, ServiceUnavailableError.code, ServiceUnavailableError.message)
+
+    @app.exception_handler(PoolTimeoutError)
+    async def _db_busy(_: Request, exc: PoolTimeoutError) -> JSONResponse:
+        # Every connection stayed busy for the whole pool timeout (overload, not a bug in the request):
+        # say so honestly and invite a retry instead of reporting an internal error (D8-09).
+        logger.error("database_pool_exhausted", extra={"error_type": type(exc).__name__})
+        return _response(503, ServiceUnavailableError.code, "The service is busy. Please try again shortly.",
+                         headers={"Retry-After": "5"})
 
     @app.exception_handler(SQLAlchemyError)
     async def _db_error(_: Request, exc: SQLAlchemyError) -> JSONResponse:

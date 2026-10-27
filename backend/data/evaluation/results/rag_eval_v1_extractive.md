@@ -1,6 +1,6 @@
 # RAG evaluation — rag_eval_v1 (extractive)
 
-- Run: 2026-10-25T14:37:54+00:00 · items: 131 · embedding: `BAAI/bge-small-en-v1.5` · generator: `extractive`
+- Run: 2026-10-27T09:16:23+00:00 · items: 131 · embedding: `BAAI/bge-small-en-v1.5` · generator: `extractive`
 - Chunking: 160 words / 30 overlap · top_k: 5 · RAG_MIN_RELEVANCE: 0.7
 
 ## Headline metrics
@@ -10,13 +10,14 @@
 | Expected behavior matched (all items) | 87.8% (115/131) |
 | Retrieval recall@5 (expected source in top 5, answerable items) | 100.0% (81/81) |
 | MRR@5 | 0.992 |
+| Precision@5 (share of top-5 chunks from an expected source) | 0.523 |
 | Required facts present (answered, answerable items) | 78.7% (59/75) |
 | Answers with all required facts | 76.1% (51/67) |
 | Answers citing an expected source | 98.6% (70/71) |
 | Answers citing a superseded version | 0 |
 | Answers citing a forbidden (out-of-scope) source | 0 |
 | Items where an unauthorized document was even a candidate | 0 |
-| Pipeline latency p50 / p95 (local CPU, includes embedding) | 82 ms / 231 ms |
+| Pipeline latency p50 / p95 (local CPU, includes embedding) | 44 ms / 99 ms |
 
 ## Behavior by category
 

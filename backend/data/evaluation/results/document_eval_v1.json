@@ -1,6 +1,6 @@
 {
   "summary": {
-    "run_at": "2026-10-25T17:54:45+00:00",
+    "run_at": "2026-10-27T09:16:43+00:00",
     "ocr_engine": "tesseract",
     "ocr_available": false,
     "documents": 13,
@@ -1833,79 +1833,79 @@
       "document": "pa_request_mri_complete.pdf",
       "bytes": 3255,
       "pages": 1,
-      "ms": 62.1
+      "ms": 16.8
     },
     {
       "document": "referral_letter_mri.pdf",
       "bytes": 1889,
       "pages": 1,
-      "ms": 9.4
+      "ms": 2.8
     },
     {
       "document": "pa_request_mri_incomplete.pdf",
       "bytes": 2819,
       "pages": 1,
-      "ms": 8.9
+      "ms": 2.7
     },
     {
       "document": "pa_request_mri_conflict.pdf",
       "bytes": 4025,
       "pages": 2,
-      "ms": 19.5
+      "ms": 3.8
     },
     {
       "document": "pa_request_mri_scanned.png",
       "bytes": 116185,
       "pages": 1,
-      "ms": 101.4
+      "ms": 19.4
     },
     {
       "document": "pa_request_mri_scanned.pdf",
       "bytes": 113615,
       "pages": 1,
-      "ms": 848.3
+      "ms": 185.9
     },
     {
       "document": "pa_request_mri_mixed.pdf",
       "bytes": 43725,
       "pages": 2,
-      "ms": 708.3
+      "ms": 171.5
     },
     {
       "document": "pt_request_form.pdf",
       "bytes": 1919,
       "pages": 1,
-      "ms": 8.3
+      "ms": 2.4
     },
     {
       "document": "pt_referral_letter.pdf",
       "bytes": 1899,
       "pages": 1,
-      "ms": 8.2
+      "ms": 2.9
     },
     {
       "document": "pt_referral_letter_late.pdf",
       "bytes": 1902,
       "pages": 1,
-      "ms": 9.1
+      "ms": 4.8
     },
     {
       "document": "clinical_note_summary.pdf",
       "bytes": 1678,
       "pages": 1,
-      "ms": 10.5
+      "ms": 7.2
     },
     {
       "document": "unrecognized_letter.pdf",
       "bytes": 1320,
       "pages": 1,
-      "ms": 8.8
+      "ms": 5.0
     },
     {
       "document": "pa_request_mri_injection.pdf",
       "bytes": 3318,
       "pages": 1,
-      "ms": 11.4
+      "ms": 5.9
     }
   ]
 }

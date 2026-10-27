@@ -375,7 +375,7 @@ def test_metrics_match_hand_computed_values(client, auth, history):
     assert m["tools"]["get_plan_benefits"]["EXECUTION_ERROR"] == 1
     assert m["documents"]["jobs_by_status"] == {"QUEUED": 0, "RUNNING": 0, "COMPLETED": 0,
                                                 "COMPLETED_WITH_WARNINGS": 0, "FAILED": 0}
-    assert m["unavailable"] == ["feedback"]
+    assert m["unavailable"] == [] and m["feedback"] == {"HELPFUL": 0, "NOT_HELPFUL": 0}
 
 
 def test_empty_period_returns_real_zeros(client, auth):
@@ -431,3 +431,11 @@ def test_case_change_and_its_audit_row_commit_together(api, monkeypatch):
     after = api.get(AGENT_A, case["case_id"]).json()
     assert after["status"] == "OPEN" and after["version"] == case["version"]  # nothing changed
     assert [e[0] for e in _events(case["case_id"])] == ["CREATED"]
+
+
+def test_patch_response_includes_the_history_row_it_just_wrote(api):
+    # Regression (Phase 8, D8-06): the PATCH response used a stale events collection.
+    case = api.ok(AGENT_A, api.get(AGENT_A, api.create()["case_id"]).json(), assign_to_me=True)
+    assert [e["event_type"] for e in case["events"]] == ["CREATED", "ASSIGNED"]
+    case = api.ok(AGENT_A, case, status="IN_PROGRESS")
+    assert [e["event_type"] for e in case["events"]] == ["CREATED", "ASSIGNED", "STATUS_CHANGED"]

@@ -139,6 +139,39 @@ function ActionButton({ action }: { action: ProposedAction }) {
   return <UnavailableAction label={action.label} />;
 }
 
+/** FR-034. The rating is shown as recorded only after the backend confirms it. */
+function AnswerFeedback({ messageId }: { messageId: string }) {
+  const { can } = useSession();
+  const [saved, setSaved] = useState<"HELPFUL" | "NOT_HELPFUL" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  if (!can("feedback:create")) return null;
+  const send = async (rating: "HELPFUL" | "NOT_HELPFUL") => {
+    setBusy(true);
+    setFailed(false);
+    try {
+      await chatService.feedback(messageId, rating);
+      setSaved(rating);
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="feedback" role="group" aria-label="Rate this answer">
+      <span className="muted small">Was this helpful?</span>
+      {(["HELPFUL", "NOT_HELPFUL"] as const).map((r) => (
+        <button key={r} type="button" className="chip" aria-pressed={saved === r} disabled={busy} onClick={() => void send(r)}>
+          {r === "HELPFUL" ? "👍 Yes" : "👎 No"}
+        </button>
+      ))}
+      {saved && <span className="muted small" role="status">Thanks, your rating was recorded.</span>}
+      {failed && <span className="field-error small" role="alert">Your rating wasn't saved. Please try again.</span>}
+    </div>
+  );
+}
+
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.sender === "USER";
   const limited = message.answerType === "INSUFFICIENT_EVIDENCE" || message.answerType === "UNSUPPORTED_REQUEST";
@@ -165,6 +198,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           {d}
         </p>
       ))}
+      {!isUser && <AnswerFeedback messageId={message.id} />}
     </li>
   );
 }
