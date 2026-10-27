@@ -39,7 +39,8 @@ def extract(path: Path) -> list[Page]:
         except UnicodeDecodeError:
             raise IngestionError("NOT_UTF8") from None
         pages = [Page(text=text, number=None)]
-    if sum(len(p.text.strip()) for p in pages) < MIN_TEXT_CHARS:
+    # Whitespace is collapsed first so the threshold doesn't depend on line endings (CRLF vs LF).
+    if sum(len(" ".join(p.text.split())) for p in pages) < MIN_TEXT_CHARS:
         raise IngestionError("NO_TEXT_LAYER" if kind == "pdf" else "EMPTY_DOCUMENT")
     return pages
 

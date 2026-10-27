@@ -20,10 +20,12 @@ PATTERNS = {
     "github_token": re.compile(r"\bgh[pousr]_[A-Za-z0-9]{36,}\b"),
     # NAME=value in config-like text; value must look like a credential (not code such as `').Split(`).
     "assigned_secret": re.compile(
-        r"(?i)\b(JWT_SECRET|ANTHROPIC_API_KEY|SEED_USER_PASSWORD)\s*=\s*['\"]?([A-Za-z0-9][A-Za-z0-9_\-+/=.]{7,})"
+        # [ \t]* (not \s*): an empty `NAME=` must not capture the next line as its value.
+        r"(?i)\b(JWT_SECRET|ANTHROPIC_API_KEY|SEED_USER_PASSWORD)[ \t]*=[ \t]*['\"]?([A-Za-z0-9][A-Za-z0-9_\-+/=.]{7,})"
     ),
 }
 ALLOWED_ASSIGNMENTS = {"replace-with-a-long-random-string-of-at-least-32-chars"}
+PLACEHOLDER_PREFIX = "replace-with-"  # documented placeholders in .env.example files
 # Test fixtures use deliberate, test-only values (e.g. tests/conftest.py TEST_JWT_SECRET); the key-format
 # patterns still apply to them.
 TEST_ONLY = ("backend/tests/",)
@@ -51,7 +53,9 @@ def scan(text: str, where: str, secrets: dict[str, str]) -> list[str]:
         if name == "assigned_secret" and where.startswith(TEST_ONLY):
             continue
         for m in rx.finditer(text):
-            if name == "assigned_secret" and (m.group(2) in ALLOWED_ASSIGNMENTS or "test" in m.group(2).lower()):
+            value = m.group(2)
+            if name == "assigned_secret" and (value in ALLOWED_ASSIGNMENTS or value.startswith(PLACEHOLDER_PREFIX)
+                                              or "test" in value.lower()):
                 continue
             hits.append(f"{where}: pattern {name}")
     hits += [f"{where}: value of {name} from backend/.env" for name, value in secrets.items() if value in text]
