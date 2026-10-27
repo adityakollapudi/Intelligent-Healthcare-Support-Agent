@@ -92,6 +92,17 @@ export const chatService = {
     apiRequest<{ items: SessionSummary[] }>("/chat/sessions", { query: { limit: 20 }, signal, validate: isSessionPage }),
   session: (sessionId: string, signal?: AbortSignal) =>
     apiRequest<SessionDetail>(`/chat/sessions/${encodeURIComponent(sessionId)}`, { signal, validate: isSessionDetail }),
+  /** FR-034: rate one of my assistant answers; re-rating replaces the earlier rating. */
+  feedback: (messageId: string, rating: "HELPFUL" | "NOT_HELPFUL") =>
+    apiRequest<{ message_id: string; rating: string; updated_at: string }>(
+      `/chat/messages/${encodeURIComponent(messageId)}/feedback`,
+      {
+        method: "POST",
+        body: { rating },
+        validate: (v): v is { message_id: string; rating: string; updated_at: string } =>
+          typeof v === "object" && v !== null && (v as { rating?: unknown }).rating === rating,
+      },
+    ),
 };
 
 // Phase 5 support cases (doc 06 §3.8). Creation is always a user-confirmed request carrying an

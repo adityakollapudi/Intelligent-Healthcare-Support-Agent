@@ -1,6 +1,6 @@
 # Document AI evaluation (synthetic corpus v1.0)
 
-- Run: 2026-10-25T17:54:45+00:00 · documents: 13 · scenarios: 10
+- Run: 2026-10-27T09:16:43+00:00 · documents: 13 · scenarios: 10
 - OCR engine: `tesseract` · available: **False**
 
 ## Extraction (documents scored: 10)
@@ -36,19 +36,19 @@
 
 | Document | Bytes | Pages | ms |
 |---|---|---|---|
-| pa_request_mri_complete.pdf | 3255 | 1 | 62.1 |
-| referral_letter_mri.pdf | 1889 | 1 | 9.4 |
-| pa_request_mri_incomplete.pdf | 2819 | 1 | 8.9 |
-| pa_request_mri_conflict.pdf | 4025 | 2 | 19.5 |
-| pa_request_mri_scanned.png | 116185 | 1 | 101.4 |
-| pa_request_mri_scanned.pdf | 113615 | 1 | 848.3 |
-| pa_request_mri_mixed.pdf | 43725 | 2 | 708.3 |
-| pt_request_form.pdf | 1919 | 1 | 8.3 |
-| pt_referral_letter.pdf | 1899 | 1 | 8.2 |
-| pt_referral_letter_late.pdf | 1902 | 1 | 9.1 |
-| clinical_note_summary.pdf | 1678 | 1 | 10.5 |
-| unrecognized_letter.pdf | 1320 | 1 | 8.8 |
-| pa_request_mri_injection.pdf | 3318 | 1 | 11.4 |
+| pa_request_mri_complete.pdf | 3255 | 1 | 16.8 |
+| referral_letter_mri.pdf | 1889 | 1 | 2.8 |
+| pa_request_mri_incomplete.pdf | 2819 | 1 | 2.7 |
+| pa_request_mri_conflict.pdf | 4025 | 2 | 3.8 |
+| pa_request_mri_scanned.png | 116185 | 1 | 19.4 |
+| pa_request_mri_scanned.pdf | 113615 | 1 | 185.9 |
+| pa_request_mri_mixed.pdf | 43725 | 2 | 171.5 |
+| pt_request_form.pdf | 1919 | 1 | 2.4 |
+| pt_referral_letter.pdf | 1899 | 1 | 2.9 |
+| pt_referral_letter_late.pdf | 1902 | 1 | 4.8 |
+| clinical_note_summary.pdf | 1678 | 1 | 7.2 |
+| unrecognized_letter.pdf | 1320 | 1 | 5.0 |
+| pa_request_mri_injection.pdf | 3318 | 1 | 5.9 |
 
 ## Mismatches
 

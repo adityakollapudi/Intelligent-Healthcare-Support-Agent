@@ -10,9 +10,9 @@ from app.core.config import Settings, get_settings
 from app.db.session import get_db
 from app.rag.embeddings import Embedder, get_embedder
 from app.rag.generation import Generator, get_generator
-from app.schemas.chat import ChatRequest, ChatResponse, SessionDetail, SessionPage
+from app.schemas.chat import ChatRequest, ChatResponse, FeedbackRequest, FeedbackResponse, SessionDetail, SessionPage
 from app.schemas.common import ErrorResponse
-from app.services import chat_service
+from app.services import chat_service, feedback_service
 from app.services.audit_service import AuditService, get_audit_service
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -55,3 +55,13 @@ def list_sessions(db: Db, principal: ChatUser, limit: Annotated[int, Query(ge=1,
 )
 def get_session(session_id: UUID, db: Db, audit: Audit, principal: ChatUser) -> SessionDetail:
     return chat_service.get_session(db, audit, principal, session_id)
+
+@router.post(
+    "/messages/{message_id}/feedback", response_model=FeedbackResponse, responses=_ERRORS,
+    summary="Rate one of my assistant answers (helpful / not helpful)",
+)
+def post_feedback(
+    message_id: UUID, body: FeedbackRequest, db: Db, audit: Audit,
+    principal: Annotated[Principal, Depends(require_any_permission(Permission.FEEDBACK_CREATE))],
+) -> FeedbackResponse:
+    return feedback_service.rate(db, audit, principal, message_id, body)

@@ -1,0 +1,89 @@
+{
+  "environment": {
+    "cpu_count": 12,
+    "users": 50,
+    "requests_per_endpoint": 500,
+    "metrics_users": 10
+  },
+  "structured": [
+    {
+      "name": "GET /health",
+      "requests": 500,
+      "concurrency": 50,
+      "p50_ms": 110.6,
+      "p95_ms": 199.3,
+      "max_ms": 337.6,
+      "error_rate": 0.0,
+      "throughput_rps": 405.4
+    },
+    {
+      "name": "GET /claims (member)",
+      "requests": 500,
+      "concurrency": 50,
+      "p50_ms": 312.4,
+      "p95_ms": 512.9,
+      "max_ms": 753.9,
+      "error_rate": 0.0,
+      "throughput_rps": 152.8
+    },
+    {
+      "name": "GET /claims/{number}",
+      "requests": 500,
+      "concurrency": 50,
+      "p50_ms": 295.9,
+      "p95_ms": 483.1,
+      "max_ms": 701.1,
+      "error_rate": 0.0,
+      "throughput_rps": 163.6
+    },
+    {
+      "name": "GET /benefits/{plan}",
+      "requests": 500,
+      "concurrency": 50,
+      "p50_ms": 323.1,
+      "p95_ms": 515.1,
+      "max_ms": 1043.6,
+      "error_rate": 0.0,
+      "throughput_rps": 151.7
+    },
+    {
+      "name": "GET /support-cases?scope=queue",
+      "requests": 500,
+      "concurrency": 50,
+      "p50_ms": 230.0,
+      "p95_ms": 343.5,
+      "max_ms": 718.3,
+      "error_rate": 0.0,
+      "throughput_rps": 211.3
+    },
+    {
+      "name": "GET /admin/metrics (30 days)",
+      "requests": 500,
+      "concurrency": 10,
+      "p50_ms": 170.3,
+      "p95_ms": 244.4,
+      "max_ms": 293.7,
+      "error_rate": 0.0,
+      "throughput_rps": 56.5
+    },
+    {
+      "name": "GET /documents (provider)",
+      "requests": 500,
+      "concurrency": 50,
+      "p50_ms": 347.3,
+      "p95_ms": 458.8,
+      "max_ms": 812.6,
+      "error_rate": 0.0,
+      "throughput_rps": 138.1
+    }
+  ],
+  "chat": {
+    "name": "POST /chat (RAG, extractive, local embeddings)",
+    "requests": 30,
+    "concurrency": 3,
+    "p50_ms": 197.3,
+    "p95_ms": 1865.7,
+    "max_ms": 1892.0,
+    "error_rate": 0.0
+  }
+}

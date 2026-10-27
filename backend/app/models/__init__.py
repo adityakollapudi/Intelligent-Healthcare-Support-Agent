@@ -2,7 +2,7 @@
 
 from app.models.audit_log import AuditLog, RevokedToken
 from app.models.claim import Claim
-from app.models.conversation import ConversationMessage, ConversationSession, MessageCitation
+from app.models.conversation import ConversationMessage, ConversationSession, MessageCitation, UserFeedback
 from app.models.document import (
     AuthorizationChecklist,
     AuthorizationChecklistItem,
@@ -30,5 +30,5 @@ __all__ = [
     "ConversationMessage", "ConversationSession", "DocumentChunk", "DocumentProcessingJob", "ExtractedField",
     "KnowledgeDocument", "Member", "MessageCitation", "Organization", "PaRequirement", "PaRequirementSet", "Plan",
     "PlanBenefit", "RevokedToken", "SupportCase", "SupportCaseDocument", "SupportCaseEvent", "ToolInvocation",
-    "UploadedDocument", "User",
+    "UploadedDocument", "User", "UserFeedback",
 ]

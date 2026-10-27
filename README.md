@@ -16,7 +16,8 @@ An AI-powered healthcare-insurance information and administrative support protot
 | Prior authorization readiness | A deterministic checklist (`SATISFIED` / `MISSING` / `UNREADABLE` / `NEEDS_MANUAL_REVIEW`) against fictional requirement sets, with evidence, sources and a reviewer summary. It is **not an approval** | 6 |
 | Escalation and human review | Support cases follow a validated lifecycle. Agents have a queue, assignment, notes and resolution, all version-checked against concurrent edits and audited | 7 |
 | Audit and admin dashboard | A read-only audit log; metrics and knowledge-gap reports computed from real records, never estimates | 7 |
-| Testing, security, deployment | Final system-wide verification | 8 (next) |
+| Feedback and retention | Members and staff rate answers (👍/👎); a retention job removes expired conversations, documents and tokens | 8 |
+| Testing, security, deployment | System-wide tests, security and load checks, Dockerfiles, Compose and CI | 8 |
 
 ## Architecture
 
@@ -46,7 +47,8 @@ flowchart LR
 ```
 backend/    FastAPI app, migrations, seed and evaluation scripts, tests   → backend/README.md
 frontend/   React application and tests                                    → frontend/README.md
-docs/       Design and phase documentation (phase-1 … phase-7)
+docs/       Design and phase documentation (phase-1 … phase-8)
+compose.yaml, .github/workflows/ci.yml   Container and CI definitions (see docs/phase-8/deployment-guide.md)
 ```
 
 ## Quick start (Windows PowerShell; local development)
@@ -86,13 +88,13 @@ All use the password you set as `SEED_USER_PASSWORD` in `backend/.env`.
 ## Tests and evaluation
 
 ```powershell
-cd backend;  .\.venv\Scripts\python -m pytest        # 428 tests (needs the local PostgreSQL)
-cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 93 tests
+cd backend;  .\.venv\Scripts\python -m pytest -ra    # 453 tests (needs the local PostgreSQL)
+cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 104 tests
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_rag         # RAG evaluation (131 items)
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_documents   # document AI evaluation
 ```
 
-Results as last recorded: the backend suite passes, the frontend suite passes, RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. Details and caveats are in each phase's testing report.
+Results recorded on 2026-10-27 (Phase 8): 453/453 backend tests (95% coverage), 104/104 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
 
 ## Documentation
 
@@ -105,13 +107,15 @@ Results as last recorded: the backend suite passes, the frontend suite passes, R
 | 5 — Tool calling | [docs/phase-5/](docs/phase-5/): tool integration, API contracts, testing report |
 | 6 — Document AI and readiness | [docs/phase-6/](docs/phase-6/): architecture, processing guide, evaluation report |
 | 7 — Escalation, audit, dashboard | [docs/phase-7/](docs/phase-7/): case management, audit architecture, metric dictionary, testing report |
+| 8 — Verification and deployment | [docs/phase-8/](docs/phase-8/): requirements verification, test report, AI evaluation, security report, deployment guide, final demo guide |
 
 ## Known limitations
 
 - **OCR is unverified:** Tesseract isn't bundled, so scanned pages are reported as unreadable until it is installed and configured.
 - **Claude features are unverified live:** generation, tool use and LLM-assisted extraction are tested with mocked clients only. The default mode is LLM-free.
-- **No malware scanning** of uploads. Retention cleanup jobs are not implemented yet.
-- **Not production-ready:** single-process background jobs, a local file store, and a local development database. Phase 8 covers system-wide testing, security review and deployment.
+- **No malware scanning** of uploads, and the audit log is not tamper-evident against a database superuser.
+- **Docker and CI are unexecuted here:** the Dockerfiles, `compose.yaml` and the CI workflow are written and validated, but Docker isn't installed in this environment and the workflow hasn't run on GitHub yet.
+- **Not production-ready:** single-process background jobs, a local file store, a local database, no mypy type checking. See [docs/phase-8/requirements-verification.md](docs/phase-8/requirements-verification.md) for the full Pass / Partial / Blocked list.
 
 ## Responsible use
 

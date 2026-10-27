@@ -145,6 +145,9 @@ def main() -> int:
                     "actual": actual,
                     "behavior_ok": actual in item["expected_behavior"],
                     "retrieval_rank": rank,
+                    # Share of the top-K chunks that come from an expected source document.
+                    "precision_at_k": round(sum(k in expected for k in top_keys) / len(top_keys), 4)
+                    if top_keys and expected else None,
                     "best_similarity": round(max((c.similarity for c in active), default=0.0), 4),
                     "best_expected_similarity": round(
                         max((c.similarity for c in active if c.document_key in expected), default=0.0), 4
@@ -229,6 +232,8 @@ def summarize(rows, settings, model_id, generator_name, n):
         "behavior_accuracy": sum(r["behavior_ok"] for r in rows) / n,
         "recall_at_k": len(hits) / len(with_sources) if with_sources else None,
         "mrr_at_k": mrr,
+        "precision_at_k": statistics.mean(r["precision_at_k"] for r in with_sources if r["precision_at_k"] is not None)
+        if with_sources else None,
         "fact_recall": facts_found / facts_total if facts_total else None,
         "citation_source_correct": sum(bool(r["cited_expected"]) for r in answered if r["cited_expected"] is not None),
         "cited_superseded": sum(r["cited_superseded"] for r in rows),
@@ -251,6 +256,8 @@ def summarize(rows, settings, model_id, generator_name, n):
         f"| Expected behavior matched (all items) | {pct(sum(r['behavior_ok'] for r in rows), n)} |",
         f"| Retrieval recall@{settings.rag_top_k} (expected source in top {settings.rag_top_k}, answerable items) | {pct(len(hits), len(with_sources))} |",
         f"| MRR@{settings.rag_top_k} | {mrr:.3f} |",
+        f"| Precision@{settings.rag_top_k} (share of top-{settings.rag_top_k} chunks from an expected source) | "
+        f"{summary['precision_at_k']:.3f} |",
         f"| Required facts present (answered, answerable items) | {pct(facts_found, facts_total)} |",
         f"| Answers with all required facts | {pct(len(all_facts), len(fact_rows))} |",
         f"| Answers citing an expected source | {pct(summary['citation_source_correct'], len(answered_with_expected))} |",

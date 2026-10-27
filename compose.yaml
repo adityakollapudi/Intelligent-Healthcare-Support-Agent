@@ -1,0 +1,91 @@
+# IHSA local integration / demo stack (synthetic data only; not a production deployment).
+#   cp .env.example .env   # then set real values (never commit .env)
+#   docker compose up -d db && docker compose run --rm migrate
+#   docker compose --profile demo run --rm seed      # demo data, only when explicitly wanted
+#   docker compose up -d api frontend
+# See docs/phase-8/deployment-guide.md.
+name: ihsa
+
+x-backend-env: &backend-env
+  APP_ENV: production
+  DATABASE_URL: postgresql+psycopg://ihsa:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/ihsa
+  DB_REQUIRED_AT_STARTUP: "true"
+  JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env (at least 32 random characters)}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+  LLM_PROVIDER: ${LLM_PROVIDER:-extractive}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  EMBEDDING_PROVIDER: fastembed
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ihsa
+      POSTGRES_USER: ihsa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ihsa -d ihsa"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # No published port: only the backend containers reach the database.
+    mem_limit: 512m
+    restart: unless-stopped
+
+  migrate:
+    build: ./backend
+    command: ["alembic", "upgrade", "head"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  seed:
+    profiles: ["demo"]
+    build: ./backend
+    command: ["sh", "-c", "python -m scripts.seed_demo_data && python -m scripts.ingest_knowledge_base"]
+    environment:
+      <<: *backend-env
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:?set SEED_USER_PASSWORD in .env for the demo seed}
+    volumes:
+      - models:/data/models
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: ./backend
+    environment: *backend-env
+    volumes:
+      - uploads:/data/uploads   # private document storage (never served)
+      - models:/data/models     # embedding model cache
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 2g
+    cpus: 2.0
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - api
+    mem_limit: 128m
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:
+  models:

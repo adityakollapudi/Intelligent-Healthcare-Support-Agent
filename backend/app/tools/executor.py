@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 
 from app.authz.dependencies import Principal
 from app.core.exceptions import AppError, NotFoundError
-from app.db.session import get_session_factory
+from app.db.session import get_side_session_factory
 from app.models import ToolInvocation
 from app.models.enums import AuditOutcome
 from app.services.audit_service import AuditService
@@ -136,7 +136,7 @@ class ToolExecutor:
 
     def _log(self, result: ToolResult, safe_args: dict[str, Any], latency_ms: int) -> None:
         try:
-            with get_session_factory()() as s, s.begin():
+            with get_side_session_factory()() as s, s.begin():
                 s.add(
                     ToolInvocation(
                         message_id=self.ctx.message_id,

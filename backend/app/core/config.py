@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     database_url: SecretStr
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=5, ge=0, le=50)
+    # Separate pool for audit/tool-log writes made inside a request (see app.db.session, D8-07).
+    db_side_pool_size: int = Field(default=5, ge=1, le=50)
+    db_side_max_overflow: int = Field(default=10, ge=0, le=100)
     db_connect_timeout_seconds: int = Field(default=5, ge=1, le=60)
     db_required_at_startup: bool = True
 
@@ -78,7 +81,8 @@ class Settings(BaseSettings):
     max_image_megapixels: float = Field(default=25.0, ge=0.1, le=100.0)
     job_timeout_seconds: int = Field(default=120, ge=5, le=900)
     max_concurrent_document_jobs: int = Field(default=1, ge=1, le=4)  # single in-process worker (TH-13)
-    document_uploads_per_hour: int = Field(default=30, ge=1, le=1000)
+    document_uploads_per_hour: int = Field(default=20,  # NFR-020
+        ge=1, le=1000)
     document_analyses_per_hour: int = Field(default=30, ge=1, le=1000)
     # Provisional default (A-07 / NFR-021); no organizational retention policy was provided.
     document_retention_days: int = Field(default=30, ge=1, le=365)

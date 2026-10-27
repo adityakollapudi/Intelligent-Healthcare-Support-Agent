@@ -15,7 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.exceptions import AppError
 from app.core.request_context import current_request_id
-from app.db.session import get_session_factory
+from app.db.session import get_side_session_factory
 from app.models import AuditLog
 from app.models.enums import AuditOutcome
 
@@ -35,6 +35,8 @@ ALLOWED_METADATA_KEYS = frozenset({
     "satisfied_count", "missing_count", "unreadable_count", "manual_review_count", "document_count",
     # Phase 7 (case workflow): status values only; notes are never audited.
     "from_status", "to_status",
+    # Phase 8 (feedback): the rating only, never the comment.
+    "rating",
 })
 
 
@@ -96,7 +98,7 @@ class AuditService:
         event = self.build(action, outcome, actor=actor, resource_type=resource_type, resource_ref=resource_ref,
                            reason_code=reason_code, metadata=metadata)
         try:
-            with get_session_factory()() as session, session.begin():
+            with get_side_session_factory()() as session, session.begin():
                 session.add(event)
         except SQLAlchemyError as exc:
             logger.error("audit_write_failed", extra={"action": action, "error_type": type(exc).__name__})

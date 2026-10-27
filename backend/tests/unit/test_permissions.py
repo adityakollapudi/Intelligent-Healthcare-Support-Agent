@@ -35,3 +35,7 @@ def test_audit_read_is_admin_only():
 
 def test_unknown_role_gets_nothing():
     assert permissions_for("SUPERUSER") == frozenset()
+
+def test_every_role_can_rate_answers():
+    # doc 03 §2 matrix row `feedback:create`: ✔ for all four roles.
+    assert all(Permission.FEEDBACK_CREATE in perms for perms in ROLE_PERMISSIONS.values())

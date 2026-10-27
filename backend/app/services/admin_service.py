@@ -24,6 +24,7 @@ from app.models import (
     SupportCase,
     ToolInvocation,
     User,
+    UserFeedback,
 )
 from app.models.document import JOB_STATUSES, READINESS_STATUSES
 from app.models.support import CASE_CATEGORIES, CASE_STATUSES, ESCALATION_REASONS, TOOL_RESULT_STATUSES
@@ -165,8 +166,10 @@ def metrics(db: Session, date_from: date | None, date_to: date | None) -> dict[s
             "rejected_case_updates": db.scalar(select(func.count()).select_from(AuditLog).where(
                 AuditLog.action == "SUPPORT_CASE_UPDATE_REJECTED", in_period(AuditLog.occurred_at))),
         },
-        # Not collected by this build: no feedback endpoint/table exists yet (FR-034).
-        "unavailable": ["feedback"],
+        # Ratings last set in the period (FR-034); one row per message per user, so re-rating isn't double-counted.
+        "feedback": _grouped(db, UserFeedback.rating, in_period(UserFeedback.updated_at),
+                             keys=("HELPFUL", "NOT_HELPFUL")),
+        "unavailable": [],
     }
 
 
