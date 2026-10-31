@@ -63,6 +63,7 @@ Compose: secrets come from `.env` only and are required (`${VAR:?}`). The databa
 All data is synthetic, and no production or company data was used.
 - Uploaded files are private, opaque-keyed, never served, and deleted by the retention job.
 - Extracted text is never persisted, and extracted field values are deleted at expiry.
+- The assistant can read only the caller's own uploads (`read_my_documents`). It reads the file for that request and stores no document text in tool logs. Statements quoted in an answer do stay in that conversation until its retention period ends. Instructions inside a document are treated as data (tested).
 - Conversations are deleted after their retention period.
 - The browser holds the token in memory only. No private data is written to localStorage or sessionStorage (verified in the bundle).
 

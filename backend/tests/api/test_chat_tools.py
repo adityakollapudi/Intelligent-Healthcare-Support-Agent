@@ -158,7 +158,9 @@ def test_claude_tool_call_is_executed_through_the_executor(chat, claude, db_sess
     body = chat(MEMBER_A, "status of SYN-CLM-2026-000101")
     assert body["answer_type"] == "TOOL_RESULT" and body["records"][0]["kind"] == "claims"
     assert {t["name"] for t in fake.requests[0]["tools"]} == {"get_claim_status", "get_plan_benefits",
-                                                              "get_required_documents", "create_support_case"}
+                                                              "get_required_documents", "read_my_documents",
+                                                              "check_document_readiness",
+                                                              "create_support_case"}
     first = _tool_results(fake)[0]
     assert first["status"] == "SUCCEEDED" and first["result"]["claims"][0]["status"] == "PENDING_INFORMATION"
     row = db_session.scalars(select(ToolInvocation).order_by(ToolInvocation.created_at.desc())).first()

@@ -48,6 +48,10 @@ class ToolResult:
     @property
     def summary(self) -> str:
         if self.status == "SUCCEEDED" and self.data is not None:
+            if "readiness_status" in self.data:
+                return f"{len(self.data['items'])} requirements checked for {self.data['procedure_code']}"
+            if "documents" in self.data:
+                return f"{len(self.data['documents'])} of your uploaded document(s) read"
             if "claims" in self.data:
                 return f"{len(self.data['claims'])} claim record(s) retrieved"
             if "benefits" in self.data:

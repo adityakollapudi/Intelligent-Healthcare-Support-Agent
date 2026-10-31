@@ -16,6 +16,7 @@ class Intent(StrEnum):
     BENEFITS_INFO = "BENEFITS_INFO"  # stored plan benefits (get_plan_benefits)
     CLAIM_STATUS = "CLAIM_STATUS"  # own claim records (get_claim_status)
     REQUIRED_DOCUMENTS = "REQUIRED_DOCUMENTS"  # configured requirement sets (get_required_documents)
+    UPLOADED_DOCUMENT = "UPLOADED_DOCUMENT"  # the caller's own uploaded files (read_my_documents)
     SUPPORT_CASE_CREATE = "SUPPORT_CASE_CREATE"  # create_support_case (proposal + user confirmation)
     SUPPORT_CASE_TRACK = "SUPPORT_CASE_TRACK"
     ACCOUNT_SPECIFIC = "ACCOUNT_SPECIFIC"  # balances, accumulators, authorization decisions: no tool exists
@@ -28,6 +29,7 @@ class Route(StrEnum):
     CLAIM_TOOL = "CLAIM_TOOL"
     BENEFITS_TOOL = "BENEFITS_TOOL"
     REQUIREMENTS = "REQUIREMENTS"  # tool if a configured procedure matches, otherwise RAG
+    UPLOADED_DOCUMENT = "UPLOADED_DOCUMENT"
     CASE_CREATE = "CASE_CREATE"
     CASE_TRACK = "CASE_TRACK"
     ACCOUNT_LOOKUP_UNAVAILABLE = "ACCOUNT_LOOKUP_UNAVAILABLE"
@@ -80,6 +82,29 @@ _MEDICAL = re.compile(
     r"is it serious|side effects?|which medicine|what medicine)\b",
     re.I,
 )
+# "my uploaded report", "this PDF", "the patient's case"; how-to questions about uploading stay document questions.
+_MY_UPLOAD = re.compile(
+    r"\b(uploaded|my (document|file|report|pdf|record)s?|(this|that|the|attached|latest|last|above) "
+    r"(document|file|report|pdf|packet)|medical (document|report|record)s?|patient'?s? (case|document|report|file)s?)\b|"
+    r"\.pdf\b",
+    re.I,
+)
+_READINESS = re.compile(
+    r"\b(readiness|ready for|ready to submit|checklist|requirements?|required|anything missing|what('s| is) missing|"
+    r"complete enough|is .{0,30}complete)\b",
+    re.I,
+)
+_UPLOAD_HOWTO = re.compile(
+    r"\b(how (do|can|should|to)|how long do i|can i|where (do|can)|(what|which) (file|format|type)s?|need to upload|"
+    r"(are|is) (required|needed)|required for|must (i|include|contain))\b",
+    re.I,
+)
+# Reading what a document says is fine; asking what to do about it is medical advice.
+_ADVICE = re.compile(
+    r"\b(should i|should (he|she|they|the patient)|prescribe|dosage|dose|which medicine|what medicine|"
+    r"is (it|this|that) serious|side effects?|diagnose (me|him|her|them))\b",
+    re.I,
+)
 _DISCLOSURE = re.compile(
     r"\b(system prompt|your (instructions|prompt|rules)|ignore (all |the |your )?(previous|prior|above) instructions|"
     r"api key|you are now (an? )?(admin|administrator|developer|system)|execute (a |an |the )?(database |sql )?query|"
@@ -115,6 +140,9 @@ def route(question: str, *, has_history: bool) -> tuple[Intent, Route]:
     q = question.strip()
     if _DISCLOSURE.search(q) or _OTHER_PEOPLE.search(q):
         return Intent.UNSUPPORTED_OR_AMBIGUOUS, Route.PROMPT_DISCLOSURE
+    howto = _UPLOAD_HOWTO.search(q) and not (wants_readiness(q) and re.search(r"\b(uploaded|my|this|\w+'s)\b", q))
+    if _MY_UPLOAD.search(q) and not howto and not _ADVICE.search(q):
+        return Intent.UPLOADED_DOCUMENT, Route.UPLOADED_DOCUMENT
     if _MEDICAL.search(q):
         return Intent.UNSUPPORTED_OR_AMBIGUOUS, Route.MEDICAL
     if _CASE_NUMBER.search(q):
@@ -135,6 +163,19 @@ def route(question: str, *, has_history: bool) -> tuple[Intent, Route]:
     if _REQUIREMENT_WORDS.search(q):
         return Intent.REQUIRED_DOCUMENTS, Route.REQUIREMENTS
     return Intent.GENERAL_FAQ, Route.RAG
+
+
+def wants_readiness(question: str) -> bool:
+    return bool(_READINESS.search(question))
+
+
+def wants_advice(question: str) -> bool:
+    return bool(_ADVICE.search(question))
+
+
+def wants_summary(question: str) -> bool:
+    return bool(re.search(r"\b(summar\w+|overview|review|brief|describe|tell me about|what does .{0,40} say|"
+                          r"explain (this|the|my)|analy[sz]e)\b", question, re.I))
 
 
 def is_follow_up(question: str) -> bool:

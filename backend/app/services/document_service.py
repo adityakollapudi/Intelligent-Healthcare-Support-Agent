@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import time
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -15,10 +16,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.authz.dependencies import Principal
-from app.core.config import Settings
+from app.core.config import Settings, get_settings
 from app.core.exceptions import AppError, NotFoundError, RateLimitedError
 from app.documents import pipeline
-from app.documents.storage import FileStorage, StorageError
+from app.documents.extraction import JobTimeoutError, PdfParseError, extract_pages
+from app.documents.ocr import OcrEngine, get_ocr_engine
+from app.documents.storage import FileStorage, StorageError, get_storage
 from app.documents.validation import validate_upload
 from app.models import DocumentProcessingJob, UploadedDocument
 from app.models.document import TERMINAL_JOB_STATUSES
@@ -144,6 +147,37 @@ def owned_document(db: Session, audit: AuditService, principal: Principal, docum
                      resource_ref=str(document_id), reason_code=reason)
         raise NotFoundError()
     return doc
+
+
+def read_own_documents(db: Session, principal: Principal, filename_contains: str | None = None,
+                       *, document_ids: list[UUID] | None = None, storage: FileStorage | None = None,
+                       ocr: OcrEngine | None = None) -> list[dict]:
+    """Page text of the caller's usable uploads, newest first, for one chat answer. The text is read
+    from the private file each time and held in memory only (no extracted text is ever persisted)."""
+    settings = get_settings()
+    query = (select(UploadedDocument)
+             .where(UploadedDocument.owner_user_id == principal.user_id, UploadedDocument.deleted_at.is_(None),
+                    UploadedDocument.expires_at > datetime.now(UTC))
+             .order_by(UploadedDocument.created_at.desc())
+             .limit(settings.chat_max_documents_read))
+    wanted = (filename_contains or "").lower()
+    files = storage or get_storage()
+    engine = ocr or get_ocr_engine()
+    documents = []
+    for doc in db.scalars(query):
+        if (wanted and wanted not in doc.original_filename.lower()) or (document_ids and doc.id not in document_ids):
+            continue
+        deadline = time.monotonic() + settings.job_timeout_seconds
+        try:
+            pages = extract_pages(files.read(doc.storage_key), doc.mime_type, settings, engine, deadline)
+        except (StorageError, PdfParseError, JobTimeoutError):
+            pages = []
+        documents.append({
+            "document_id": doc.id,
+            "filename": doc.original_filename,
+            "pages": [{"page_number": p.page_number, "readable": p.readable, "text": p.text} for p in pages],
+        })
+    return documents
 
 
 def upload(

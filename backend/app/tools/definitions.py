@@ -62,6 +62,17 @@ class GetRequiredDocumentsInput(_Strict):
         return self
 
 
+class ReadMyDocumentsInput(_Strict):
+    filename_contains: str | None = Field(
+        default=None, max_length=120, description="Optional part of a file name, to read one uploaded document."
+    )
+
+
+class CheckDocumentReadinessInput(_Strict):
+    procedure_code: str = Field(pattern=r"^SYN-PROC-[A-Z0-9-]{2,30}$", description="Configured procedure code.")
+    document_ids: list[UUID] = Field(min_length=1, max_length=10, description="The caller's own uploaded documents.")
+
+
 class CreateSupportCaseInput(_Strict):
     category: CaseCategory
     summary: str = Field(min_length=10, max_length=2000, description="Short description of the issue for an agent.")
@@ -85,6 +96,46 @@ class GetPlanBenefitsOutput(BenefitsResponse):
 
 class GetRequiredDocumentsOutput(RequirementSetResponse):
     pass
+
+
+class DocumentPage(_Strict):
+    page_number: int
+    readable: bool
+    text: str
+
+
+class UploadedDocumentText(_Strict):
+    document_id: UUID
+    filename: str
+    pages: list[DocumentPage]
+
+
+class ReadMyDocumentsOutput(_Strict):
+    """Untrusted file content held for this request only. It's never stored in tool_invocations."""
+
+    documents: list[UploadedDocumentText]
+
+
+class ReadinessPreviewItem(_Strict):
+    requirement_code: str
+    description: str
+    status: Literal["SATISFIED", "MISSING", "UNREADABLE", "NEEDS_MANUAL_REVIEW"]
+    found: str | None = None
+    document_id: UUID | None = None
+    filename: str | None = None
+    page: int | None = None
+
+
+class CheckDocumentReadinessOutput(_Strict):
+    """A read-only preview for chat. Nothing is saved; the PA readiness screen creates checklists."""
+
+    procedure_code: str
+    display_name: str
+    readiness_status: str
+    items: list[ReadinessPreviewItem]
+    document_names: list[str]
+    warnings: list[str]
+    disclaimer: str
 
 
 class SupportCaseProposal(_Strict):

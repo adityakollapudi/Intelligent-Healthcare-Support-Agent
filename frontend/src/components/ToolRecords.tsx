@@ -1,7 +1,7 @@
 // Structured tool output shown next to an assistant answer. Everything rendered here came back from a
 // backend tool call and passed the response validator; nothing is derived from the answer text.
 import { formatDate, formatDateTime, humanize } from "../lib/format";
-import type { BenefitsResponse, ChatRecord, RequirementSet, ToolExecution } from "../types/api";
+import type { BenefitsResponse, ChatRecord, DocumentSource, RequirementSet, ToolExecution } from "../types/api";
 import { CLAIM_STATUS_META, MetaBadge } from "./status";
 import { StatusBadge } from "./ui";
 
@@ -9,6 +9,8 @@ const TOOL_LABELS: Record<string, string> = {
   get_claim_status: "Claim lookup",
   get_plan_benefits: "Plan benefits lookup",
   get_required_documents: "Requirements lookup",
+  read_my_documents: "Your uploaded documents",
+  check_document_readiness: "Readiness check",
   create_support_case: "Support case preparation",
 };
 
@@ -29,6 +31,23 @@ export function ToolExecutionList({ executions }: { executions: ToolExecution[] 
         </li>
       ))}
     </ul>
+  );
+}
+
+function DocumentSources({ sources }: { sources: DocumentSource[] }) {
+  if (sources.length === 0) return null;
+  return (
+    <section className="record" aria-label="Uploaded document sources">
+      <p className="record-title">From your uploaded documents</p>
+      <ul>
+        {sources.map((s) => (
+          <li key={s.marker}>
+            <strong>[{s.marker}]</strong> {s.filename}, page {s.page}
+            <p className="muted small">{s.excerpt}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -113,6 +132,8 @@ export function ToolRecords({ records }: { records: ChatRecord[] }) {
     <>
       {records.map((r, i) => {
         switch (r.kind) {
+          case "document_sources":
+            return <DocumentSources key={i} sources={r.data.sources} />;
           case "claims":
             return <ClaimsRecord key={i} claims={r.data.claims} />;
           case "plan_benefits":

@@ -163,6 +163,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .message-assistant { justify-self: start; background: var(--white); }
 .message-sender { font-size: var(--text-xs); font-weight: 700; color: var(--color-muted); margin-bottom: var(--space-1); }
 .message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.reveal-caret { display: inline-block; width: 0.5em; height: 1em; margin-left: 2px; vertical-align: text-bottom; background: currentColor; opacity: 0.5; }
 .composer { position: sticky; bottom: 0; background: var(--color-bg); padding-top: var(--space-2); }
 .composer textarea { resize: vertical; min-height: 76px; }
 .composer-footer { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-top: var(--space-2); flex-wrap: wrap; }

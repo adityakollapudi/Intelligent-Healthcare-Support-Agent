@@ -71,6 +71,7 @@ class Settings(BaseSettings):
     chat_history_messages: int = Field(default=6, ge=0, le=20)
     chat_rate_limit_per_minute: int = Field(default=20, ge=1, le=600)
     chat_session_retention_days: int = Field(default=30, ge=1, le=365)
+    chat_max_documents_read: int = Field(default=10, ge=1, le=50)  # newest uploads read for one question
     tool_max_calls_per_message: int = Field(default=3, ge=1, le=10)
 
     # --- Documents and readiness (Phase 6; doc 07 §5.1, ADR-09) ---------------------------------

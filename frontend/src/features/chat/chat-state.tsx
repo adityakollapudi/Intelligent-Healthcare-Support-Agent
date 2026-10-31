@@ -20,6 +20,8 @@ export interface ChatMessage {
   disclaimers?: string[];
   records?: ChatRecord[];
   toolExecutions?: ToolExecution[];
+  /** A new answer, revealed word by word. Reopened history appears at once. */
+  reveal?: boolean;
 }
 
 interface ChatValue {
@@ -124,6 +126,7 @@ export function ChatProvider({ children, available = features.chat.available }: 
           disclaimers: response.disclaimers,
           records: response.records ?? [],
           toolExecutions: response.tool_executions ?? [],
+          reveal: true,
         },
       ]);
     } catch (err) {

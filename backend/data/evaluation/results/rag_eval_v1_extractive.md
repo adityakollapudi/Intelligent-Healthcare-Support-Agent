@@ -1,6 +1,6 @@
 # RAG evaluation — rag_eval_v1 (extractive)
 
-- Run: 2026-10-31T16:31:20+00:00 · items: 131 · embedding: `BAAI/bge-small-en-v1.5` · generator: `extractive`
+- Run: 2026-10-31T17:29:47+00:00 · items: 131 · embedding: `BAAI/bge-small-en-v1.5` · generator: `extractive`
 - Chunking: 160 words / 30 overlap · top_k: 5 · RAG_MIN_RELEVANCE: 0.7
 
 ## Headline metrics
@@ -17,7 +17,7 @@
 | Answers citing a superseded version | 0 |
 | Answers citing a forbidden (out-of-scope) source | 0 |
 | Items where an unauthorized document was even a candidate | 0 |
-| Pipeline latency p50 / p95 (local CPU, includes embedding) | 74 ms / 363 ms |
+| Pipeline latency p50 / p95 (local CPU, includes embedding) | 46 ms / 132 ms |
 
 ## Behavior by category
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -9,6 +9,7 @@ import { Alert, Button, ErrorState, PageHeader } from "../components/ui";
 import { useSession } from "../features/auth/session";
 import { MAX_MESSAGE_LENGTH, useChat, validateMessage, type ChatMessage } from "../features/chat/chat-state";
 import { useRequest } from "../hooks/useRequest";
+import { useWordReveal } from "../hooks/useWordReveal";
 import { features } from "../lib/features";
 import { formatDateTime, humanize } from "../lib/format";
 import { chatService, supportCasesService } from "../services";
@@ -20,9 +21,11 @@ const SUGGESTIONS: Record<string, string[]> = {
     "What is the status of my claim SYN-CLM-2026-000101?",
     "What does the claim status pending information mean?",
     "How long do I have to appeal a denied claim?",
+    "Summarize my latest uploaded document",
   ],
   PROVIDER: [
     "What documents are required for a lumbar MRI prior authorization?",
+    "Summarize my latest uploaded document",
     "Within how many days must an in-network provider submit a claim?",
   ],
   default: ["How do I update my mailing address?", "What happens after a support case is created?"],
@@ -172,33 +175,39 @@ function AnswerFeedback({ messageId }: { messageId: string }) {
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({ message, onReveal }: { message: ChatMessage; onReveal: () => void }) {
   const isUser = message.sender === "USER";
+  const { shown, done } = useWordReveal(message.text, Boolean(message.reveal), onReveal);
   const limited = message.answerType === "INSUFFICIENT_EVIDENCE" || message.answerType === "UNSUPPORTED_REQUEST";
   return (
     <li className={`message ${isUser ? "message-user" : "message-assistant"} ${limited ? "message-limited" : ""}`}>
       <p className="message-sender">{isUser ? "You" : "Assistant"}</p>
       {/* Rendered as text: backend content is never interpreted as HTML. */}
-      <p className="message-text">{message.text}</p>
-      {message.evidenceStatus && message.evidenceStatus !== "NOT_APPLICABLE" && (
+      {/* Screen readers get the whole answer once, not every word as it appears. */}
+      <p className="message-text" aria-hidden={!done}>
+        {shown}
+        {!done && <span className="reveal-caret" />}
+      </p>
+      {!done && <p className="sr-only">{message.text}</p>}
+      {done && message.evidenceStatus && message.evidenceStatus !== "NOT_APPLICABLE" && (
         <MetaBadge meta={EVIDENCE_STATUS_META[message.evidenceStatus]} />
       )}
-      {message.toolExecutions && <ToolExecutionList executions={message.toolExecutions} />}
-      {message.records && <ToolRecords records={message.records} />}
-      {message.citations && <SourceCitationList citations={message.citations} />}
-      {message.proposedActions && message.proposedActions.length > 0 && (
+      {done && message.toolExecutions && <ToolExecutionList executions={message.toolExecutions} />}
+      {done && message.records && <ToolRecords records={message.records} />}
+      {done && message.citations && <SourceCitationList citations={message.citations} />}
+      {done && message.proposedActions && message.proposedActions.length > 0 && (
         <div className="message-actions">
           {message.proposedActions.map((a) => (
             <ActionButton key={a.action_type} action={a} />
           ))}
         </div>
       )}
-      {message.disclaimers?.map((d) => (
+      {done && message.disclaimers?.map((d) => (
         <p key={d} className="muted small">
           {d}
         </p>
       ))}
-      {!isUser && <AnswerFeedback messageId={message.id} />}
+      {done && !isUser && <AnswerFeedback messageId={message.id} />}
     </li>
   );
 }
@@ -248,12 +257,13 @@ export function ChatPage() {
   const validation = touched ? validateMessage(chat.draft) : null;
 
   // Auto-scroll only if the reader is already near the bottom.
-  useEffect(() => {
+  const followLatest = useCallback(() => {
     const list = listRef.current;
     if (!list) return;
     const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 160;
     if (nearBottom) list.scrollTop = list.scrollHeight;
-  }, [chat.messages.length]);
+  }, []);
+  useEffect(followLatest, [chat.messages.length, followLatest]);
 
   const submit = () => {
     const invalid = validateMessage(chat.draft);
@@ -301,7 +311,7 @@ export function ChatPage() {
           ) : (
             <ol ref={listRef} className="messages" aria-live="polite">
               {chat.messages.map((m) => (
-                <MessageBubble key={m.id} message={m} />
+                <MessageBubble key={m.id} message={m} onReveal={followLatest} />
               ))}
             </ol>
           )}
