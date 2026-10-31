@@ -59,7 +59,7 @@ npm run dev                          # http://localhost:5173
 ```powershell
 # health and smoke checks (from backend/)
 Invoke-RestMethod http://127.0.0.1:8000/api/v1/health      # {"status":"ok",...}
-.\.venv\Scripts\python -m pytest -ra                        # 455 tests
+.\.venv\Scripts\python -m pytest -ra                        # 456 tests
 .\.venv\Scripts\python -m scripts.perf_smoke               # bounded local load test
 ```
 

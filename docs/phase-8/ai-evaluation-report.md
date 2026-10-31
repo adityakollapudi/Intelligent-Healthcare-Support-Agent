@@ -2,7 +2,7 @@
 
 What was measured, how, and what remains unmeasured. **All AI results here are from the LLM-free configuration** (`LLM_PROVIDER=extractive`: local `bge-small` embeddings plus an extractive answerer that quotes retrieved sentences). No live LLM was evaluated, because there is no approved API key. Claude paths are covered by mocked or scripted-client tests only, and those tests check control flow, not answer quality.
 
-## 1. RAG evaluation (`scripts/evaluate_rag.py`, run 2026-10-27)
+## 1. RAG evaluation (`scripts/evaluate_rag.py`, run 2026-10-31, after adding the heart-surgery guide)
 
 **Dataset:** `backend/data/evaluation/rag_eval_v1.jsonl`, 131 synthetic questions written for this project (builder `data/evaluation/build_eval_set.py`). Each item has:
 - an expected behavior (ANSWER / INSUFFICIENT / CLARIFY / UNSUPPORTED / CONFLICT / TOOL / TOOL_NOT_FOUND / PROPOSE_CASE);
@@ -10,7 +10,7 @@ What was measured, how, and what remains unmeasured. **All AI results here are f
 - required facts (substrings a correct answer must contain);
 - forbidden sources.
 
-**Corpus:** 14 synthetic knowledge documents, including a superseded version and a deliberately conflicting pair.
+**Corpus:** 15 synthetic knowledge documents, including a superseded version and a deliberately conflicting pair.
 
 | Category | Items | Behavior matched |
 |---|---|---|
@@ -33,7 +33,7 @@ What was measured, how, and what remains unmeasured. **All AI results here are f
 |---|---|
 | Recall@5 (an expected source is in the top 5) | 100% (81/81) |
 | MRR@5 | 0.992 |
-| Precision@5 (share of top-5 chunks from a labeled source) | 0.523 |
+| Precision@5 (share of top-5 chunks from a labeled source) | 0.519 |
 | Wrong-version retrieval → cited | 0 answers cited a superseded document |
 | Unauthorized candidates | 0 items where another audience's or plan's document was even retrieved |
 

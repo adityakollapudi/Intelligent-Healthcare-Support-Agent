@@ -342,4 +342,5 @@ def test_checklists_are_private(api, client, auth):
 
 def test_requirement_sets_listing(client, auth, knowledge):
     sets = client.get("/api/v1/authorization/requirement-sets", headers=auth(PROVIDER_A)).json()
-    assert [s["procedure_code"] for s in sets] == ["SYN-PROC-MRI-LUMBAR", "SYN-PROC-PT-EXTENDED"]
+    assert [s["procedure_code"] for s in sets] == [
+        "SYN-PROC-CARDIAC-CABG", "SYN-PROC-MRI-LUMBAR", "SYN-PROC-PT-EXTENDED"]

@@ -122,7 +122,7 @@ def test_manifest_rejects_paths_outside_the_corpus(tmp_path, bad_file):
 
 def test_real_corpus_is_ingested(knowledge, db_session):
     docs = db_session.scalars(select(KnowledgeDocument).where(KnowledgeDocument.ingestion_status == "INGESTED")).all()
-    assert len(docs) == 15  # 14 corpus documents + 1 adversarial test document
+    assert len(docs) == 16  # 15 corpus documents + 1 adversarial test document
     pdf = next(d for d in docs if d.source_type == "pdf")
     assert pdf.page_count == 2 and {c.page_start for c in pdf.chunks} == {1, 2}
     assert all(c.embedding_dim == 384 for d in docs for c in d.chunks)
