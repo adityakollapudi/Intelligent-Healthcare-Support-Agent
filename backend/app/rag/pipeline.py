@@ -24,10 +24,22 @@ from app.cases import escalation
 from app.core.config import Settings
 from app.models import DocumentChunk, KnowledgeDocument
 from app.rag import citations as citation_check
+from app.rag import uploaded
 from app.rag.embeddings import Embedder
 from app.rag.evidence import EvidenceState, assess, money_conflicts
 from app.rag.generation import Generation, Generator
-from app.rag.intent import CLAIM_NUMBER, PLAN_CODE, Intent, Route, benefit_category, is_follow_up, route
+from app.rag.intent import (
+    CLAIM_NUMBER,
+    PLAN_CODE,
+    Intent,
+    Route,
+    benefit_category,
+    is_follow_up,
+    route,
+    wants_advice,
+    wants_readiness,
+    wants_summary,
+)
 from app.rag.prompts import EvidenceItem
 from app.rag.retrieval import Candidate, RetrievalScope, search
 from app.services import requirements_service
@@ -37,6 +49,9 @@ logger = logging.getLogger(__name__)
 
 SYNTHETIC_NOTE = "Information comes from synthetic prototype documents and is not a coverage or authorization decision."
 RECORD_NOTE = "Values marked as records come directly from the synthetic database."
+UPLOAD_NOTE = (
+    "Quoted from your uploaded document. This isn't a clinical opinion, or a coverage or authorization decision."
+)
 STATUS_LABELS = {
     "RECEIVED": "Received",
     "UNDER_PROCESSING": "Under processing",
@@ -87,6 +102,7 @@ class TurnContext:
     can_create_cases: bool
     can_read_cases: bool
     can_check_readiness: bool = False
+    can_read_documents: bool = False
 
 
 _ID_LIKE = re.compile(r"\b[A-Z]{2,}-[A-Z0-9-]{3,}\b|\d{4,}|\S+@\S+")
@@ -143,6 +159,29 @@ def case_offer(ctx: TurnContext, reason: str, category: str) -> Action:
 
 def run(db: Session, settings: Settings, embedder: Embedder, generator: Generator, ctx: TurnContext) -> PipelineResult:
     intent, rt = route(ctx.question, has_history=bool(ctx.history))
+
+    named_upload = None
+    if rt is Route.UPLOADED_DOCUMENT:
+        if ctx.can_read_documents:
+            return _document_turn(db, settings, embedder, generator, ctx, intent)
+        return PipelineResult(
+            intent,
+            "UNSUPPORTED_REQUEST",
+            "NOT_APPLICABLE",
+            "Your account doesn't have uploaded documents to read. Documents linked to a support case are "
+            "on that case's screen.",
+        )
+    if (rt in (Route.RAG, Route.MEDICAL, Route.REQUIREMENTS) and ctx.can_read_documents
+            and not wants_advice(ctx.question)):
+        # "What are Aarav Sharma's symptoms?": a person named in the caller's own uploads, no "document" word.
+        named_upload = uploaded.full_person_name(ctx.question)
+    if named_upload:
+        read = ctx.executor.execute("read_my_documents", {})
+        if read.status == "SUCCEEDED" and any(
+            uploaded.mentions([p["text"] for p in d["pages"]], named_upload) for d in read.data["documents"]
+        ):
+            return _document_turn(db, settings, embedder, generator, ctx, Intent.UPLOADED_DOCUMENT, read)
+        ctx.executor.results.clear()  # nothing relevant was used; don't report the lookup on this answer
 
     if rt is Route.PROMPT_DISCLOSURE:
         return PipelineResult(
@@ -515,6 +554,7 @@ def _with_question(ctx: TurnContext, question: str) -> TurnContext:
         ctx.can_create_cases,
         ctx.can_read_cases,
         ctx.can_check_readiness,
+        ctx.can_read_documents,
     )
 
 
@@ -563,6 +603,245 @@ def _retrieve(db, settings, embedder, ctx: TurnContext):
         char_budget=settings.rag_context_char_budget,
     )
     return assessment, int((time.perf_counter() - started) * 1000)
+
+
+# --- the caller's own uploaded documents ------------------------------------------------------------
+
+
+def _upload_refusal(intent: str, result: ToolResult, text: str) -> PipelineResult:
+    return PipelineResult(intent, "TOOL_RESULT", "NOT_APPLICABLE", text, tool_results=[result],
+                          disclaimers=[UPLOAD_NOTE])
+
+
+def _choose_documents(question: str, documents: list[dict]) -> tuple[list[dict], str | None]:
+    """Which uploads the question is about. Returns (documents, person named but not found)."""
+    filename = re.search(r"[\w.-]+\.(?:pdf|png|jpe?g)\b", question, re.I)
+    if filename:
+        wanted = filename.group(0).lower()
+        return [d for d in documents if d["filename"].lower() == wanted], None
+    person = uploaded.full_person_name(question)
+    if person:
+        matches = [d for d in documents if uploaded.mentions([p["text"] for p in d["pages"]], person)]
+        return matches, None if matches else person
+    tokens = [w for w in uploaded.name_tokens(question)
+              if any(uploaded.mentions([p["text"] for p in d["pages"]], w) for d in documents)]
+    if tokens:
+        return [d for d in documents if uploaded.mentions([p["text"] for p in d["pages"]], " ".join(tokens))], None
+    if re.search(r"\b(this|that|the|latest|last|attached|above)\b.{0,12}\b(document|file|report|pdf|packet)\b",
+                 question, re.I):
+        return documents[:1], None  # newest first
+    return documents, None
+
+
+def _sources(cited: list[uploaded.Statement]) -> tuple[dict[tuple[str, int], str], list[dict]]:
+    markers: dict[tuple[str, int], str] = {}
+    sources: list[dict] = []
+    for item in cited:
+        key = (item.document_id, item.page)
+        if key not in markers:
+            markers[key] = f"C{len(sources) + 1}"
+            sources.append({"marker": markers[key], "document_id": item.document_id, "filename": item.filename,
+                            "page": item.page, "excerpt": item.text[:400]})
+    return markers, sources
+
+
+def _summary_text(summaries: list[uploaded.Summary]) -> tuple[str, list[dict], bool]:
+    cited = [s for summary in summaries for s in summary.lines]
+    cited += [s for summary in summaries for group in summary.conflicts.values() for s in group]
+    markers, sources = _sources(cited)
+    blocks = []
+    for summary in summaries:
+        lines = [f"Summary of {summary.filename} (quoted from the document):"]
+        lines += [f"- {s.text} [{markers[(s.document_id, s.page)]}]" for s in summary.lines]
+        if summary.unreadable:
+            lines.append(f"Couldn't be read in this copy: {', '.join(summary.unreadable)}.")
+        if summary.not_stated:
+            lines.append(f"Not stated in the document: {', '.join(summary.not_stated)}.")
+        for label, group in summary.conflicts.items():
+            values = "; ".join(f"{s.value} [{markers[(s.document_id, s.page)]}]" for s in group)
+            lines.append(f"The document gives different values for {label}: {values}. Someone should check this.")
+        blocks.append("\n".join(lines))
+    return "\n\n".join(blocks), sources, any(summary.conflicts for summary in summaries)
+
+
+_READINESS_LABELS = {
+    "DOCUMENTATION_APPEARS_COMPLETE": "Documentation appears complete",
+    "MANUAL_REVIEW_REQUIRED": "Manual review required",
+    "DOCUMENTATION_INCOMPLETE": "Documentation incomplete",
+}
+_ITEM_HEADINGS = (("SATISFIED", "Found"), ("MISSING", "Missing"), ("UNREADABLE", "Couldn't be read"),
+                  ("NEEDS_MANUAL_REVIEW", "Needs a person to review"))
+
+
+def _readiness_procedure(db: Session, ctx: TurnContext, chosen: list[dict]) -> tuple[str | None, list[str]]:
+    """The requirement set to use: the procedure in the question, else the one the documents state."""
+    named = requirements_service.match_procedures(db, ctx.question)
+    if len(named) == 1:
+        return named[0].procedure_code, []
+    active = {s.procedure_code: s.display_name for s in requirements_service.active_sets(db)}
+    text = " ".join(p["text"] for d in chosen for p in d["pages"])
+    stated = {c.upper() for c in requirements_service.PROCEDURE_CODE.findall(text)} & set(active)
+    if len(stated) == 1:
+        return stated.pop(), []
+    return None, list(active.values())
+
+
+def _readiness_turn(db: Session, ctx: TurnContext, intent: str, chosen: list[dict], read: ToolResult) -> PipelineResult:
+    code, options = _readiness_procedure(db, ctx, chosen)
+    if code is None:
+        return PipelineResult(intent, "CLARIFICATION", "NOT_APPLICABLE",
+                              f"Which procedure should I check against? Configured sets: {'; '.join(options)}.",
+                              tool_results=[read])
+    result = ctx.executor.execute("check_document_readiness",
+                                  {"procedure_code": code, "document_ids": [str(d["document_id"]) for d in chosen]})
+    if result.status != "SUCCEEDED":
+        return _tool_failure(ctx, intent, result, "readiness check")
+    data = result.data
+    evidence = [uploaded.Statement(str(i["document_id"]), i["filename"], i["page"], None,
+                                   f"{i['description']}: {i['found']}"[:400])
+                for i in data["items"] if i["found"] and i["page"]]
+    markers, sources = _sources(evidence)
+    lines = [f"Readiness check of {', '.join(data['document_names'])} against {data['display_name']}.",
+             f"Result: {_READINESS_LABELS[data['readiness_status']]}."]
+    for status, heading in _ITEM_HEADINGS:
+        items = [i for i in data["items"] if i["status"] == status]
+        if not items:
+            continue
+        lines.append(f"\n{heading}:")
+        for i in items:
+            value = f": {i['found']}" if i["found"] else ""
+            marker = markers.get((str(i["document_id"]), i["page"]))
+            lines.append(f"- {i['description']}{value}" + (f" [{marker}]" if marker else ""))
+    lines += [f"\n{w}" for w in data["warnings"]]
+    return PipelineResult(
+        intent,
+        "TOOL_RESULT",
+        "SUPPORTED",
+        "\n".join(lines),
+        citation_check="PASSED",
+        actions=[Action("START_READINESS_CHECK", "Create a checklist for review", False, True,
+                        {"procedure_code": code})] if ctx.can_check_readiness else [],
+        disclaimers=[data["disclaimer"]],
+        tool_results=[read, result],
+        records=[{"kind": "document_sources", "data": {"sources": sources}}],
+    )
+
+
+def _document_turn(db: Session, settings, embedder, generator, ctx: TurnContext, intent: str,
+                   read: ToolResult | None = None) -> PipelineResult:
+    started = time.perf_counter()
+    result = read or ctx.executor.execute("read_my_documents", {})
+    if result.status != "SUCCEEDED":
+        return _tool_failure(ctx, intent, result, "document lookup")
+    documents = result.data["documents"]
+    if not documents:
+        return _upload_refusal(intent, result, "You haven't uploaded any documents yet. Add one on the Documents "
+                                               "screen, then ask me about it.")
+    chosen, missing_person = _choose_documents(ctx.question, documents)
+    if missing_person:
+        return _upload_refusal(intent, result, f"None of your uploaded documents mention {missing_person}. I can "
+                                               "only read documents uploaded from your own account.")
+    if not chosen:
+        return _upload_refusal(intent, result, "I couldn't find an uploaded document with that name on your account.")
+
+    if wants_readiness(ctx.question):
+        return _readiness_turn(db, ctx, intent, chosen, result)
+    unread = [f"{d['filename']} p.{p['page_number']}" for d in chosen for p in d["pages"] if not p["readable"]]
+    items = {str(d["document_id"]): [
+        s for p in d["pages"] if p["text"]
+        for s in uploaded.statements(str(d["document_id"]), d["filename"], p["page_number"], p["text"])
+    ] for d in chosen}
+    chosen = [d for d in chosen if items[str(d["document_id"])]]
+    if not chosen:
+        return _upload_refusal(intent, result, "I found your document but couldn't read any text in it. Scanned "
+                               "pages need OCR, which isn't available here. Nothing has been guessed.")
+
+    names = uploaded.name_tokens(ctx.question)
+    terms = uploaded.question_terms(ctx.question, names)
+    every = [s for d in chosen for s in items[str(d["document_id"])]]
+    retrieval_ms = int((time.perf_counter() - started) * 1000)
+    conflict = False
+    generation_ms = 0
+    if generator.name == "anthropic":
+        text, sources = _llm_document_answer(generator, ctx, every)
+        generation_ms = int((time.perf_counter() - started) * 1000) - retrieval_ms
+        if text is None:
+            return _not_in_documents(ctx, intent, result, chosen, retrieval_ms)
+    elif wants_summary(ctx.question) or not terms:
+        summaries = [uploaded.summarize(d["filename"], items[str(d["document_id"])]) for d in chosen[:3]]
+        text, sources, conflict = _summary_text(summaries)
+        if len(chosen) > 3:
+            text += f"\n\nShowing your 3 newest documents of {len(chosen)}."
+    else:
+        vector = embedder.embed_query(ctx.question)
+        vectors = embedder.embed_documents([s.text for s in every])
+        similarity = [sum(a * b for a, b in zip(vector, v, strict=True)) for v in vectors]
+        best = uploaded.rank(every, terms, similarity)
+        if not best:
+            return _not_in_documents(ctx, intent, result, chosen, retrieval_ms)
+        markers, sources = _sources(best)
+        lines = [f"- {s.text} [{markers[(s.document_id, s.page)]}]" for s in best]
+        text = "From your uploaded document:\n" + "\n".join(lines)
+        if len(chosen) > 1:
+            text = "From your uploaded documents:\n" + "\n".join(
+                f"- {s.filename}: {s.text} [{markers[(s.document_id, s.page)]}]" for s in best)
+    if unread:
+        text += f"\n\nI couldn't read these pages, so this may be incomplete: {', '.join(unread[:5])}."
+    return PipelineResult(
+        intent,
+        "DOCUMENT_GROUNDED",
+        "CONFLICTING" if conflict else "SUPPORTED",
+        text,
+        citation_check="PASSED",
+        escalation_reason="CONFLICTING_INFORMATION" if conflict else None,
+        actions=[case_offer(ctx, "CONFLICTING_INFORMATION", "DOCUMENT_ISSUE")] if conflict else [],
+        disclaimers=[UPLOAD_NOTE],
+        retrieved_document_ids=sorted({s["document_id"] for s in sources}),
+        retrieval_ms=retrieval_ms,
+        generation_ms=generation_ms,
+        tool_results=[result],
+        records=[{"kind": "document_sources", "data": {"sources": sources}}],
+    )
+
+
+def _not_in_documents(ctx: TurnContext, intent: str, result: ToolResult, chosen: list[dict],
+                      retrieval_ms: int) -> PipelineResult:
+    names = ", ".join(d["filename"] for d in chosen[:3])
+    return PipelineResult(
+        intent,
+        "INSUFFICIENT_EVIDENCE",
+        "INSUFFICIENT",
+        f"I read {names} but didn't find that, so I can't give a verified answer. Nothing has been guessed.",
+        escalation_reason="NO_ADEQUATE_ANSWER",
+        actions=[case_offer(ctx, "NO_ADEQUATE_ANSWER", "DOCUMENT_ISSUE")],
+        retrieval_ms=retrieval_ms,
+        tool_results=[result],
+    )
+
+
+def _llm_document_answer(generator, ctx: TurnContext, statements_: list[uploaded.Statement]):
+    """Claude writes from page-level evidence; its markers are validated like any other answer's."""
+    pages: dict[tuple[str, int], list[uploaded.Statement]] = {}
+    for s in statements_:
+        pages.setdefault((s.document_id, s.page), []).append(s)
+    items: list[EvidenceItem] = []
+    for (document_id, page), group in pages.items():
+        candidate = Candidate(
+            uuid4(), UUID(document_id), "uploaded-document", group[0].filename, "uploaded", "UPLOADED_DOCUMENT", None,
+            None, "ACTIVE", None, page, page, "\n".join(s.text for s in group), 1.0, 0.0, 1.0,
+        )
+        items.append(EvidenceItem(f"C{len(items) + 1}", candidate))
+    generation = generator.generate(ctx.question, items, ctx.history)
+    check = citation_check.validate(generation.answer_text, generation.citations_used, {i.marker for i in items})
+    if not generation.evidence_sufficient or check.status == "ALL_INVALID_DOWNGRADED":
+        return None, []
+    if _FALSE_SUCCESS.search(check.text):
+        logger.warning("model_claimed_unperformed_action")
+        return None, []
+    used = {i.marker: i.candidate for i in items if i.marker in check.valid_markers}
+    sources = [{"marker": m, "document_id": str(c.document_id), "filename": c.title, "page": c.page_start,
+                "excerpt": excerpt(c)} for m, c in used.items()]
+    return check.text, sources
 
 
 def _rag_turn(db, settings, embedder, generator, ctx: TurnContext, intent: str) -> PipelineResult:

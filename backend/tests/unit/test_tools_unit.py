@@ -8,8 +8,9 @@ from app.tools.definitions import CreateSupportCaseInput, GetClaimStatusInput, G
 from app.tools.registry import TOOLS, anthropic_tool_definitions
 
 
-def test_allowlist_is_exactly_the_four_tools():
-    assert set(TOOLS) == {"get_claim_status", "get_plan_benefits", "get_required_documents", "create_support_case"}
+def test_allowlist_is_exactly_the_six_tools():
+    assert set(TOOLS) == {"get_claim_status", "get_plan_benefits", "get_required_documents", "read_my_documents",
+                          "check_document_readiness", "create_support_case"}
     assert {n for n, s in TOOLS.items() if not s.read_only} == {"create_support_case"}
     assert TOOLS["create_support_case"].confirmation == "user"
     assert TOOLS["create_support_case"].any_of_permissions == (Permission.CASES_CREATE,)

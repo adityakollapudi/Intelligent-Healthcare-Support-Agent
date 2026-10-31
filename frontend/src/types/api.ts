@@ -191,7 +191,17 @@ export type ChatRecord =
   | { kind: "claims"; data: { claims: (ClaimSummary & { status_description?: string | null })[] } }
   | { kind: "plan_benefits"; data: BenefitsResponse }
   | { kind: "requirements"; data: RequirementSet }
-  | { kind: "support_case_proposal"; data: SupportCaseProposal };
+  | { kind: "support_case_proposal"; data: SupportCaseProposal }
+  | { kind: "document_sources"; data: { sources: DocumentSource[] } };
+
+/** A page of the caller's own uploaded file that an answer quotes. */
+export interface DocumentSource {
+  marker: string;
+  document_id: string;
+  filename: string;
+  page: number;
+  excerpt: string;
+}
 
 export interface CreateCaseRequest {
   category: CaseCategory;

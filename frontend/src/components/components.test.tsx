@@ -6,6 +6,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { checkFile, FileDropzone } from "./FileDropzone";
 import { SourceCitationList } from "./SourceCitation";
 import { CLAIM_STATUS_META, MetaBadge } from "./status";
+import { ToolRecords } from "./ToolRecords";
 
 const file = (name: string, type: string, size: number) => new File([new Uint8Array(size)], name, { type });
 
@@ -54,6 +55,15 @@ describe("SourceCitationList", () => {
     expect(screen.getByText("pp. 3–4")).toBeInTheDocument();
     expect(screen.getByText("<b>bold?</b>")).toBeInTheDocument();
     expect(screen.getByText(/Effective/)).toBeInTheDocument();
+  });
+});
+
+describe("ToolRecords", () => {
+  it("names the uploaded file and page an answer quotes", () => {
+    const sources = [{ marker: "C1", document_id: "d1", filename: "packet.pdf", page: 2, excerpt: "Symptoms: back pain." }];
+    render(<ToolRecords records={[{ kind: "document_sources", data: { sources } }]} />);
+    expect(screen.getByText(/packet\.pdf, page 2/)).toBeInTheDocument();
+    expect(screen.getByText("Symptoms: back pain.")).toBeInTheDocument();
   });
 });
 

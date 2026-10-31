@@ -12,6 +12,7 @@ An AI-powered healthcare-insurance information and administrative support protot
 | Claims and benefits | A member's own synthetic claims and plan benefits; providers can look up any plan | 2–3 |
 | Source-grounded assistant (RAG) | Answers come from a synthetic knowledge base, with validated citations. It says "I couldn't find this" instead of guessing, and flags conflicting sources | 4 |
 | Controlled tool calling | The assistant can look up claims, benefits and documentation requirements through an allowlisted, permission-checked executor, and can *propose* a support case that is created only after the user confirms | 5 |
+| Questions about uploaded documents | Ask the assistant to summarize or answer from your own uploads, with the file name and page shown; missing, unreadable and conflicting details are reported, and nothing is inferred. It can also run a read-only readiness check | 8 |
 | Document AI | Upload a PDF, PNG or JPEG. The text layer is extracted, with OCR for scanned pages; fields are extracted and validated, each with its source page | 6 |
 | Prior authorization readiness | A deterministic checklist (`SATISFIED` / `MISSING` / `UNREADABLE` / `NEEDS_MANUAL_REVIEW`) against fictional requirement sets, with evidence, sources and a reviewer summary. It is **not an approval** | 6 |
 | Escalation and human review | Support cases follow a validated lifecycle. Agents have a queue, assignment, notes and resolution, all version-checked against concurrent edits and audited | 7 |
@@ -88,13 +89,13 @@ All use the password you set as `SEED_USER_PASSWORD` in `backend/.env`.
 ## Tests and evaluation
 
 ```powershell
-cd backend;  .\.venv\Scripts\python -m pytest -ra    # 456 tests (needs the local PostgreSQL)
-cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 104 tests
+cd backend;  .\.venv\Scripts\python -m pytest -ra    # 486 tests (needs the local PostgreSQL)
+cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 109 tests
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_rag         # RAG evaluation (131 items)
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_documents   # document AI evaluation
 ```
 
-Results recorded on 2026-10-27 (Phase 8): 456/456 backend tests (95% coverage), 104/104 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
+Results recorded on 2026-10-27 (Phase 8): 486/486 backend tests (95% coverage), 109/109 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
 
 ## Documentation
 

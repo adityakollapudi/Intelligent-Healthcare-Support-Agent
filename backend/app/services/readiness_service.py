@@ -7,16 +7,22 @@ items; no model is involved, so its counts can't drift from the checklist."""
 
 from __future__ import annotations
 
+import re
 from datetime import date
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.authz.dependencies import Principal
 from app.cases import escalation
+from app.core.config import get_settings
 from app.core.exceptions import AppError, ForbiddenError, NotFoundError
+from app.documents import fields as field_rules
 from app.documents import readiness_rules as rules
+from app.documents.extraction import OK as PAGE_OK
+from app.documents.extraction import UNREADABLE as PAGE_UNREADABLE
+from app.documents.extraction import PageText
 from app.models import (
     AuthorizationChecklist,
     AuthorizationChecklistItem,
@@ -29,6 +35,7 @@ from app.models import (
     UploadedDocument,
 )
 from app.models.enums import AuditOutcome
+from app.rag import uploaded
 from app.schemas.readiness import (
     DISCLAIMER,
     DISCLAIMER_VERSION,
@@ -47,6 +54,10 @@ from app.services import document_service, requirements_service
 from app.services.audit_service import AuditService
 
 _USABLE_JOBS = ("COMPLETED", "COMPLETED_WITH_WARNINGS")
+# A combined packet has no single title; its section headings say which documents it contains.
+_PACKET_SECTIONS = ((re.compile(r"REFERRAL"), "REFERRAL_LETTER"),
+                    (re.compile(r"CLINICAL NOTE"), "CLINICAL_NOTE_SUMMARY"),
+                    (re.compile(r"REQUEST FORM|PRIOR AUTHORI"), "PA_REQUEST_FORM"))
 
 
 class DocumentNotAnalyzedError(AppError):
@@ -133,6 +144,64 @@ def create_checklist(db: Session, audit: AuditService, principal: Principal, bod
     )
     db.commit()
     return detail
+
+
+def _read_evidence(document: dict, active_codes: set[str]) -> list[rules.DocumentEvidence]:
+    """Evidence from a document's text, read now and kept in memory, using the same field rules as analysis."""
+    pages = [PageText(p["page_number"], p["text"], "TEXT_LAYER", PAGE_OK if p["readable"] else PAGE_UNREADABLE)
+             for p in document["pages"]]
+    document_id, filename = document["document_id"], document["filename"]
+    doc_type = field_rules.classify(pages)
+    types, source = [doc_type], pages
+    if doc_type == "UNRECOGNIZED":
+        parsed = {p.page_number: uploaded.statements(str(document_id), filename, p.page_number, p.text) for p in pages}
+        every = [s for group in parsed.values() for s in group]
+        sections = {s.section or "" for s in every}
+        types = [t for rx, t in _PACKET_SECTIONS if any(rx.search(section) for section in sections)]
+        if any((s.label or "").lower() == "procedure code" for s in every) and "PA_REQUEST_FORM" not in types:
+            types.append("PA_REQUEST_FORM")
+        source = [PageText(p.page_number, "\n".join(s.text.removeprefix("Synthetic ") for s in parsed[p.page_number]),
+                           "TEXT_LAYER", p.status) for p in pages]
+    low = get_settings().extraction_low_confidence
+    return [
+        rules.DocumentEvidence(document_id, filename, kind, {
+            r.field_name: rules.FieldEvidence(uuid4(), document_id, filename, r.field_name, r.validation_status,
+                                              r.normalized_value, r.raw_value, r.source_page)
+            for r in field_rules.extract_fields(kind, source, active_codes, low)
+        })
+        for kind in types or ["UNRECOGNIZED"]
+    ]
+
+
+def preview(db: Session, audit: AuditService, principal: Principal, procedure_code: str,
+            document_ids: list[UUID]) -> dict:
+    """Read-only readiness check for chat: the same requirements and rules as a checklist, on the caller's
+    own documents. Nothing is written. Creating a reviewable checklist stays on the PA readiness screen."""
+    documents = document_service.read_own_documents(db, principal, document_ids=document_ids)
+    if not documents:
+        raise NotFoundError()
+    verified = requirements_service.load_verified_set(db, audit, principal, procedure_code)
+    active = {s.procedure_code for s in requirements_service.active_sets(db)}
+    evidence = [e for d in documents for e in _read_evidence(d, active)]
+    items = []
+    statuses = []
+    for req, source in verified.items:
+        result = rules.evaluate(rules.Requirement(req.requirement_code, req.rule_type, req.rule_params,
+                                                  source_verified=source is not None), evidence)
+        statuses.append(result.item_status)
+        first = result.evidence[0] if result.evidence else None
+        items.append({
+            "requirement_code": req.requirement_code, "description": req.description, "status": result.item_status,
+            "found": first.raw_value if first else None, "document_id": first.document_id if first else None,
+            "filename": first.filename if first else None, "page": first.source_page if first else None,
+        })
+    stated = {e.fields["procedure_code"].normalized_value for e in evidence
+              if "procedure_code" in e.fields and e.fields["procedure_code"].validation_status == "VALID"}
+    warnings = [f"The document states {code}, not {verified.req_set.procedure_code}."
+                for code in sorted(c for c in stated if c and c != verified.req_set.procedure_code)]
+    return {"procedure_code": verified.req_set.procedure_code, "display_name": verified.req_set.display_name,
+            "readiness_status": rules.overall(statuses), "items": items,
+            "document_names": [d["filename"] for d in documents], "warnings": warnings, "disclaimer": DISCLAIMER}
 
 
 def _evidence(doc: UploadedDocument, job: DocumentProcessingJob) -> rules.DocumentEvidence:

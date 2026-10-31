@@ -60,9 +60,10 @@ class ToolExecution(ApiModel):
 
 class Record(ApiModel):
     """Verified structured output of a successful tool call, for display. `kind` selects the renderer:
-    claims | plan_benefits | requirements | support_case_proposal (a proposal is not a created case)."""
+    claims | plan_benefits | requirements | support_case_proposal (a proposal is not a created case) |
+    document_sources (the pages of the caller's own uploaded files that an answer quotes)."""
 
-    kind: Literal["claims", "plan_benefits", "requirements", "support_case_proposal"]
+    kind: Literal["claims", "plan_benefits", "requirements", "support_case_proposal", "document_sources"]
     data: dict[str, Any]
 
 
