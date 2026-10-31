@@ -117,7 +117,7 @@ Claim statuses: `RECEIVED`, `UNDER_PROCESSING`, `PENDING_INFORMATION`, `PROCESSE
 
 ## AI / RAG (Phase 4)
 
-- **Knowledge corpus:** `data/knowledge/` (14 synthetic documents plus `manifest.json`). Manage it as described in `docs/phase-4/knowledge-base-guide.md`, then run `python -m scripts.ingest_knowledge_base`.
+- **Knowledge corpus:** `data/knowledge/` (15 synthetic documents plus `manifest.json`). Manage it as described in `docs/phase-4/knowledge-base-guide.md`, then run `python -m scripts.ingest_knowledge_base`.
 - **Embeddings:** `BAAI/bge-small-en-v1.5`, run locally on CPU via fastembed. They are stored as `REAL[]` in PostgreSQL; pgvector isn't required (deviation D4-01).
 - **Answers:**
   - `LLM_PROVIDER=extractive` (default): no LLM. Answers quote the retrieved source sentences, and every answer says so.

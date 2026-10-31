@@ -127,6 +127,15 @@ def test_required_documents_are_sourced_from_the_active_document(executor):
     assert "not an authorization approval" in data["disclaimer"]
 
 
+def test_heart_surgery_requirements_are_sourced_from_the_active_document(executor):
+    result = executor(PROVIDER_A).execute("get_required_documents", {"procedure_text": "heart bypass surgery"})
+    assert result.status == "SUCCEEDED", result.error
+    data = result.data
+    assert data["procedure_code"] == "SYN-PROC-CARDIAC-CABG" and len(data["requirements"]) == 7
+    assert data["evidence_status"] == "SUPPORTED"
+    assert all(req["source"] and req["source"]["chunk_id"] for req in data["requirements"])
+
+
 def test_unknown_procedure_is_not_found(executor):
     result = executor(MEMBER_A).execute("get_required_documents", {"procedure_code": "SYN-PROC-HEART-TRANSPLANT"})
     assert result.status == "NOT_FOUND"

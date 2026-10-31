@@ -18,7 +18,7 @@ Final verification of the integrated IHSA prototype. All results below were prod
 | Suite | Command (from the folder shown) | Total | Passed | Failed | Skipped |
 |---|---|---|---|---|---|
 | Backend lint | `backend> .venv\Scripts\ruff check app tests scripts` | — | clean | 0 | — |
-| Backend tests (unit, API, integration, workflows, security) | `backend> .venv\Scripts\python -m pytest -ra` | **455** | **455** | 0 | 0 |
+| Backend tests (unit, API, integration, workflows, security) | `backend> .venv\Scripts\python -m pytest -ra` | **456** | **456** | 0 | 0 |
 | Backend coverage | `backend> .venv\Scripts\python -m pytest --cov=app` | — | 95% lines | — | — |
 | Migrations | `backend> .venv\Scripts\alembic check`; dev `downgrade 0005` → `upgrade head` | — | no drift; reversible | 0 | — |
 | Frontend lint | `frontend> npm run lint` | — | clean | 0 | — |
@@ -36,7 +36,7 @@ Final verification of the integrated IHSA prototype. All results below were prod
 
 **Skips are reported explicitly.** pytest runs with `-ra`, and with PostgreSQL available nothing was skipped. If the database is unreachable, the database-backed tests are *skipped* and listed, never counted as passed (`tests/conftest.py`).
 
-## 3. What the backend suite covers (455 tests)
+## 3. What the backend suite covers (456 tests)
 
 | Area | Main files | Notes |
 |---|---|---|
