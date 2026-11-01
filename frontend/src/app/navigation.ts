@@ -7,11 +7,13 @@ export interface NavItem {
   label: string;
   /** User needs at least one of these permissions to see the item. */
   anyOf: string[];
+  /** Roles excluded from seeing this item even if they have a matching permission. */
+  excludeRoles?: Role[];
 }
 
 export const NAV_ITEMS: NavItem[] = [
   { path: "/provider", label: "Workspace", anyOf: ["readiness:create"] },
-  { path: "/chat", label: "Assistant", anyOf: ["chat:use"] },
+  { path: "/chat", label: "Assistant", anyOf: ["chat:use"], excludeRoles: ["ADMIN"] },
   { path: "/claims", label: "My claims", anyOf: ["claims:read:own"] },
   { path: "/benefits", label: "Plan benefits", anyOf: ["benefits:read:own", "benefits:read:any"] },
   { path: "/plan-documents", label: "Plan documents", anyOf: ["knowledge:read"] },
@@ -30,6 +32,8 @@ export const HOME_BY_ROLE: Record<Role, string> = {
   ADMIN: "/admin",
 };
 
-export function visibleNav(permissions: string[]): NavItem[] {
-  return NAV_ITEMS.filter((item) => item.anyOf.some((p) => permissions.includes(p)));
+export function visibleNav(permissions: readonly string[], role?: Role): NavItem[] {
+  return NAV_ITEMS.filter(
+    (item) => item.anyOf.some((p) => permissions.includes(p)) && (!role || !item.excludeRoles?.includes(role))
+  );
 }

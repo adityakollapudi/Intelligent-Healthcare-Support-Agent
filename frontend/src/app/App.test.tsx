@@ -1,8 +1,9 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { apiError, authRoutes, json, mockApi } from "../test/fetch-mock";
+import { apiError, authRoutes, json, ME, mockApi } from "../test/fetch-mock";
 import { renderApp, renderSignedIn } from "../test/render";
+import { visibleNav } from "./navigation";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -89,12 +90,22 @@ describe("role-aware navigation", () => {
     ["MEMBER", ["Assistant", "My claims", "Plan benefits", "Plan documents", "Documents", "Support cases"], "Assistant"],
     ["PROVIDER", ["Workspace", "Assistant", "Plan benefits", "Plan documents", "Documents", "PA readiness", "Support cases"], "Provider workspace"],
     ["SUPPORT_AGENT", ["Assistant", "Plan benefits", "Plan documents", "Case queue"], "Case queue"],
-    ["ADMIN", ["Assistant", "Plan benefits", "Plan documents", "Admin dashboard", "Users"], "Admin dashboard"],
+    ["ADMIN", ["Plan benefits", "Plan documents", "Admin dashboard", "Users"], "Admin dashboard"],
   ] as const)("%s sees only its screens and lands on its home page", async (role, expected, home) => {
     mockApi(authRoutes(role));
     await renderSignedIn();
     expect(navLabels()).toEqual(expected);
     expect(await screen.findByRole("heading", { level: 1, name: home })).toBeInTheDocument();
+  });
+
+  it("hides Assistant navigation exclusively for ADMIN while preserving other permitted items", () => {
+    const adminNav = visibleNav(ME.ADMIN.permissions, "ADMIN").map((i) => i.label);
+    expect(adminNav).not.toContain("Assistant");
+    expect(adminNav).toEqual(["Plan benefits", "Plan documents", "Admin dashboard", "Users"]);
+
+    expect(visibleNav(ME.MEMBER.permissions, "MEMBER").map((i) => i.label)).toContain("Assistant");
+    expect(visibleNav(ME.PROVIDER.permissions, "PROVIDER").map((i) => i.label)).toContain("Assistant");
+    expect(visibleNav(ME.SUPPORT_AGENT.permissions, "SUPPORT_AGENT").map((i) => i.label)).toContain("Assistant");
   });
 
   it("every visible link leads to a rendered screen (no not-found, no access denied)", async () => {

@@ -10,7 +10,7 @@ export function AppLayout() {
   const { user, signOut } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const items = visibleNav(user?.permissions ?? []);
+  const items = visibleNav(user?.permissions ?? [], user?.role);
 
   // Close the mobile drawer after navigating.
   useEffect(() => setMenuOpen(false), [location.pathname]);
