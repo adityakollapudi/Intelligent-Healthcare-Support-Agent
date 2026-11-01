@@ -190,6 +190,7 @@ GLOSSARY: tuple[tuple[str, dict[str, str]], ...] = (
     (r"\bdeductibles?\b", {"en": "Deductible: what you pay yourself each year before your plan starts sharing costs.", "te": "డిడక్టిబుల్: ప్లాన్ ఖర్చులో భాగం పంచుకోవడం మొదలయ్యే ముందు ప్రతి సంవత్సరం మీరే చెల్లించే మొత్తం.", "hi": "डिडक्टिबल: प्लान के खर्च बाँटने से पहले हर साल आपकी अपनी दी जाने वाली रकम।"}),
     (r"\bcoinsurance\b", {"en": "Coinsurance: your share of a bill, as a percentage.", "te": "కోఇన్సూరెన్స్: బిల్లులో మీ వాటా, శాతం రూపంలో.", "hi": "कोइंश्योरेंस: बिल में आपका हिस्सा, प्रतिशत में।"}),
     (r"\bprior auth\w*|\bpre-?authori[sz]ation\b", {"en": "Prior authorization: getting approval from the plan before a service.", "te": "ప్రియర్ ఆథరైజేషన్: సేవ తీసుకునే ముందు ప్లాన్ నుండి అనుమతి పొందడం.", "hi": "प्रायर ऑथराइज़ेशन: सेवा लेने से पहले प्लान से अनुमति लेना।"}),
+    (r"\bout[- ]of[- ]pocket\b", {"en": "Out-of-pocket maximum: the most you pay in a plan year for covered in-network care.", "te": "అవుట్-ఆఫ్-పాకెట్ గరిష్ట పరిమితి: ఒక ప్లాన్ సంవత్సరంలో నెట్‌వర్క్‌లోని కవర్ అయ్యే సేవలకు మీరు చెల్లించే గరిష్ట మొత్తం.", "hi": "आउट-ऑफ़-पॉकेट अधिकतम सीमा: एक प्लान वर्ष में नेटवर्क की कवर की गई सेवाओं के लिए आपकी सबसे ज़्यादा दी जाने वाली रकम।"}),
     (r"\bout[- ]of[- ]network\b", {"en": "Out of network: doctors or hospitals without an agreement with your plan, which can cost you more.", "te": "అవుట్-ఆఫ్-నెట్‌వర్క్: మీ ప్లాన్‌తో ఒప్పందం లేని డాక్టర్లు/ఆసుపత్రులు. ఖర్చు ఎక్కువ కావచ్చు.", "hi": "आउट-ऑफ़-नेटवर्क: जिन डॉक्टरों/अस्पतालों का आपके प्लान से समझौता नहीं है। खर्च ज़्यादा हो सकता है।"}),
     (r"\bin[- ]network\b", {"en": "In network: doctors or hospitals with an agreement with your plan.", "te": "ఇన్-నెట్‌వర్క్: మీ ప్లాన్‌తో ఒప్పందం ఉన్న డాక్టర్లు/ఆసుపత్రులు.", "hi": "इन-नेटवर्क: जिन डॉक्टरों/अस्पतालों का आपके प्लान से समझौता है।"}),
     (r"\bappeal", {"en": "Appeal: asking for a decision to be looked at again.", "te": "అప్పీల్: ఒక నిర్ణయాన్ని మళ్లీ పరిశీలించమని కోరడం.", "hi": "अपील: किसी फ़ैसले की दोबारा जाँच का अनुरोध।"}),
@@ -202,6 +203,11 @@ FIXED: tuple[tuple[str, dict[str, str | None]], ...] = (
         "en": "I want to make sure you get the correct information. I couldn't confidently answer this using the information available, so I won't guess. I can help you contact our support team, and they won't need you to explain everything again.",
         "te": "మీకు సరైన సమాచారం అందాలని నా ఉద్దేశం. అందుబాటులో ఉన్న సమాచారంతో నేను దీనికి నమ్మకంగా సమాధానం చెప్పలేకపోతున్నాను, అందుకే ఊహించి చెప్పను. మా సపోర్ట్ టీమ్‌ను సంప్రదించడంలో సహాయం చేస్తాను. మీరు అంతా మళ్లీ చెప్పాల్సిన అవసరం ఉండదు.",
         "hi": "मैं चाहता हूँ कि आपको सही जानकारी मिले। उपलब्ध जानकारी से मैं इसका भरोसेमंद जवाब नहीं दे पा रहा, इसलिए अनुमान नहीं लगाऊँगा। मैं सपोर्ट टीम से जुड़ने में मदद कर सकता हूँ। आपको सब कुछ दोबारा नहीं बताना पड़ेगा।",
+    }),
+    (r"^Your plan is (?P<plan>.+?)\. Your member number is (?P<number>\S+)\.$", {
+        "en": None,
+        "te": "మీ ప్లాన్ {plan}. మీ మెంబర్ నంబర్ {number}.",
+        "hi": "आपका प्लान {plan} है। आपका मेंबर नंबर {number} है।",
     }),
     (r"^The only matching information", {
         "en": None,

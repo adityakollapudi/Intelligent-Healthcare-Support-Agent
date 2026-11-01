@@ -186,7 +186,7 @@ def _options(result: PipelineResult) -> list[dict[str, Any]]:
 
 def _guide(result: PipelineResult) -> Presented:
     terms = _each(lambda lang: _term_block(result.source_text or "", lang))
-    if result.guide == "simplify" and terms["en"]:
+    if result.guide in ("simplify", "define") and terms["en"]:
         return Presented(_each(lambda lang: _join(_w("simplify_heading", lang), terms[lang])))
     key = {"simplify": "simplify_short", "procedures": "guide_procedures",
            "authorization": "guide_authorization"}.get(result.guide or "", "guide_general")

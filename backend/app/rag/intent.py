@@ -33,6 +33,10 @@ class Route(StrEnum):
     UPLOADED_DOCUMENT = "UPLOADED_DOCUMENT"
     GUIDED = "GUIDED"  # offer simple choices instead of an answer
     SIMPLIFY = "SIMPLIFY"  # explain the previous answer in simpler words
+    DEFINE = "DEFINE"  # what an insurance word means (general meaning, no plan values)
+    MY_PLAN = "MY_PLAN"  # the caller's own plan and member number
+    PLAN_LIMIT = "PLAN_LIMIT"  # the deductible or out-of-pocket maximum of the caller's plan
+    BENEFIT_COST = "BENEFIT_COST"  # what one kind of service costs on the caller's plan
     CASE_CREATE = "CASE_CREATE"
     CASE_TRACK = "CASE_TRACK"
     ACCOUNT_LOOKUP_UNAVAILABLE = "ACCOUNT_LOOKUP_UNAVAILABLE"
@@ -129,6 +133,27 @@ _OTHER_PEOPLE = re.compile(
     r"\b(every|all|other|another|someone else'?s?) (members?|users?|patients?|people)('s|s')?\b|\banother member'?s\b",
     re.I,
 )
+_TERM = (r"(co-?pay|deductible|coinsurance|out[- ]of[- ]pocket(?: maximum| max| limit)?|in[- ]network|"
+         r"out[- ]of[- ]network|prior authori[sz]ation|pre-?authori[sz]ation|appeal|referral)s?")
+_DEFINE = re.compile(
+    rf"^\s*(what('?s| is| are| does)|define|explain|meaning of)\s+(the word |the term )?(a |an |the )?{_TERM}(\s+mean)?\W*$|"
+    rf"\bdifference between\b.*\b{_TERM}\b",
+    re.I,
+)
+_MY_PLAN = re.compile(
+    r"\b(what|which)\b.{0,20}\bplan\b.{0,12}\b(am i|do i|i am|i'?m|i have)\b|\bmy plan name\b|"
+    r"\bmy (member|membership) (id|number)\b",
+    re.I,
+)
+_PLAN_LIMIT = re.compile(
+    r"^\s*(what('?s| is)|how much is|tell me|show( me)?)\s+(my|our|the)\s+((annual|yearly|plan'?s?|current|individual)\s+)*"
+    r"(?P<limit>deductible|out[- ]of[- ]pocket(\s+(maximum|max|limit))?)\W*$",
+    re.I,
+)
+# The plan record answers these exactly; searching the documents mixes in other visit types.
+_RECORD_CATEGORIES = {"PRIMARY_CARE", "SPECIALIST", "EMERGENCY"}
+_NOT_SIMPLE = re.compile(r"\b(virtual|telehealth|video|out[- ]of[- ]network|prior|pre-?auth\w*|waived?|admitted)\b", re.I)
+_COST = re.compile(r"\b(how much|costs?|co-?pays?|coinsurance|cover(s|ed|age)?|pay)\b", re.I)
 _STOP = set(
     """a an the and or of to in on for with is are was were be it its this that what which who how when
 where why do does did can could should would will i my me we our you your they there here about from by as at
@@ -177,12 +202,33 @@ def route(question: str, *, has_history: bool) -> tuple[Intent, Route]:
         return Intent.BENEFITS_INFO, Route.BENEFITS_TOOL
     if is_generic_documents(q) or is_authorization_process(q):
         return Intent.REQUIRED_DOCUMENTS, Route.REQUIREMENTS
+    if _DEFINE.search(q):
+        return Intent.GENERAL_FAQ, Route.DEFINE
+    if _MY_PLAN.search(q):
+        return Intent.BENEFITS_INFO, Route.MY_PLAN
+    if _PLAN_LIMIT.search(q):
+        return Intent.GENERAL_FAQ, Route.PLAN_LIMIT
+    if is_simple_visit_cost(q):
+        return Intent.BENEFITS_INFO, Route.BENEFIT_COST
     content = [w for w in _WORD.findall(q.lower()) if w not in _STOP]
     if len(content) < 2 and not (has_history and is_follow_up(q)):
         return Intent.UNSUPPORTED_OR_AMBIGUOUS, Route.CLARIFY  # e.g. "the form": too little to route on
     if _REQUIREMENT_WORDS.search(q):
         return Intent.REQUIRED_DOCUMENTS, Route.REQUIREMENTS
     return Intent.GENERAL_FAQ, Route.RAG
+
+
+def is_simple_visit_cost(question: str) -> bool:
+    return (bool(_COST.search(question)) and benefit_category(question) in _RECORD_CATEGORIES
+            and len(_WORD.findall(question)) <= 10 and not _NOT_SIMPLE.search(question))
+
+
+def plan_limit_question(question: str) -> str:
+    """The wording that finds the plan guide's section, whatever words the customer used."""
+    limit = _PLAN_LIMIT.search(question)
+    if limit and limit["limit"].lower() == "deductible":
+        return "What is the deductible for my plan?"
+    return "What is my out-of-pocket maximum?"
 
 
 def is_authorization_process(question: str) -> bool:

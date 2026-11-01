@@ -89,3 +89,14 @@ Language quality and simplicity were checked by reading sample answers, not meas
 No new setup is needed: start the database, API and frontend as in the deployment guide, then open http://localhost:5173 and sign in. Members land on the assistant.
 
 Screenshots aren't included, because the browser pane was hidden during testing. The screens were checked by reading the live page.
+
+## Everyday questions answered directly
+
+Testing 41 customer questions found simple ones being sent to a person. These now answer directly:
+
+- **Insurance words:** "What is a deductible?" uses the fixed glossary, with general meanings only. The new out-of-pocket entry's Telugu and Hindi wording needs human review.
+- **Own account:** "What plan am I on?" and "What is my member ID?" come from the signed-in member's record.
+- **Deductible and out-of-pocket maximum:** these come from the member's plan guide.
+- **Primary care, specialist and emergency costs:** simple questions use the member's plan record. Searching documents had mixed in virtual visits and raised a false conflict.
+
+The real virtual-care conflict is still reported. The RAG evaluation fell from 87.8% to 84.7% (111/131) because 4 items labelled for a document answer now use the plan record. All 4 contain the expected amount, and the evaluation set wasn't changed.

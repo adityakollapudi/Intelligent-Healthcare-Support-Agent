@@ -37,6 +37,7 @@ from app.rag.intent import (
     is_authorization_process,
     is_follow_up,
     is_generic_documents,
+    plan_limit_question,
     route,
     wants_advice,
     wants_readiness,
@@ -114,6 +115,7 @@ class TurnContext:
     can_read_cases: bool
     can_check_readiness: bool = False
     can_read_documents: bool = False
+    member_number: str | None = None
 
 
 _ID_LIKE = re.compile(r"\b[A-Z]{2,}-[A-Z0-9-]{3,}\b|\d{4,}|\S+@\S+")
@@ -200,6 +202,13 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
 
     if rt is Route.GUIDED:
         return _guided_turn(ctx, intent, "general")
+    if rt is Route.DEFINE:
+        return PipelineResult(intent, "CLARIFICATION", "NOT_APPLICABLE", "Here is what that means.",
+                              guide="define", options=_help_options(ctx), source_text=ctx.question)
+    if rt is Route.MY_PLAN:
+        return _my_plan_turn(ctx, intent)
+    if rt is Route.PLAN_LIMIT:
+        ctx = _with_question(ctx, plan_limit_question(ctx.question))
     if rt is Route.SIMPLIFY:
         last = next((text for role, text in reversed(ctx.history) if role == "assistant"), None)
         return _guided_turn(ctx, intent, "simplify", last)
@@ -283,8 +292,8 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
 
     if rt is Route.CLAIM_TOOL:
         return _claim_turn(db, settings, embedder, generator, ctx, intent)
-    if rt is Route.BENEFITS_TOOL:
-        return _benefits_turn(ctx, intent)
+    if rt is Route.BENEFITS_TOOL or (rt is Route.BENEFIT_COST and ctx.scope.restrict_plan):
+        return _benefits_turn(ctx, intent)  # a member's own plan record, not a search of the documents
     if rt is Route.CASE_CREATE:
         return _case_turn(ctx, intent)
     if rt is Route.REQUIREMENTS:
@@ -403,6 +412,23 @@ def _claim_turn(db, settings, embedder, generator, ctx: TurnContext, intent: str
         records=[{"kind": "claims", "data": result.data}],
         actions=view,
         disclaimers=[RECORD_NOTE] + ([SYNTHETIC_NOTE] if cited else []),
+    )
+
+
+def _my_plan_turn(ctx: TurnContext, intent: str) -> PipelineResult:
+    if not ctx.member_number:
+        return PipelineResult(intent, "TOOL_RESULT", "NOT_APPLICABLE",
+                              "Your account isn't linked to a member plan.")
+    result = ctx.executor.execute("get_plan_benefits", {})
+    if result.status != "SUCCEEDED":
+        return _tool_failure(ctx, intent, result, "plan lookup")
+    return PipelineResult(
+        intent,
+        "TOOL_RESULT",
+        "VERIFIED_RECORD",
+        f"Your plan is {result.data['plan_name']}. Your member number is {ctx.member_number}.",
+        tool_results=[result],
+        disclaimers=[RECORD_NOTE],
     )
 
 
@@ -606,6 +632,7 @@ def _with_question(ctx: TurnContext, question: str) -> TurnContext:
         ctx.can_read_cases,
         ctx.can_check_readiness,
         ctx.can_read_documents,
+        ctx.member_number,
     )
 
 
