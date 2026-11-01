@@ -63,7 +63,7 @@ export const ME = {
     role: "ADMIN",
     organization: null,
     member: null,
-    permissions: ["audit:read", "benefits:read:any", "cases:assign:any", "cases:read:metadata_all", "chat:use", "config:manage", "feedback:create", "knowledge:read", "knowledge_gaps:read", "metrics:read", "requirements:read"],
+    permissions: ["audit:read", "benefits:read:any", "cases:assign:any", "cases:read:metadata_all", "chat:use", "config:manage", "feedback:create", "knowledge:read", "knowledge_gaps:read", "metrics:read", "requirements:read", "users:manage"],
   },
 } as const;
 

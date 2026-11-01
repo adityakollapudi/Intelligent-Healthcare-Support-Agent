@@ -48,7 +48,9 @@ def test_implemented_routes_match_the_contract(app):
         ("GET", "/api/v1/authorization/checklists/{checklist_id}"),
         ("PATCH", "/api/v1/support-cases/{case_id}"), ("GET", "/api/v1/admin/metrics"),
         ("GET", "/api/v1/admin/audit-events"), ("GET", "/api/v1/admin/knowledge-gaps"),
-        ("GET", "/api/v1/admin/support-agents"), ("POST", "/api/v1/chat/messages/{message_id}/feedback"),
+        ("GET", "/api/v1/admin/support-agents"), ("GET", "/api/v1/admin/users"),
+        ("GET", "/api/v1/admin/users/options"), ("POST", "/api/v1/admin/users"),
+        ("POST", "/api/v1/chat/messages/{message_id}/feedback"),
         ("POST", "/api/v1/chat/messages/{message_id}/translate"),
         ("GET", "/api/v1/knowledge/documents"), ("GET", "/api/v1/knowledge/documents/{document_id}"),
     }
@@ -63,7 +65,7 @@ def test_every_non_public_route_requires_authentication(app):
                 continue
             assert get_current_principal in set(_flatten(route.dependant)), f"{method} {path} lacks auth"
             checked += 1
-    assert checked == 30
+    assert checked == 33
 
 
 def test_openapi_documents_the_response_schemas(client):

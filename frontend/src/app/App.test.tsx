@@ -89,7 +89,7 @@ describe("role-aware navigation", () => {
     ["MEMBER", ["Assistant", "My claims", "Plan benefits", "Plan documents", "Documents", "Support cases"], "Assistant"],
     ["PROVIDER", ["Workspace", "Assistant", "Plan benefits", "Plan documents", "Documents", "PA readiness", "Support cases"], "Provider workspace"],
     ["SUPPORT_AGENT", ["Assistant", "Plan benefits", "Plan documents", "Case queue"], "Case queue"],
-    ["ADMIN", ["Assistant", "Plan benefits", "Plan documents", "Admin dashboard"], "Admin dashboard"],
+    ["ADMIN", ["Assistant", "Plan benefits", "Plan documents", "Admin dashboard", "Users"], "Admin dashboard"],
   ] as const)("%s sees only its screens and lands on its home page", async (role, expected, home) => {
     mockApi(authRoutes(role));
     await renderSignedIn();

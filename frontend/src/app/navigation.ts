@@ -20,6 +20,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/cases", label: "Support cases", anyOf: ["cases:read:own"] },
   { path: "/agent", label: "Case queue", anyOf: ["cases:read:queue"] },
   { path: "/admin", label: "Admin dashboard", anyOf: ["metrics:read"] },
+  { path: "/users", label: "Users", anyOf: ["users:manage"] },
 ];
 
 export const HOME_BY_ROLE: Record<Role, string> = {

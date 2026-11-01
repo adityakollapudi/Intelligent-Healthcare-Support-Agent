@@ -96,6 +96,8 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 
 **Plan documents.** `GET /knowledge/documents` and `GET /knowledge/documents/{id}` let customers read the documents the assistant answers from, so they can check an answer. They use the same access rule as retrieval: members see general documents and their own plan, current versions only, and anything else returns 404. The text comes from the indexed passages. Citations in chat link to the exact section.
 
+**Users.** Administrators add members, providers and support agents on the Users screen (`GET` and `POST /admin/users`, permission `users:manage`). Members get a new member number and a chosen plan, and providers and agents join an organization of the matching type. Emails must use `@example.test`, passwords need 12 or more characters and are stored only as hashes, and each creation is audited as `USER_CREATED`. Administrator accounts can't be created here.
+
 **Errors** use one format everywhere:
 ```json
 {"error": {"code": "RESOURCE_NOT_FOUND", "message": "The requested item was not found.", "details": [], "request_id": "…"}}

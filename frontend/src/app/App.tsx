@@ -5,6 +5,7 @@ import { SessionProvider, useSession } from "../features/auth/session";
 import { ChatProvider } from "../features/chat/chat-state";
 import { BenefitsPage } from "../pages/BenefitsPage";
 import { PlanDocumentsPage } from "../pages/PlanDocumentsPage";
+import { UsersPage } from "../pages/UsersPage";
 import { ChatPage } from "../pages/ChatPage";
 import { ClaimsPage } from "../pages/ClaimsPage";
 import { DocumentsPage } from "../pages/DocumentsPage";
@@ -50,6 +51,7 @@ export function AppRoutes() {
         {guarded("/cases", <CasesPage />)}
         {guarded("/agent", <AgentPage />)}
         {guarded("/admin", <AdminPage />)}
+        {guarded("/users", <UsersPage />)}
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

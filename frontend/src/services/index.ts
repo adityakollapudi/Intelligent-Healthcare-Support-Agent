@@ -26,6 +26,9 @@ import {
   isSessionPage,
 } from "../lib/validators";
 import type {
+  CreateUserRequest,
+  ManagedUser,
+  UserFormOptions,
   PlanDocumentDetail,
   PlanDocumentSummary,
   Language,
@@ -222,4 +225,17 @@ export const adminService = {
       validate: isAuditPage,
     }),
   agents: (signal?: AbortSignal) => apiRequest<AgentSummary[]>("/admin/support-agents", { signal, validate: isAgents }),
+  users: (role: string, signal?: AbortSignal) =>
+    apiRequest<ManagedUser[]>("/admin/users", { query: role ? { role } : {}, signal, validate: (v): v is ManagedUser[] => Array.isArray(v) }),
+  userOptions: (signal?: AbortSignal) =>
+    apiRequest<UserFormOptions>("/admin/users/options", {
+      signal,
+      validate: (v): v is UserFormOptions => typeof v === "object" && v !== null && Array.isArray((v as { plans?: unknown }).plans),
+    }),
+  createUser: (body: CreateUserRequest) =>
+    apiRequest<ManagedUser>("/admin/users", {
+      method: "POST",
+      body,
+      validate: (v): v is ManagedUser => typeof v === "object" && v !== null && typeof (v as { id?: unknown }).id === "string",
+    }),
 };

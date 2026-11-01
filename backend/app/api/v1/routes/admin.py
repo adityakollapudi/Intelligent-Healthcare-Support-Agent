@@ -1,4 +1,4 @@
-﻿"""Administration (doc 06 §3.9). Read-only: there is no route that edits or deletes audit records."""
+﻿"""Administration (doc 06 §3.9). There is no route that edits or deletes audit records."""
 
 from datetime import date, datetime
 from typing import Annotated, Any, Literal
@@ -13,12 +13,14 @@ from app.db.session import get_db
 from app.models.enums import AuditOutcome
 from app.schemas.common import ErrorResponse
 from app.schemas.support_case import AgentSummary
-from app.services import admin_service, support_case_service
+from app.schemas.user_admin import CreateUserRequest, ManagedUser, UserFormOptions
+from app.services import admin_service, support_case_service, user_admin_service
 from app.services.audit_service import AuditService, get_audit_service
 
 router = APIRouter(prefix="/admin", tags=["administration"])
 Db = Annotated[Session, Depends(get_db)]
 Audit = Annotated[AuditService, Depends(get_audit_service)]
+UserManager = Annotated[Principal, Depends(require_any_permission(Permission.USERS_MANAGE))]
 _ERRORS = {s: {"model": ErrorResponse} for s in (401, 403, 422)}
 From = Annotated[date | None, Query(alias="from")]
 To = Annotated[date | None, Query(alias="to")]
@@ -72,3 +74,26 @@ def get_support_agents(
     db: Db, principal: Annotated[Principal, Depends(require_any_permission(Permission.CASES_ASSIGN_ANY))],
 ) -> list[AgentSummary]:
     return support_case_service.list_agents(db)
+
+
+@router.get("/users/options", response_model=UserFormOptions, responses=_ERRORS,
+            summary="Plans and organizations a new user can join")
+def get_user_options(db: Db, principal: UserManager) -> UserFormOptions:
+    return user_admin_service.form_options(db)
+
+
+@router.get("/users", response_model=list[ManagedUser], responses=_ERRORS, summary="All user accounts")
+def get_users(
+    db: Db, audit: Audit, principal: UserManager,
+    role: Annotated[Literal["MEMBER", "PROVIDER", "SUPPORT_AGENT", "ADMIN"] | None, Query()] = None,
+) -> list[ManagedUser]:
+    result = user_admin_service.list_users(db, role)
+    audit.record("USERS_VIEWED", AuditOutcome.SUCCESS, actor=principal, resource_type="user")
+    return result
+
+
+@router.post("/users", response_model=ManagedUser, status_code=201,
+             responses={s: {"model": ErrorResponse} for s in (401, 403, 409, 422)},
+             summary="Create a member, provider or support agent")
+def create_user(body: CreateUserRequest, db: Db, audit: Audit, principal: UserManager) -> ManagedUser:
+    return user_admin_service.create_user(db, audit, principal, body)

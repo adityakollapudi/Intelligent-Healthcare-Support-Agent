@@ -28,7 +28,7 @@ def test_seed_counts_match_the_seed_definition(db_session):
     counts = _counts(db_session)
     assert counts["claims"] == len(seed_data.CLAIMS)
     assert counts["plans"] == len(seed_data.PLANS) >= 2
-    assert counts["users"] == len(seed_data.USERS)
+    assert {u["email"] for u in seed_data.USERS} <= set(db_session.scalars(select(User.email)))  # tests add more
 
 
 def test_all_seed_records_are_marked_synthetic(db_session):

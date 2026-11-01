@@ -510,6 +510,35 @@ export interface DocumentText {
   pages: { page_number: number; text: string; readable: boolean; handwritten: boolean; unclear_words: string[] }[];
 }
 
+export type ManagedRole = "MEMBER" | "PROVIDER" | "SUPPORT_AGENT";
+
+export interface ManagedUser {
+  id: string;
+  email: string;
+  display_name: string;
+  role: Role;
+  account_status: string;
+  organization_name: string | null;
+  member_number: string | null;
+  plan_name: string | null;
+  created_at: string;
+  last_login_at: string | null;
+}
+
+export interface UserFormOptions {
+  plans: { plan_code: string; plan_name: string }[];
+  organizations: { id: string; name: string; role: ManagedRole }[];
+}
+
+export interface CreateUserRequest {
+  email: string;
+  display_name: string;
+  role: ManagedRole;
+  password: string;
+  plan_code?: string;
+  organization_id?: string;
+}
+
 export interface ItemEvidence {
   field_id: string;
   document_id: string;

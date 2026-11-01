@@ -3,7 +3,7 @@ from app.models.enums import Role
 
 
 def test_catalogue_matches_phase1_doc03():
-    assert len(Permission) == 27
+    assert len(Permission) == 28
 
 
 def test_every_role_has_a_permission_set():

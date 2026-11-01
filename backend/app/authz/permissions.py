@@ -33,6 +33,7 @@ class Permission(StrEnum):
     AUDIT_READ = "audit:read"
     FEEDBACK_CREATE = "feedback:create"
     CONFIG_MANAGE = "config:manage"
+    USERS_MANAGE = "users:manage"
 
 
 P = Permission
@@ -56,7 +57,7 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
     Role.ADMIN: frozenset({
         P.CHAT_USE, P.KNOWLEDGE_READ, P.BENEFITS_READ_ANY, P.REQUIREMENTS_READ, P.CASES_READ_METADATA_ALL,
         P.CASES_ASSIGN_ANY, P.METRICS_READ, P.KNOWLEDGE_GAPS_READ, P.AUDIT_READ, P.FEEDBACK_CREATE,
-        P.CONFIG_MANAGE,
+        P.CONFIG_MANAGE, P.USERS_MANAGE,
     }),
 }
 

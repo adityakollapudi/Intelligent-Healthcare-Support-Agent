@@ -6,6 +6,58 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiError, authRoutes, json, mockApi } from "../test/fetch-mock";
 import { renderSignedIn } from "../test/render";
 
+describe("user management", () => {
+  const OPTIONS = {
+    plans: [{ plan_code: "SYN-PLAN-GOLD-01", plan_name: "Gold" }],
+    organizations: [
+      { id: "o1", name: "Maplestone", role: "PROVIDER" },
+      { id: "o2", name: "Support Center", role: "SUPPORT_AGENT" },
+    ],
+  };
+  const row = { id: "u1", email: "a@example.test", display_name: "Ana Test", role: "MEMBER", account_status: "ACTIVE", organization_name: null, member_number: "SYN-M-000004", plan_name: "Gold", created_at: "2026-11-01T00:00:00Z", last_login_at: null };
+
+  it("adds a provider, keeps the role for the next one and refreshes the list", async () => {
+    const { calls } = mockApi({
+      ...authRoutes("ADMIN"),
+      "GET /admin/metrics": () => json(200, METRICS),
+      "GET /admin/users/options": () => json(200, OPTIONS),
+      "GET /admin/users": () => json(200, [row]),
+      "POST /admin/users": () => json(201, { ...row, display_name: "Pat Provider", email: "pat@example.test", role: "PROVIDER" }),
+    });
+    const { navigate, user } = await renderSignedIn();
+    navigate("/users");
+    await user.selectOptions(await screen.findByLabelText("Role"), "PROVIDER");
+    expect(screen.getByLabelText("Organization")).toHaveDisplayValue("Maplestone");
+    await user.type(screen.getByLabelText("Full name"), "Pat Provider");
+    await user.type(screen.getByLabelText(/Email name/), "pat");
+    await user.type(screen.getByLabelText(/^Password/), "Synthetic-Pass-1!");
+    await user.click(screen.getByRole("button", { name: "Add user" }));
+    expect(await screen.findByText(/pat@example.test\) can sign in now/)).toBeInTheDocument();
+    expect(calls.find((c) => c.method === "POST" && c.path === "/admin/users")?.body).toMatchObject({ email: "pat@example.test", role: "PROVIDER", organization_id: "o1" });
+    expect(screen.getByLabelText("Role")).toHaveDisplayValue("Provider");
+    expect(screen.getByLabelText("Full name")).toHaveValue("");
+    await waitFor(() => expect(calls.filter((c) => c.method === "GET" && c.path === "/admin/users").length).toBeGreaterThan(1));
+  });
+
+  it("shows the server's refusal and keeps what was typed", async () => {
+    mockApi({
+      ...authRoutes("ADMIN"),
+      "GET /admin/metrics": () => json(200, METRICS),
+      "GET /admin/users/options": () => json(200, OPTIONS),
+      "GET /admin/users": () => json(200, []),
+      "POST /admin/users": () => apiError(409, "EMAIL_IN_USE", "An account with this email already exists."),
+    });
+    const { navigate, user } = await renderSignedIn();
+    navigate("/users");
+    await user.type(await screen.findByLabelText("Full name"), "Ana Test");
+    await user.type(screen.getByLabelText(/Email name/), "ana");
+    await user.type(screen.getByLabelText(/^Password/), "Synthetic-Pass-1!");
+    await user.click(screen.getByRole("button", { name: "Add user" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.getByLabelText("Full name")).toHaveValue("Ana Test");
+  });
+});
+
 afterEach(() => vi.unstubAllGlobals());
 
 const SUMMARY = {
