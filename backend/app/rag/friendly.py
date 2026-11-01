@@ -78,7 +78,7 @@ def _claims(result: PipelineResult, data: dict) -> Presented:
                      partial=any(c.get("status_description") for c in claims) and len(claims) == 1)
 
 
-def _benefits(data: dict) -> Presented:
+def _benefits(data: dict, for_member: bool = True) -> Presented:
     plan = data["plan_name"]
 
     def render(lang: str) -> str:
@@ -96,7 +96,8 @@ def _benefits(data: dict) -> Presented:
                 lines.append(f"- {_w('needs_approval', lang)}")
             blocks.append("\n".join(lines))
         values = " ".join(f"{b['in_network_cost_share']} {b['out_of_network_cost_share']}" for b in data["benefits"])
-        return _join(_w("benefits_heading", lang, plan=plan), *blocks, _w("benefits_note", lang),
+        heading = "benefits_heading" if for_member else "benefits_heading_staff"
+        return _join(_w(heading, lang, plan=plan), *blocks, _w("benefits_note", lang),
                      _term_block(values, lang))
 
     return Presented(_each(render))
@@ -162,7 +163,8 @@ def _quoted(result: PipelineResult) -> Presented:
         if uploaded:
             return _join(_w("doc_heading", lang), body, note)
         coverage = _w("coverage_note", lang) if re.search(r"\bcover", result.source_text or "", re.I) else ""
-        return _join(_w("found_heading", lang), body, note, coverage, _term_block(body, lang), _w("found_next", lang))
+        heading = _w("found_heading" if result.for_member else "found_heading_staff", lang)
+        return _join(heading, body, note, coverage, _term_block(body, lang), _w("found_next", lang))
 
     return Presented(_each(render), partial=True)
 
@@ -189,7 +191,8 @@ def _guide(result: PipelineResult) -> Presented:
     if result.guide in ("simplify", "define") and terms["en"]:
         return Presented(_each(lambda lang: _join(_w("simplify_heading", lang), terms[lang])))
     key = {"simplify": "simplify_short", "procedures": "guide_procedures",
-           "authorization": "guide_authorization"}.get(result.guide or "", "guide_general")
+           "authorization": "guide_authorization", "general_provider": "guide_provider",
+           "general_agent": "guide_agent", "general_admin": "guide_admin"}.get(result.guide or "", "guide_general")
     return Presented(_each(lambda lang: _w(key, lang)), suggestions=_options(result))
 
 
@@ -217,7 +220,7 @@ def _body(result: PipelineResult) -> Presented:
         if record["kind"] == "claims" and record["data"]["claims"]:
             return _claims(result, record["data"])
         if record["kind"] == "plan_benefits":
-            return _benefits(record["data"])
+            return _benefits(record["data"], result.for_member)
         if record["kind"] == "requirements":
             return _requirements(result, record["data"])
     fixed = _fixed(result)

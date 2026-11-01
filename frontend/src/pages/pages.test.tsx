@@ -419,7 +419,7 @@ describe("customer-friendly assistant", () => {
     mockApi({ ...authRoutes("PROVIDER") });
     const { navigate } = await renderSignedIn();
     navigate("/chat");
-    await screen.findByRole("button", { name: "Understand My Health Benefits" });
+    await screen.findByRole("button", { name: "Gold Plan Benefits" });
     expect(screen.queryByRole("button", { name: "Check My Claim Status" })).not.toBeInTheDocument();
   });
 

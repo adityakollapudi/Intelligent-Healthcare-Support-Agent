@@ -272,14 +272,14 @@ function MessageBubble({ message, onReveal }: { message: ChatMessage; onReveal: 
 /** The first thing a customer sees: a greeting and the things they can do. */
 function WelcomePanel() {
   const chat = useChat();
-  const { can } = useSession();
+  const { user } = useSession();
   const navigate = useNavigate();
-  const actions = QUICK_ACTIONS.filter((a) => !a.permission || can(a.permission));
+  const role = user?.role ?? "MEMBER";
   return (
     <div className="chat-welcome">
-      <p className="welcome-text">{WELCOME[chat.language]}</p>
+      <p className="welcome-text">{WELCOME[role][chat.language]}</p>
       <ul className="quick-actions">
-        {actions.map((a) => (
+        {QUICK_ACTIONS[role].map((a) => (
           <li key={a.id}>
             <button
               type="button"

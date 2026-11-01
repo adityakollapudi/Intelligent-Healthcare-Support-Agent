@@ -1,7 +1,7 @@
 // Assistant screen wording in English, Telugu and Hindi. The rest of the portal stays in English.
 // Quick actions send ordinary questions through the normal chat path, so no answer is written here.
 
-import type { Language } from "../../types/api";
+import type { Language, Role } from "../../types/api";
 
 export const ANSWER_LANGUAGES: { code: Language; name: string; action: string }[] = [
   { code: "en", name: "English", action: "Show in English" },
@@ -9,10 +9,27 @@ export const ANSWER_LANGUAGES: { code: Language; name: string; action: string }[
   { code: "hi", name: "हिन्दी", action: "हिन्दी में दिखाएँ" },
 ];
 
-export const WELCOME: Record<Language, string> = {
-  en: "Hello! Welcome to your healthcare support portal. I'm your virtual healthcare assistant. I can help you understand your health plan, check claim information, find required documents, and answer your questions.\n\nHow can I help you today?",
-  te: "నమస్కారం! మీ హెల్త్‌కేర్ సపోర్ట్ పోర్టల్‌కు స్వాగతం. మీ హెల్త్ ప్లాన్, క్లెయిమ్ వివరాలు, అవసరమైన డాక్యుమెంట్లు మరియు ఇతర సందేహాల గురించి తెలుసుకోవడానికి నేను సహాయం చేస్తాను.\n\nఈరోజు మీకు ఎలా సహాయం చేయగలను?",
-  hi: "नमस्ते! आपके हेल्थकेयर सपोर्ट पोर्टल में आपका स्वागत है। मैं आपकी हेल्थ प्लान, क्लेम की जानकारी, ज़रूरी दस्तावेज़ और अन्य सवालों को समझने में मदद कर सकता हूँ।\n\nआज मैं आपकी कैसे सहायता कर सकता हूँ?",
+export const WELCOME: Record<Role, Record<Language, string>> = {
+  MEMBER: {
+    en: "Hello! Welcome to your healthcare support portal. I'm your virtual healthcare assistant. I can help you understand your health plan, check claim information, find required documents, and answer your questions.\n\nHow can I help you today?",
+    te: "నమస్కారం! మీ హెల్త్‌కేర్ సపోర్ట్ పోర్టల్‌కు స్వాగతం. మీ హెల్త్ ప్లాన్, క్లెయిమ్ వివరాలు, అవసరమైన డాక్యుమెంట్లు మరియు ఇతర సందేహాల గురించి తెలుసుకోవడానికి నేను సహాయం చేస్తాను.\n\nఈరోజు మీకు ఎలా సహాయం చేయగలను?",
+    hi: "नमस्ते! आपके हेल्थकेयर सपोर्ट पोर्टल में आपका स्वागत है। मैं आपकी हेल्थ प्लान, क्लेम की जानकारी, ज़रूरी दस्तावेज़ और अन्य सवालों को समझने में मदद कर सकता हूँ।\n\nआज मैं आपकी कैसे सहायता कर सकता हूँ?",
+  },
+  PROVIDER: {
+    en: "Hello! I'm your provider assistant. I can help with prior authorization paperwork, plan benefits and the documents you've uploaded.\n\nWhat do you need today?",
+    te: "నమస్కారం! నేను మీ ప్రొవైడర్ అసిస్టెంట్. ప్రియర్ ఆథరైజేషన్ పత్రాలు, ప్లాన్ ప్రయోజనాలు, మీరు అప్‌లోడ్ చేసిన డాక్యుమెంట్ల విషయంలో సహాయం చేస్తాను.\n\nఈరోజు మీకు ఏమి కావాలి?",
+    hi: "नमस्ते! मैं आपका प्रोवाइडर असिस्टेंट हूँ। मैं प्रायर ऑथराइज़ेशन के काग़ज़ात, प्लान के लाभ और आपके अपलोड किए दस्तावेज़ों में मदद कर सकता हूँ।\n\nआज आपको क्या चाहिए?",
+  },
+  SUPPORT_AGENT: {
+    en: "Hello! I'm your support assistant. I can help with support procedures, plan details and what the documents say.\n\nWhat do you need to look up?",
+    te: "నమస్కారం! నేను మీ సపోర్ట్ అసిస్టెంట్. సపోర్ట్ విధానాలు, ప్లాన్ వివరాలు, డాక్యుమెంట్ల సమాచారం విషయంలో సహాయం చేస్తాను.\n\nమీరు ఏమి చూడాలనుకుంటున్నారు?",
+    hi: "नमस्ते! मैं आपका सपोर्ट असिस्टेंट हूँ। मैं सपोर्ट प्रक्रियाओं, प्लान की जानकारी और दस्तावेज़ों में मदद कर सकता हूँ।\n\nआप क्या देखना चाहते हैं?",
+  },
+  ADMIN: {
+    en: "Hello! I can answer questions about plans and documents. Numbers and logs are on the Admin dashboard, and accounts are on the Users screen.\n\nWhat would you like to do?",
+    te: "నమస్కారం! ప్లాన్లు, డాక్యుమెంట్ల గురించి సమాధానం ఇవ్వగలను. గణాంకాలు, లాగ్‌లు Admin dashboard లో, ఖాతాలు Users స్క్రీన్‌లో ఉన్నాయి.\n\nమీరు ఏమి చేయాలనుకుంటున్నారు?",
+    hi: "नमस्ते! मैं प्लान और दस्तावेज़ों के सवालों के जवाब दे सकता हूँ। आँकड़े और लॉग Admin dashboard पर हैं, और खाते Users स्क्रीन पर हैं।\n\nआप क्या करना चाहते हैं?",
+  },
 };
 
 export interface QuickAction {
@@ -20,18 +37,47 @@ export interface QuickAction {
   label: Record<Language, string>;
   message?: string; // sent to the assistant
   path?: string; // or opens a screen
-  permission?: string;
 }
 
-export const QUICK_ACTIONS: QuickAction[] = [
-  { id: "benefits", message: "Show my plan benefits", label: { en: "Understand My Health Benefits", te: "నా హెల్త్ ప్రయోజనాలు తెలుసుకోవాలి", hi: "मेरे हेल्थ लाभ समझें" } },
-  { id: "claims", message: "Show my claims", permission: "claims:read:own", label: { en: "Check My Claim Status", te: "నా క్లెయిమ్ స్థితి చూడాలి", hi: "मेरे क्लेम की स्थिति देखें" } },
-  { id: "documents", message: "Which documents do I need?", label: { en: "Required Documents", te: "అవసరమైన డాక్యుమెంట్లు", hi: "ज़रूरी दस्तावेज़" } },
-  { id: "authorization", message: "How does prior authorization work?", label: { en: "Authorization Process", te: "అనుమతి ప్రక్రియ", hi: "अनुमति की प्रक्रिया" } },
-  { id: "upload", path: "/documents", permission: "documents:upload", label: { en: "Upload Medical Documents", te: "వైద్య డాక్యుమెంట్లు అప్‌లోడ్ చేయాలి", hi: "मेडिकल दस्तावेज़ अपलोड करें" } },
-  { id: "request", message: "Please create a support case", permission: "cases:create", label: { en: "Create a Support Request", te: "సపోర్ట్ రిక్వెస్ట్ సృష్టించాలి", hi: "सपोर्ट रिक्वेस्ट बनाएँ" } },
-  { id: "person", message: "I want to talk to a person", permission: "cases:create", label: { en: "Talk to a Support Representative", te: "సపోర్ట్ ప్రతినిధితో మాట్లాడాలి", hi: "सपोर्ट प्रतिनिधि से बात करें" } },
-];
+const PLAN_BENEFITS: QuickAction = { id: "plan", message: "Show benefits for SYN-PLAN-GOLD-01", label: { en: "Gold Plan Benefits", te: "గోల్డ్ ప్లాన్ ప్రయోజనాలు", hi: "गोल्ड प्लान के लाभ" } };
+const DOCUMENTS: QuickAction = { id: "documents", message: "Which documents do I need?", label: { en: "Required Documents", te: "అవసరమైన డాక్యుమెంట్లు", hi: "ज़रूरी दस्तावेज़" } };
+const AUTHORIZATION: QuickAction = { id: "authorization", message: "How does prior authorization work?", label: { en: "Authorization Process", te: "అనుమతి ప్రక్రియ", hi: "अनुमति की प्रक्रिया" } };
+const UPLOAD: QuickAction = { id: "upload", path: "/documents", label: { en: "Upload Medical Documents", te: "వైద్య డాక్యుమెంట్లు అప్‌లోడ్ చేయాలి", hi: "मेडिकल दस्तावेज़ अपलोड करें" } };
+const PERSON: QuickAction = { id: "person", message: "I want to talk to a person", label: { en: "Talk to a Support Representative", te: "సపోర్ట్ ప్రతినిధితో మాట్లాడాలి", hi: "सपोर्ट प्रतिनिधि से बात करें" } };
+const APPEALS: QuickAction = { id: "appeals", message: "How do I appeal a denied claim?", label: { en: "How Claim Appeals Work", te: "క్లెయిమ్ అప్పీల్ ఎలా పనిచేస్తుంది", hi: "क्लेम अपील कैसे होती है" } };
+
+export const QUICK_ACTIONS: Record<Role, QuickAction[]> = {
+  MEMBER: [
+    { id: "benefits", message: "Show my plan benefits", label: { en: "Understand My Health Benefits", te: "నా హెల్త్ ప్రయోజనాలు తెలుసుకోవాలి", hi: "मेरे हेल्थ लाभ समझें" } },
+    { id: "claims", message: "Show my claims", label: { en: "Check My Claim Status", te: "నా క్లెయిమ్ స్థితి చూడాలి", hi: "मेरे क्लेम की स्थिति देखें" } },
+    DOCUMENTS,
+    AUTHORIZATION,
+    UPLOAD,
+    { id: "request", message: "Please create a support case", label: { en: "Create a Support Request", te: "సపోర్ట్ రిక్వెస్ట్ సృష్టించాలి", hi: "सपोर्ट रिक्वेस्ट बनाएँ" } },
+    PERSON,
+  ],
+  PROVIDER: [
+    { id: "readiness", path: "/readiness", label: { en: "Check Paperwork Readiness", te: "పత్రాలు సిద్ధమా చూడాలి", hi: "काग़ज़ात की तैयारी जाँचें" } },
+    DOCUMENTS,
+    AUTHORIZATION,
+    UPLOAD,
+    PLAN_BENEFITS,
+    PERSON,
+  ],
+  SUPPORT_AGENT: [
+    { id: "queue", path: "/agent", label: { en: "Open Case Queue", te: "కేస్ క్యూ తెరవాలి", hi: "केस क्यू खोलें" } },
+    { id: "escalate", message: "When do I escalate a case?", label: { en: "When to Escalate a Case", te: "కేసును ఎప్పుడు ఎస్కలేట్ చేయాలి", hi: "केस कब एस्केलेट करें" } },
+    { id: "first", message: "Which cases do I take first?", label: { en: "Which Cases Come First", te: "ముందుగా ఏ కేసులు తీసుకోవాలి", hi: "पहले कौन से केस लें" } },
+    PLAN_BENEFITS,
+    APPEALS,
+  ],
+  ADMIN: [
+    { id: "dashboard", path: "/admin", label: { en: "Open Admin Dashboard", te: "అడ్మిన్ డాష్‌బోర్డ్ తెరవాలి", hi: "एडमिन डैशबोर्ड खोलें" } },
+    { id: "users", path: "/users", label: { en: "Manage Users", te: "వినియోగదారులను నిర్వహించాలి", hi: "उपयोगकर्ता प्रबंधित करें" } },
+    PLAN_BENEFITS,
+    APPEALS,
+  ],
+};
 
 export interface ChatText {
   title: string; description: string; newConversation: string; conversation: string; you: string; assistant: string;

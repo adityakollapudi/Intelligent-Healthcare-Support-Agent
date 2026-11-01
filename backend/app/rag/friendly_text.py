@@ -60,6 +60,7 @@ WORDS: dict[str, dict[str, str]] = {
     "next": {"en": "What you should do next", "te": "తర్వాత మీరు ఏమి చేయాలి", "hi": "आगे आपको क्या करना है"},
     "more": {"en": "More detail from the claims guide", "te": "క్లెయిమ్స్ గైడ్‌లో మరిన్ని వివరాలు", "hi": "क्लेम गाइड में और जानकारी"},
     "benefits_heading": {"en": "Here is what your {plan} record shows:", "te": "మీ {plan} రికార్డులో ఉన్న వివరాలు:", "hi": "आपके {plan} रिकॉर्ड में यह जानकारी है:"},
+    "benefits_heading_staff": {"en": "Here is what the {plan} record shows:", "te": "{plan} రికార్డులో ఉన్నది:", "hi": "{plan} के रिकॉर्ड में यह है:"},
     "in_network": {"en": "You pay at in-network providers", "te": "నెట్‌వర్క్‌లోని ఆసుపత్రులు/డాక్టర్ల వద్ద మీరు చెల్లించేది", "hi": "नेटवर्क के अंदर के डॉक्टर/अस्पताल में आप देंगे"},
     "out_network": {"en": "You pay outside the network", "te": "నెట్‌వర్క్ బయట మీరు చెల్లించేది", "hi": "नेटवर्क के बाहर आप देंगे"},
     "limit": {"en": "Limit", "te": "పరిమితి", "hi": "सीमा"},
@@ -124,6 +125,7 @@ WORDS: dict[str, dict[str, str]] = {
         "hi": "ध्यान दें: जानकारी कम होने का मतलब यह नहीं कि आपका अनुरोध अस्वीकार हो गया।",
     },
     "found_heading": {"en": "Here's what I found in your plan documents:", "te": "మీ ప్లాన్ డాక్యుమెంట్లలో నాకు దొరికినది:", "hi": "आपके प्लान दस्तावेज़ों में मुझे यह मिला:"},
+    "found_heading_staff": {"en": "Here's what I found in the documents:", "te": "డాక్యుమెంట్లలో నాకు దొరికినది:", "hi": "दस्तावेज़ों में मुझे यह मिला:"},
     "found_next": {
         "en": "Want this explained more simply? Just say \"I don't understand\". You can also ask for a support person.",
         "te": "ఇంకా సులభంగా వివరించాలా? \"అర్థం కాలేదు\" అని చెప్పండి. సపోర్ట్ ప్రతినిధిని కూడా అడగవచ్చు.",
@@ -142,8 +144,23 @@ WORDS: dict[str, dict[str, str]] = {
         "te": "పర్వాలేదు. ఏ భాగం అర్థం కాలేదో చెప్పండి, లేదా మీకు కావాల్సినది ఎంచుకోండి:",
         "hi": "कोई बात नहीं। बताइए कौन-सा हिस्सा समझ नहीं आया, या नीचे से चुनें:",
     },
+    "guide_provider": {
+        "en": "Hello! I can help with prior authorization paperwork, plan benefits and the documents you've uploaded. What do you need?",
+        "te": "నమస్కారం! ప్రియర్ ఆథరైజేషన్ పత్రాలు, ప్లాన్ ప్రయోజనాలు, మీరు అప్‌లోడ్ చేసిన డాక్యుమెంట్ల విషయంలో సహాయం చేస్తాను. మీకు ఏమి కావాలి?",
+        "hi": "नमस्ते! मैं प्रायर ऑथराइज़ेशन के काग़ज़ात, प्लान के लाभ और आपके अपलोड किए दस्तावेज़ों में मदद कर सकता हूँ। आपको क्या चाहिए?",
+    },
+    "guide_agent": {
+        "en": "Hello! I can help with support procedures, plan details and what the documents say. Your cases are in the Case queue.",
+        "te": "నమస్కారం! సపోర్ట్ విధానాలు, ప్లాన్ వివరాలు, డాక్యుమెంట్ల సమాచారం విషయంలో సహాయం చేస్తాను. మీ కేసులు Case queue లో ఉన్నాయి.",
+        "hi": "नमस्ते! मैं सपोर्ट प्रक्रियाओं, प्लान की जानकारी और दस्तावेज़ों में मदद कर सकता हूँ। आपके केस Case queue में हैं।",
+    },
+    "guide_admin": {
+        "en": "Hello! I can answer questions about plans and documents. Numbers and logs are on the Admin dashboard, and accounts are on the Users screen.",
+        "te": "నమస్కారం! ప్లాన్లు, డాక్యుమెంట్ల గురించి సమాధానం ఇవ్వగలను. గణాంకాలు, లాగ్‌లు Admin dashboard లో, ఖాతాలు Users స్క్రీన్‌లో ఉన్నాయి.",
+        "hi": "नमस्ते! मैं प्लान और दस्तावेज़ों के सवालों के जवाब दे सकता हूँ। आँकड़े और लॉग Admin dashboard पर हैं, और खाते Users स्क्रीन पर हैं।",
+    },
     "guide_general": {
-        "en": "No problem! I can help you understand it. What would you like to know?",
+        "en": "Hello! I can help with your claims, plan costs and documents. What would you like to know?",
         "te": "పర్వాలేదు! నేను అర్థమయ్యేలా చెబుతాను. మీరు ఏమి తెలుసుకోవాలనుకుంటున్నారు?",
         "hi": "कोई बात नहीं! मैं समझाने में मदद करूँगा। आप क्या जानना चाहते हैं?",
     },

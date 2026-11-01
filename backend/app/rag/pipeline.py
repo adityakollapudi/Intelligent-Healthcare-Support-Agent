@@ -100,6 +100,7 @@ class PipelineResult:
     guide: str | None = None
     options: list[tuple[str, str]] = field(default_factory=list)
     source_text: str | None = None
+    for_member: bool = True  # staff have no plan of their own, so answers can't say "your plan"
 
 
 @dataclass
@@ -117,6 +118,7 @@ class TurnContext:
     can_check_readiness: bool = False
     can_read_documents: bool = False
     member_number: str | None = None
+    role: str = "MEMBER"
 
 
 _ID_LIKE = re.compile(r"\b[A-Z]{2,}-[A-Z0-9-]{3,}\b|\d{4,}|\S+@\S+")
@@ -175,7 +177,26 @@ def case_offer(ctx: TurnContext, reason: str, category: str) -> Action:
     )
 
 
+_GOLD_BENEFITS = ("Show Gold plan benefits", "Show benefits for SYN-PLAN-GOLD-01")
+_APPEALS = ("How do claim appeals work?", "How do I appeal a denied claim?")
+_STAFF_OPTIONS = {
+    "PROVIDER": [("opt_documents", "Which documents do I need?"),
+                 ("How does prior authorization work?", "How does prior authorization work?"),
+                 _GOLD_BENEFITS, ("opt_person", "I want to talk to a person")],
+    "SUPPORT_AGENT": [("When do I escalate a case?", "When do I escalate a case?"),
+                      ("Which cases do I take first?", "Which cases do I take first?"), _GOLD_BENEFITS, _APPEALS],
+    "ADMIN": [_GOLD_BENEFITS, _APPEALS, ("How does prior authorization work?", "How does prior authorization work?")],
+}
+_GENERAL_GUIDE = {"PROVIDER": "general_provider", "SUPPORT_AGENT": "general_agent", "ADMIN": "general_admin"}
+
+
+def _general(ctx: TurnContext) -> str:
+    return _GENERAL_GUIDE.get(ctx.role, "general")
+
+
 def _help_options(ctx: TurnContext) -> list[tuple[str, str]]:
+    if ctx.role in _STAFF_OPTIONS:
+        return _STAFF_OPTIONS[ctx.role]
     options = [("opt_covers", "Show my plan benefits"), ("opt_pay", "How much will I pay? Show my plan benefits")]
     if ctx.can_view_claims:
         options.append(("opt_claim", "Show my claims"))
@@ -202,7 +223,7 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
     intent, rt = route(plain_words(ctx.question), has_history=bool(ctx.history))
 
     if rt is Route.GUIDED:
-        return _guided_turn(ctx, intent, "general")
+        return _guided_turn(ctx, intent, _general(ctx))
     if rt is Route.DEFINE:
         return PipelineResult(intent, "CLARIFICATION", "NOT_APPLICABLE", "Here is what that means.",
                               guide="define", options=_help_options(ctx), source_text=ctx.question)
@@ -273,7 +294,7 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
             "Could you tell me a bit more about what you'd like to know? For example: \"What is the "
             'status of claim SYN-CLM-2026-000101?", "Show my plan benefits" or "What does a '
             'lumbar MRI prior authorization request need?"',
-            guide="general",
+            guide=_general(ctx),
             options=_help_options(ctx),
         )
     if rt is Route.CASE_TRACK:
@@ -345,6 +366,16 @@ def _claim_turn(db, settings, embedder, generator, ctx: TurnContext, intent: str
             "UNSUPPORTED_REQUEST",
             "NOT_APPLICABLE",
             "Your account can't look up member claims. Claim lookups are limited to the member the claim belongs to.",
+            tool_results=[result],
+        )
+    if result.status in ("INVALID_ARGUMENTS", "NOT_FOUND") and not ctx.can_view_claims:
+        return PipelineResult(
+            intent,
+            "UNSUPPORTED_REQUEST",
+            "NOT_APPLICABLE",
+            "You can read a claim only when it's linked to a case assigned to you. "
+            + ("I couldn't find that claim on your cases. " if number else "")
+            + "Open the case from the Case queue to see it.",
             tool_results=[result],
         )
     if result.status == "INVALID_ARGUMENTS":
@@ -494,6 +525,7 @@ def _benefits_turn(ctx: TurnContext, intent: str) -> PipelineResult:
         text,
         tool_results=[result],
         records=[{"kind": "plan_benefits", "data": plan}],
+        for_member=ctx.scope.restrict_plan,
         disclaimers=[RECORD_NOTE, SYNTHETIC_NOTE],
     )
 
@@ -634,6 +666,7 @@ def _with_question(ctx: TurnContext, question: str) -> TurnContext:
         ctx.can_check_readiness,
         ctx.can_read_documents,
         ctx.member_number,
+        ctx.role,
     )
 
 
@@ -998,6 +1031,11 @@ def _finish(
             "\n\nThese sources disagree, so I can't tell you which one applies. A support agent can confirm "
             "the correct information."
         )
+    if not ctx.scope.restrict_plan:  # staff see every plan, so each plan's value must say which plan it's from
+        for marker, item in by_marker.items():
+            if item.candidate.plan_id is not None:
+                plan = item.candidate.title.removesuffix(" Benefit Guide")
+                text = re.sub(rf"^- (.*\[{marker}\])$", lambda m, p=plan: f"- {p}: {m.group(1)}", text, flags=re.M)
     answer_type = "TOOL_RESULT" if succeeded else "DOCUMENT_GROUNDED"
     evidence = "CONFLICTING" if conflict else ("VERIFIED_RECORD" if succeeded and not cited_markers else "SUPPORTED")
     return PipelineResult(
@@ -1011,6 +1049,7 @@ def _finish(
         actions=[case_offer(ctx, "CONFLICTING_INFORMATION", "KNOWLEDGE_GAP")] if conflict else [],
         disclaimers=disclaimers + ([RECORD_NOTE] if succeeded else []),
         source_text=ctx.question,
+        for_member=ctx.scope.restrict_plan,
         gap_topic=gap_topic(ctx.question) if conflict else None,
         retrieved_document_ids=sorted({str(i.candidate.document_id) for i in items}),
         retrieval_ms=retrieval_ms,

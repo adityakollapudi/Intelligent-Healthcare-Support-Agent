@@ -36,6 +36,10 @@ _REPLACEMENTS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
         (r"\bcontact support\b", "member support line hours"),
         (r"\bpre-?auth\w*|\bprior auth\b", "prior authorization"),
         (r"\bclinics?\b", "providers"),
+        (r"\b(when|how) (do|should|can) i escalate( a case)?\b|\bsteps to escalate a case\b",
+         "an agent escalates a case to a supervisor when"),
+        (r"\b(which|what) cases? (do|should) i (take|pick|handle)( first)?\b",
+         "agents take unassigned cases from the queue oldest first"),
         (r"\bback (mri|scan)\b", "lumbar spine MRI"),
     )
 )

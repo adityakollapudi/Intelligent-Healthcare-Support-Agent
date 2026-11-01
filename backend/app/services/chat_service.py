@@ -213,6 +213,7 @@ def handle_message(
         can_check_readiness=principal.has(Permission.READINESS_CREATE),
         can_read_documents=principal.has(Permission.DOCUMENTS_READ_OWN),
         member_number=principal.member_number,
+        role=principal.role,
     )
     try:
         result = pipeline.run(db, settings, embedder, generator, ctx)

@@ -6,6 +6,21 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiError, authRoutes, json, mockApi } from "../test/fetch-mock";
 import { renderSignedIn } from "../test/render";
 
+describe("assistant welcome by role", () => {
+  it.each([
+    ["MEMBER", "Check My Claim Status", "Open Case Queue"],
+    ["PROVIDER", "Check Paperwork Readiness", "Check My Claim Status"],
+    ["SUPPORT_AGENT", "Open Case Queue", "Understand My Health Benefits"],
+    ["ADMIN", "Manage Users", "Check My Claim Status"],
+  ] as const)("%s sees its own shortcuts", async (role, shown, hidden) => {
+    mockApi({ ...authRoutes(role), "GET /admin/metrics": () => json(200, METRICS), "GET /chat/sessions": () => json(200, { items: [], next_cursor: null }) });
+    const { navigate } = await renderSignedIn();
+    navigate("/chat");
+    expect(await screen.findByRole("button", { name: shown })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: hidden })).not.toBeInTheDocument();
+  });
+});
+
 describe("user management", () => {
   const OPTIONS = {
     plans: [{ plan_code: "SYN-PLAN-GOLD-01", plan_name: "Gold" }],

@@ -9,7 +9,7 @@ from app.core.config import get_settings
 from app.rag.generation import EvidenceItem, ExtractiveGenerator
 from app.rag.intent import Route, route
 from app.rag.wording import plain_words
-from tests.conftest import MEMBER_A, MEMBER_B, PROVIDER_A
+from tests.conftest import ADMIN_A, AGENT_A, MEMBER_A, MEMBER_B, PROVIDER_A
 
 pytestmark = pytest.mark.postgres
 
@@ -126,6 +126,42 @@ def test_a_gap_offers_next_steps_and_never_guesses(ask, app):
     assert body["evidence_status"] == "INSUFFICIENT" and "won't guess" in body["answer_text"]
     assert body["proposed_actions"]
     assert [r for r in body["records"] if r["kind"] == "suggestions"]
+
+
+@pytest.mark.parametrize(("email", "words"), [
+    (MEMBER_A, "your claims"), (PROVIDER_A, "prior authorization paperwork"),
+    (AGENT_A, "support procedures"), (ADMIN_A, "Admin dashboard"),
+])
+def test_each_role_gets_its_own_greeting_and_shortcuts(ask, email, words):
+    body = ask("Hi", email)
+    assert words in body["answer_text"]
+    options = next(r["data"]["options"] for r in body["records"] if r["kind"] == "suggestions")
+    labels = " ".join(o["label"]["en"] for o in options)
+    assert ("my claim" in labels) == (email == MEMBER_A)
+
+
+@pytest.mark.parametrize("email", [PROVIDER_A, AGENT_A, ADMIN_A])
+def test_staff_answers_name_each_plan_and_never_say_your_plan(ask, email):
+    text = ask("What is my deductible?", email)["answer_text"]
+    assert "your plan documents" not in text
+    assert "Synthetic Gold Plan: " in text and "Synthetic Bronze Plan: " in text
+    assert "your Synthetic Gold Plan" not in ask("Show benefits for SYN-PLAN-GOLD-01", email)["answer_text"]
+
+
+def test_members_still_see_their_own_plan_wording(ask):
+    text = ask("What is my deductible?")["answer_text"]
+    assert "your plan documents" in text and "Synthetic Gold Plan:" not in text
+
+
+@pytest.mark.parametrize("question", ["Show my claims", "What is the status of claim SYN-CLM-2026-000101?"])
+def test_agents_are_pointed_to_their_cases_for_claims(ask, question):
+    assert "linked to a case assigned to you" in ask(question, AGENT_A)["answer_text"]
+
+
+def test_agents_can_read_their_procedures_and_members_cannot(ask):
+    question = "When do I escalate a case?"
+    assert "supervisor" in ask(question, AGENT_A)["answer_text"]
+    assert "10 business days" not in ask(question, MEMBER_A)["answer_text"]
 
 
 @pytest.mark.parametrize(("question", "expected"), [
