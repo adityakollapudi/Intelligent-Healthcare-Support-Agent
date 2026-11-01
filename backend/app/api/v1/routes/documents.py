@@ -12,7 +12,14 @@ from app.documents import pipeline
 from app.documents.ocr import OcrEngine, get_ocr_engine
 from app.documents.storage import FileStorage, get_storage
 from app.schemas.common import ErrorResponse
-from app.schemas.document import AnalyzeResponse, DeclaredPurpose, DocumentDetail, DocumentPage, DocumentSummary
+from app.schemas.document import (
+    AnalyzeResponse,
+    DeclaredPurpose,
+    DocumentDetail,
+    DocumentPage,
+    DocumentSummary,
+    DocumentText,
+)
 from app.services import document_service
 from app.services.audit_service import AuditService, get_audit_service
 
@@ -67,6 +74,22 @@ def list_documents(db: Db, principal: Reader) -> DocumentPage:
 )
 def get_document(document_id: UUID, db: Db, audit: Audit, principal: LinkedReader) -> DocumentDetail:
     return document_service.get_document(db, audit, principal, document_id)
+
+
+@router.get(
+    "/{document_id}/text", response_model=DocumentText, responses=_ERRORS,
+    summary="The text read from my document, so I can check it; read on request and never stored",
+)
+def get_document_text(
+    document_id: UUID,
+    db: Db,
+    audit: Audit,
+    settings: Config,
+    storage: Storage,
+    ocr: Annotated[OcrEngine, Depends(get_ocr_engine)],
+    principal: LinkedReader,
+) -> DocumentText:
+    return document_service.read_text(db, audit, settings, storage, ocr, principal, document_id)
 
 
 @router.post(

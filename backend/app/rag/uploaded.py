@@ -100,6 +100,15 @@ def _rejoin_wrapped(lines: list[str]) -> list[str]:
     return out
 
 
+def mark_unclear(text: str, unclear: list[str]) -> str:
+    """Puts [?] after each word OCR wasn't sure of, so an answer can't quote a guess as fact."""
+    wanted = {w.lower() for w in unclear}
+    return "\n".join(
+        " ".join(f"{word} [?]" if word.lower() in wanted else word for word in line.split(" "))
+        for line in text.split("\n")
+    )
+
+
 def statements(document_id: str, filename: str, page: int, text: str) -> list[Statement]:
     raw = [ln.strip() for ln in text.split("\n") if ln.strip()]
     # The title above a two-column table ("Field" / "Value") is not one of its labels.

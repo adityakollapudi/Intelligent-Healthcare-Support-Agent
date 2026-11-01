@@ -20,11 +20,11 @@ export function useRequest<T, A extends unknown[]>(fn: (signal: AbortSignal, ...
 
   useEffect(() => () => controller.current?.abort(), []);
 
-  const run = useCallback(async (...args: A) => {
+  const start = useCallback(async (showLoading: boolean, args: A) => {
     controller.current?.abort();
     const current = new AbortController();
     controller.current = current;
-    setState({ status: "loading" });
+    if (showLoading) setState({ status: "loading" });
     try {
       const data = await fnRef.current(current.signal, ...args);
       if (!current.signal.aborted) setState({ status: "success", data });
@@ -36,10 +36,14 @@ export function useRequest<T, A extends unknown[]>(fn: (signal: AbortSignal, ...
     }
   }, []);
 
+  const run = useCallback((...args: A) => start(true, args), [start]);
+  // Fetches again while the current result stays on screen, for polling and background updates.
+  const refresh = useCallback((...args: A) => start(false, args), [start]);
+
   const reset = useCallback(() => {
     controller.current?.abort();
     setState({ status: "idle" });
   }, []);
 
-  return { state, run, reset };
+  return { state, run, refresh, reset };
 }

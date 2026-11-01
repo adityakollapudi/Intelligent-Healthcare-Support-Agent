@@ -90,11 +90,13 @@ class Settings(BaseSettings):
     document_analyses_per_hour: int = Field(default=30, ge=1, le=1000)
     # Provisional default (A-07 / NFR-021); no organizational retention policy was provided.
     document_retention_days: int = Field(default=30, ge=1, le=365)
-    ocr_engine: Literal["tesseract", "disabled"] = "tesseract"
+    ocr_engine: Literal["local", "tesseract", "disabled"] = "local"
     ocr_tesseract_path: str = "tesseract"  # executable name on PATH or an absolute path
+    ocr_handwriting_model_dir: str = ".models/trocr-base-handwritten"
+    ocr_printed_min_score: float = Field(default=0.97, ge=0, le=1)  # lines below this go to the handwriting model
     ocr_languages: str = Field(default="eng", pattern=r"^[a-z]{3}(\+[a-z]{3})*$")
     ocr_dpi: int = Field(default=300, ge=72, le=400)
-    ocr_page_timeout_seconds: float = Field(default=30.0, ge=1, le=300)
+    ocr_page_timeout_seconds: float = Field(default=90.0, ge=1, le=300)
     ocr_min_text_chars_per_page: int = Field(default=50, ge=0, le=5000)
     ocr_min_word_confidence: float = Field(default=60.0, ge=0, le=100)  # provisional (doc 07 §5.2)
     extraction_low_confidence: float = Field(default=0.70, ge=0, le=1)  # provisional (doc 07 §5.4)

@@ -127,7 +127,9 @@ describe("documents screen", () => {
     navigate("/documents?doc=d-1");
     await user.click(await screen.findByRole("button", { name: "Analyze document" }));
     expect(await screen.findByText(/Checking again every few seconds/)).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { name: "pa_form.pdf" });
     const table = await screen.findByRole("table", { name: "Extracted fields" }, { timeout: 5000 });
+    expect(heading).toBeInTheDocument(); // polling keeps the panel in place instead of redrawing it
     expect(within(table).getByText("SYN-M-000001")).toBeInTheDocument();
     expect(within(table).getByText("→ 2026-11-04")).toBeInTheDocument();
     expect(within(table).getByText("Not found")).toBeInTheDocument(); // ABSENT
@@ -209,5 +211,33 @@ describe("readiness screen", () => {
     const { navigate } = await renderSignedIn();
     navigate("/readiness");
     expect(await screen.findByRole("heading", { level: 1 })).not.toHaveTextContent("Prior authorization readiness");
+  });
+});
+
+describe("text read from a document", () => {
+  const TEXT = { document_id: "d-1", pages: [{ page_number: 1, text: "Tab. Naproxen 500 mg\nProcedure syn-pro", readable: true, handwritten: true, unclear_words: ["syn-pro"] }] };
+  const routes = (text: () => Response) => ({
+    ...authRoutes("PROVIDER"),
+    "GET /documents": () => json(200, { items: [], next_cursor: null }),
+    "GET /documents/d-1": () => json(200, { ...DOC, latest_job: JOB }),
+    "GET /documents/d-1/text": text,
+  });
+
+  it("shows what was read and highlights unclear words", async () => {
+    mockApi(routes(() => json(200, TEXT)));
+    const { navigate } = await renderSignedIn();
+    navigate("/documents?doc=d-1");
+    const panel = await screen.findByRole("region", { name: "What we read" });
+    expect(await within(panel).findByText(/Tab\. Naproxen 500 mg/)).toBeInTheDocument();
+    expect(within(panel).getByText("syn-pro").tagName).toBe("MARK");
+    expect(within(panel).getByText(/can misread/)).toBeInTheDocument();
+  });
+
+  it("offers a retry when the text can't be loaded", async () => {
+    mockApi(routes(() => apiError(500, "INTERNAL_ERROR", "Failed")));
+    const { navigate } = await renderSignedIn();
+    navigate("/documents?doc=d-1");
+    const panel = await screen.findByRole("region", { name: "What we read" });
+    expect(await within(panel).findByRole("alert")).toBeInTheDocument();
   });
 });

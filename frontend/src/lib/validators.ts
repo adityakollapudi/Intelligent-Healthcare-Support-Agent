@@ -11,6 +11,7 @@ import {
   type ChecklistDetail,
   type ChecklistSummary,
   type DocumentDetail,
+  type DocumentText,
   type DocumentSummary,
   type RequirementSetSummary,
   CASE_CATEGORIES,
@@ -156,6 +157,9 @@ export const isDocumentSummary = (v: unknown): v is DocumentSummary =>
 
 export const isDocumentDetail = (v: unknown): v is DocumentDetail =>
   isObj(v) && isStr(v.document_id) && isStr(v.original_filename) && (v.latest_job === null || isJobDetail(v.latest_job));
+
+export const isDocumentText = (v: unknown): v is DocumentText =>
+  isObj(v) && isStr(v.document_id) && Array.isArray(v.pages);
 
 export const isDocumentPage = (v: unknown): v is { items: DocumentSummary[] } =>
   isObj(v) && Array.isArray(v.items) && v.items.every(isDocumentSummary);

@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 
 from app.core.config import get_settings
 from app.db.session import get_session_factory
+from app.documents.extraction import PageText
 from app.models import AuthorizationChecklist, MessageCitation, SupportCase, ToolInvocation
 from app.rag.generation import Generation, get_generator
 from app.rag.intent import Intent, Route, route
@@ -125,6 +126,16 @@ def test_instructions_inside_a_document_are_never_followed(docs):
 def test_medical_advice_about_a_document_is_refused(docs):
     answer = docs.ask(PROVIDER_A, "What medicine should I take based on my uploaded report?")
     assert answer["answer_type"] == "UNSUPPORTED_REQUEST" and "medical advice" in answer["answer_text"]
+
+
+def test_handwritten_pages_warn_and_mark_unclear_words(docs, monkeypatch):
+    page = PageText(1, "Metformin 500 mg twice daily", "OCR", "OK", low_confidence_words={"metformin": 41.0},
+                    handwritten=True)
+    monkeypatch.setattr("app.services.document_service.extract_pages", lambda *_args: [page])
+    docs.upload(MEMBER_A, ["Handwritten note"], "note.pdf")
+    body = docs.ask(MEMBER_A, "Summarize my document")
+    assert "Metformin [?]" in body["answer_text"]
+    assert any("may have misread it" in note for note in body["disclaimers"])
 
 
 def test_upload_how_to_questions_stay_with_the_knowledge_base(docs):

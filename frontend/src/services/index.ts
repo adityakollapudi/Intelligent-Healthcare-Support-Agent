@@ -9,6 +9,7 @@ import {
   isChecklistDetail,
   isChecklistPage,
   isDocumentDetail,
+  isDocumentText,
   isDocumentPage,
   isDocumentSummary,
   isRequirementSets,
@@ -38,6 +39,7 @@ import type {
   ChecklistSummary,
   DeclaredPurpose,
   DocumentDetail,
+  DocumentText,
   DocumentSummary,
   RequirementSetSummary,
   BenefitsResponse,
@@ -181,6 +183,9 @@ export const documentsService = {
   list: (signal?: AbortSignal) => apiRequest<{ items: DocumentSummary[] }>("/documents", { signal, validate: isDocumentPage }),
   get: (id: string, signal?: AbortSignal) =>
     apiRequest<DocumentDetail>(`/documents/${encodeURIComponent(id)}`, { signal, validate: isDocumentDetail }),
+  // Scanned pages are read again here (the text is never stored), which can take a while on a CPU.
+  text: (id: string, signal?: AbortSignal) =>
+    apiRequest<DocumentText>(`/documents/${encodeURIComponent(id)}/text`, { signal, validate: isDocumentText, timeoutMs: 150_000 }),
   analyze: (id: string) =>
     apiRequest<{ job_id: string; status: string }>(`/documents/${encodeURIComponent(id)}/analyze`, {
       method: "POST",

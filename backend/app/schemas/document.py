@@ -73,6 +73,22 @@ class DocumentDetail(DocumentSummary):
     latest_job: JobDetail | None
 
 
+class DocumentTextPage(ApiModel):
+    page_number: int
+    text: str
+    readable: bool
+    handwritten: bool
+    unclear_words: list[str]
+
+
+class DocumentText(ApiModel):
+    """The text read from one document, so its owner can check it. Read on request and never stored."""
+
+    document_id: UUID
+    pages: list[DocumentTextPage]
+    data_environment: DataEnvironment = DATA_ENVIRONMENT
+
+
 class DocumentPage(ApiModel):
     items: list[DocumentSummary]
     next_cursor: str | None = None

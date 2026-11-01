@@ -18,5 +18,6 @@ htmlcov/
 
 # Local runtime data (private PostgreSQL cluster, downloaded embedding model, logs, uploads)
 .local/
+.models/
 *.log
 uploads/

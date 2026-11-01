@@ -40,10 +40,16 @@ class PageText:
     # Words OCR read below OCR_MIN_WORD_CONFIDENCE, with their confidence (lower-cased keys).
     low_confidence_words: dict[str, float] = field(default_factory=dict)
     word_confidence: dict[str, float] = field(default_factory=dict)
+    handwritten: bool = False
 
     @property
     def readable(self) -> bool:
         return self.status in READABLE_STATUSES
+
+    @property
+    def unclear_words(self) -> list[str]:
+        """Low-confidence words worth a person's attention; stray punctuation isn't."""
+        return sorted(w for w in self.low_confidence_words if any(c.isalnum() for c in w))
 
     def detail(self) -> dict:
         """Metadata safe to persist (no document text)."""
@@ -123,13 +129,16 @@ def _ocr_page(number: int, image: bytes, native: str, settings: Settings, ocr: O
     low = {t: c for t, c in words.items() if c < settings.ocr_min_word_confidence}
     mean = result.mean_confidence or 0.0
     status = OK if mean >= settings.ocr_min_word_confidence else LOW_QUALITY
+    # A confident reading of handwriting can still be the wrong word, so it always needs a person's check.
+    warning = "OCR_LOW_CONFIDENCE" if status != OK else "OCR_HANDWRITING_NEEDS_CHECK" if result.handwritten else None
     return PageText(
         number,
         text,
         "OCR",
         status,
-        warning=None if status == OK else "OCR_LOW_CONFIDENCE",
+        warning=warning,
         ocr_confidence=mean,
         low_confidence_words=low,
         word_confidence=words,
+        handwritten=result.handwritten,
     )

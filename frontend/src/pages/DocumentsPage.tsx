@@ -11,7 +11,7 @@ import { useSession } from "../features/auth/session";
 import { useRequest } from "../hooks/useRequest";
 import { formatBytes, formatDateTime, humanize } from "../lib/format";
 import { documentsService } from "../services";
-import type { DeclaredPurpose, DocumentDetail, DocumentField, JobDetail } from "../types/api";
+import type { DeclaredPurpose, DocumentDetail, DocumentField, DocumentText, JobDetail } from "../types/api";
 
 const POLL_MS = 2000;
 const POLL_LIMIT_MS = 150_000; // backend job timeout (120 s) plus margin
@@ -24,6 +24,63 @@ const PAGE_STATUS_TEXT: Record<string, string> = {
   LOW_QUALITY: "Low OCR quality",
   UNREADABLE: "Could not be read",
 };
+
+const PAGE_WARNING_TEXT: Record<string, string> = {
+  OCR_HANDWRITING_NEEDS_CHECK: "Handwriting: please check the text below",
+};
+
+function UnclearText({ text, unclear }: { text: string; unclear: string[] }) {
+  const wanted = new Set(unclear);
+  return (
+    <p className="message-text read-text">
+      {/* Plain text rendering: document content is never interpreted as HTML. */}
+      {text.split(/(\s+)/).map((part, index) =>
+        wanted.has(part.toLowerCase()) ? (
+          <mark key={index} title="The system wasn't sure of this word">{part}</mark>
+        ) : (
+          part
+        ),
+      )}
+    </p>
+  );
+}
+
+function ReadTextPages({ pages }: { pages: DocumentText["pages"] }) {
+  const handwritten = pages.some((p) => p.handwritten);
+  const unclear = pages.some((p) => p.unclear_words.length > 0);
+  if (!pages.some((p) => p.text)) return <p className="muted">No text could be read from this document.</p>;
+  return (
+    <>
+      <p className="muted small">
+        Compare this with your original document.
+        {handwritten && " It includes handwriting, which the system can misread, even when it seems confident."}
+        {unclear && " Highlighted words were especially unclear."}
+      </p>
+      {pages.map((p) => (
+        <section key={p.page_number} className="read-page" aria-label={`Page ${p.page_number}`}>
+          {pages.length > 1 && <h4>Page {p.page_number}</h4>}
+          {p.text ? <UnclearText text={p.text} unclear={p.unclear_words} /> : <p className="muted">Nothing could be read on this page.</p>}
+        </section>
+      ))}
+    </>
+  );
+}
+
+function ReadText({ documentId, jobId }: { documentId: string; jobId: string }) {
+  const text = useRequest((signal) => documentsService.text(documentId, signal));
+  useEffect(() => {
+    void text.run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read again after each analysis
+  }, [documentId, jobId]);
+  return (
+    <section className="section" aria-label="What we read">
+      <h3>What we read from your document</h3>
+      {text.state.status === "loading" && <LoadingState label="Reading your document. Handwriting can take up to a minute…" />}
+      {text.state.status === "error" && <ErrorState error={text.state.error} onRetry={() => void text.run()} />}
+      {text.state.status === "success" && <ReadTextPages pages={text.state.data.pages} />}
+    </section>
+  );
+}
 
 function FieldValue({ field }: { field: DocumentField }) {
   if (field.raw_value === null) {
@@ -41,7 +98,7 @@ function FieldValue({ field }: { field: DocumentField }) {
 
 export function FieldTable({ fields }: { fields: DocumentField[] }) {
   if (fields.length === 0) {
-    return <p className="muted">No fields are defined for this document type, so nothing was extracted.</p>;
+    return <p className="muted">This isn't a form with set fields, so no fields were picked out.</p>;
   }
   return (
     <div className="table-wrap">
@@ -112,7 +169,7 @@ function JobResult({ job, canCheckReadiness, documentId }: { job: JobDetail; can
                   </td>
                   <td>
                     {PAGE_STATUS_TEXT[p.status] ?? p.status}
-                    {p.warning && <span className="muted small"> · {humanize(p.warning)}</span>}
+                    {p.warning && <span className="muted small"> · {PAGE_WARNING_TEXT[p.warning] ?? humanize(p.warning)}</span>}
                   </td>
                 </tr>
               ))}
@@ -126,6 +183,7 @@ function JobResult({ job, canCheckReadiness, documentId }: { job: JobDetail; can
             Values are copied from the document and checked for format only. They aren't verified as correct, and a
             missing or unreadable value isn't guessed.
           </Alert>
+          <ReadText documentId={documentId} jobId={job.job_id} />
           <FieldTable fields={job.fields} />
           {job.warnings.length > 0 && (
             <details className="section">
@@ -181,7 +239,7 @@ function DocumentPanel({ documentId, onChanged }: { documentId: string; onChange
       setPollExpired(true);
       return;
     }
-    const timer = setTimeout(() => void detail.run(), POLL_MS);
+    const timer = setTimeout(() => void detail.refresh(), POLL_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-arm on every new result
   }, [doc]);
@@ -193,7 +251,7 @@ function DocumentPanel({ documentId, onChanged }: { documentId: string; onChange
       await documentsService.analyze(documentId);
       pollStarted.current = Date.now();
       setPollExpired(false);
-      await detail.run();
+      await detail.refresh();
     } catch (err) {
       setStartError(err);
     } finally {
@@ -262,7 +320,7 @@ export function DocumentsPage() {
       setFile(null);
       setCheck(null);
       setParams({ doc: doc.document_id });
-      void list.run();
+      void list.refresh();
     } catch (err) {
       setUploadError(err);
     } finally {
@@ -330,7 +388,7 @@ export function DocumentsPage() {
         {Boolean(uploadError) && <ErrorState error={uploadError} />}
       </section>
 
-      {selected && <DocumentPanel key={selected} documentId={selected} onChanged={() => void list.run()} />}
+      {selected && <DocumentPanel key={selected} documentId={selected} onChanged={() => void list.refresh()} />}
 
       <section className="section" aria-labelledby="docs-heading">
         <h2 id="docs-heading">Your documents</h2>

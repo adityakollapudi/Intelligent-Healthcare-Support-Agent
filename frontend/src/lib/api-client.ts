@@ -15,6 +15,7 @@ export interface RequestOptions<T> {
   auth?: boolean;
   /** Return null on 2xx-with-no-body (204). */
   expectEmpty?: boolean;
+  timeoutMs?: number;
   /** Extra request headers (e.g. Idempotency-Key). Authorization and Content-Type are set here, not by callers. */
   headers?: Record<string, string>;
 }
@@ -63,7 +64,7 @@ async function readJson(response: Response): Promise<unknown> {
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions<T> = {}): Promise<T> {
-  const { method = "GET", query, body, signal, validate, auth = true, expectEmpty = false } = options;
+  const { method = "GET", query, body, signal, validate, auth = true, expectEmpty = false, timeoutMs = config.requestTimeoutMs } = options;
   const headers: Record<string, string> = { ...options.headers, Accept: "application/json" };
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   // Multipart bodies get their boundary header from the browser; never set it by hand.
@@ -76,7 +77,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions<T> = {
   const timer = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, config.requestTimeoutMs);
+  }, timeoutMs);
   const onCallerAbort = () => controller.abort();
   signal?.addEventListener("abort", onCallerAbort);
 

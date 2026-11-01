@@ -42,6 +42,7 @@ class OcrWord:
 @dataclass
 class OcrResult:
     lines: list[list[OcrWord]] = field(default_factory=list)
+    handwritten: bool = False  # part of the page was read by the handwriting model
 
     @property
     def words(self) -> list[OcrWord]:
@@ -127,6 +128,10 @@ def parse_tsv(tsv: str) -> OcrResult:
 def build_ocr(settings: Settings) -> OcrEngine:
     if settings.ocr_engine == "disabled":
         return DisabledOcr()
+    if settings.ocr_engine == "local":
+        from app.documents.handwriting import LocalOcr
+
+        return LocalOcr(settings.ocr_handwriting_model_dir, settings.ocr_printed_min_score)
     return TesseractOcr(settings.ocr_tesseract_path, settings.ocr_languages)
 
 

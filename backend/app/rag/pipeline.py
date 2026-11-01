@@ -54,6 +54,10 @@ RECORD_NOTE = "Values marked as records come directly from the synthetic databas
 UPLOAD_NOTE = (
     "Quoted from your uploaded document. This isn't a clinical opinion, or a coverage or authorization decision."
 )
+HANDWRITING_NOTE = (
+    "This came from handwriting, and the computer may have misread it. Words marked [?] were especially unclear. "
+    "Check any medicine name, dose or date with your doctor or pharmacist before relying on it."
+)
 STATUS_LABELS = {
     "RECEIVED": "Received",
     "UNDER_PROCESSING": "Under processing",
@@ -796,9 +800,11 @@ def _document_turn(db: Session, settings, embedder, generator, ctx: TurnContext,
     unread = [f"{d['filename']} p.{p['page_number']}" for d in chosen for p in d["pages"] if not p["readable"]]
     items = {str(d["document_id"]): [
         s for p in d["pages"] if p["text"]
-        for s in uploaded.statements(str(d["document_id"]), d["filename"], p["page_number"], p["text"])
+        for s in uploaded.statements(str(d["document_id"]), d["filename"], p["page_number"],
+                                     uploaded.mark_unclear(p["text"], p.get("unclear_words", [])))
     ] for d in chosen}
     chosen = [d for d in chosen if items[str(d["document_id"])]]
+    handwritten = any(p.get("handwritten") for d in chosen for p in d["pages"])
     if not chosen:
         return _upload_refusal(intent, result, "I found your document but couldn't read any text in it. Scanned "
                                "pages need OCR, which isn't available here. Nothing has been guessed.")
@@ -842,7 +848,7 @@ def _document_turn(db: Session, settings, embedder, generator, ctx: TurnContext,
         citation_check="PASSED",
         escalation_reason="CONFLICTING_INFORMATION" if conflict else None,
         actions=[case_offer(ctx, "CONFLICTING_INFORMATION", "DOCUMENT_ISSUE")] if conflict else [],
-        disclaimers=[UPLOAD_NOTE],
+        disclaimers=[UPLOAD_NOTE, HANDWRITING_NOTE] if handwritten else [UPLOAD_NOTE],
         retrieved_document_ids=sorted({s["document_id"] for s in sources}),
         retrieval_ms=retrieval_ms,
         generation_ms=generation_ms,

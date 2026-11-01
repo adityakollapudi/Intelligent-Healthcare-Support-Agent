@@ -171,6 +171,17 @@ def test_scanned_document_with_an_ocr_engine(api, app):
     assert fields["member_number"]["extraction_method"] == "OCR" and fields["member_number"]["confidence"] == 0.91
 
 
+def test_owner_can_read_the_text_and_others_cannot(api, client, auth):
+    doc = api.upload(MEMBER_A, text_pdf(PA_LINES), "mine.pdf").json()
+    url = f"/api/v1/documents/{doc['document_id']}/text"
+    response = client.get(url, headers=auth(MEMBER_A))
+    assert response.status_code == 200, response.text
+    page = response.json()["pages"][0]
+    assert PA_LINES[1] in page["text"] and page["readable"] and not page["handwritten"]
+    assert client.get(url, headers=auth(MEMBER_B)).status_code == 404
+    assert latest_audit("DOCUMENT_TEXT_VIEWED", doc["document_id"]) is not None
+
+
 def test_mixed_document_with_unreadable_page_marks_fields_illegible(api):
     import pymupdf
 

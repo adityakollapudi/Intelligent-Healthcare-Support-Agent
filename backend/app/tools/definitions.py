@@ -102,6 +102,8 @@ class DocumentPage(_Strict):
     page_number: int
     readable: bool
     text: str
+    handwritten: bool = False
+    unclear_words: list[str] = []
 
 
 class UploadedDocumentText(_Strict):

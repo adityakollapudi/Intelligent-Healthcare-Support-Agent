@@ -505,6 +505,11 @@ export interface DocumentDetail extends Omit<DocumentSummary, "latest_job"> {
   latest_job: JobDetail | null;
 }
 
+export interface DocumentText {
+  document_id: string;
+  pages: { page_number: number; text: string; readable: boolean; handwritten: boolean; unclear_words: string[] }[];
+}
+
 export interface ItemEvidence {
   field_id: string;
   document_id: string;

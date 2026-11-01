@@ -17,3 +17,5 @@ anthropic==2.3.0
 # Phase 6 (documents): multipart uploads, image validation (OCR uses the Tesseract CLI, configured via OCR_TESSERACT_PATH)
 python-multipart==0.0.32
 pillow==13.0.0
+# Handwriting: RapidOCR finds and reads text lines; TrOCR runs through ONNX Runtime (from fastembed)
+rapidocr==3.10.0

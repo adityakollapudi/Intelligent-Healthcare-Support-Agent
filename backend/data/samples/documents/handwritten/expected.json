@@ -1,0 +1,58 @@
+{
+  "knee_note_ink.png": [
+    "Patient: Aarav Sharma",
+    "Date of service 03/14/2026",
+    "Right knee pain for six weeks",
+    "Physical therapy for four weeks",
+    "Request MRI of the right knee"
+  ],
+  "knee_note_script.png": [
+    "Patient: Aarav Sharma",
+    "Date of service 03/14/2026",
+    "Right knee pain for six weeks",
+    "Physical therapy for four weeks",
+    "Request MRI of the right knee"
+  ],
+  "knee_note_print.png": [
+    "Patient: Aarav Sharma",
+    "Date of service 03/14/2026",
+    "Right knee pain for six weeks",
+    "Physical therapy for four weeks",
+    "Request MRI of the right knee"
+  ],
+  "knee_note_bradley.png": [
+    "Patient: Aarav Sharma",
+    "Date of service 03/14/2026",
+    "Right knee pain for six weeks",
+    "Physical therapy for four weeks",
+    "Request MRI of the right knee"
+  ],
+  "prescription_ink.png": [
+    "Patient: Meera Iyer",
+    "Date 02/20/2026",
+    "Atorvastatin 20 mg once daily",
+    "Metformin 500 mg twice daily",
+    "Follow up in three months"
+  ],
+  "prescription_script.png": [
+    "Patient: Meera Iyer",
+    "Date 02/20/2026",
+    "Atorvastatin 20 mg once daily",
+    "Metformin 500 mg twice daily",
+    "Follow up in three months"
+  ],
+  "prescription_print.png": [
+    "Patient: Meera Iyer",
+    "Date 02/20/2026",
+    "Atorvastatin 20 mg once daily",
+    "Metformin 500 mg twice daily",
+    "Follow up in three months"
+  ],
+  "prescription_bradley.png": [
+    "Patient: Meera Iyer",
+    "Date 02/20/2026",
+    "Atorvastatin 20 mg once daily",
+    "Metformin 500 mg twice daily",
+    "Follow up in three months"
+  ]
+}

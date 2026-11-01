@@ -32,6 +32,8 @@ from app.schemas.document import (
     DocumentField,
     DocumentPage,
     DocumentSummary,
+    DocumentText,
+    DocumentTextPage,
     JobDetail,
     JobSummary,
     PageDetail,
@@ -175,7 +177,8 @@ def read_own_documents(db: Session, principal: Principal, filename_contains: str
         documents.append({
             "document_id": doc.id,
             "filename": doc.original_filename,
-            "pages": [{"page_number": p.page_number, "readable": p.readable, "text": p.text} for p in pages],
+            "pages": [{"page_number": p.page_number, "readable": p.readable, "text": p.text,
+                       "handwritten": p.handwritten, "unclear_words": p.unclear_words} for p in pages],
         })
     return documents
 
@@ -279,6 +282,25 @@ def get_document(db: Session, audit: AuditService, principal: Principal, documen
                      resource_ref=str(document_id))
         return detail(db, doc)
     return detail(db, owned_document(db, audit, principal, document_id))
+
+
+def read_text(db: Session, audit: AuditService, settings: Settings, storage: FileStorage, ocr: OcrEngine,
+              principal: Principal, document_id: UUID) -> DocumentText:
+    """Same access rule as get_document. The text is held in memory for this response only."""
+    get_document(db, audit, principal, document_id)
+    doc = db.get(UploadedDocument, document_id)
+    deadline = time.monotonic() + settings.job_timeout_seconds
+    try:
+        pages = extract_pages(storage.read(doc.storage_key), doc.mime_type, settings, ocr, deadline)
+    except (StorageError, PdfParseError, JobTimeoutError):
+        pages = []
+    audit.record("DOCUMENT_TEXT_VIEWED", AuditOutcome.SUCCESS, actor=principal, resource_type="uploaded_document",
+                 resource_ref=str(document_id))
+    return DocumentText(document_id=document_id, pages=[
+        DocumentTextPage(page_number=p.page_number, text=p.text, readable=p.readable, handwritten=p.handwritten,
+                         unclear_words=p.unclear_words)
+        for p in pages
+    ])
 
 
 def request_analysis(db: Session, audit: AuditService, settings: Settings, principal: Principal,
