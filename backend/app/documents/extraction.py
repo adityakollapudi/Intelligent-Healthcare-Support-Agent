@@ -2,7 +2,7 @@
 
 PDF pages use the PyMuPDF text layer. Only pages with fewer than OCR_MIN_TEXT_CHARS_PER_PAGE
 characters, and images, go to OCR (rendered at OCR_DPI). Every page reports how it was read and
-whether it was fully readable; extracted text is held in memory for this job only (never persisted)."""
+whether it was fully readable; extracted text is held in memory only (never persisted)."""
 
 from __future__ import annotations
 

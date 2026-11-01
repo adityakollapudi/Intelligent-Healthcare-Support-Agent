@@ -44,6 +44,7 @@ os.environ.update({
     # don't depend on whether Tesseract is installed; OCR paths use an explicit fake engine.
     "DOCUMENT_STORAGE_DIR": ".local/test-uploads",
     "OCR_ENGINE": "disabled",
+    "JWT_ACCESS_TOKEN_MINUTES": "30",
 })
 
 

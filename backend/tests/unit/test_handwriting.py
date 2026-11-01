@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import itertools
 import time
 
 import numpy as np
@@ -11,8 +12,8 @@ from PIL import Image
 
 from app.core.config import get_settings
 from app.documents.extraction import LOW_QUALITY, OK, extract_pages
-from app.documents.handwriting import LocalOcr, _choose, _rows, _words
-from app.documents.ocr import OcrResult, OcrTimeoutError, OcrUnavailableError, OcrWord
+from app.documents.handwriting import LocalOcr, _choose, _needs_second_reading, _rows, _words
+from app.documents.ocr import OcrResult, OcrUnavailableError, OcrWord
 from app.rag.uploaded import mark_unclear
 
 
@@ -57,13 +58,14 @@ def test_a_handwritten_page_is_read_by_both_and_keeps_the_better_line(monkeypatc
     assert result.text == "metformin daily\nmetformin daily" and result.handwritten
 
 
-def test_short_labels_and_numbers_stay_with_the_printed_reader():
-    assert _choose("C/C:", 0.9, [("\u0120clc", 0.99)])[0].text == "C/C:"
+def test_numbers_stay_with_the_printed_reader():
     assert [w.text for w in _choose("21/10/2026", 0.9, [("\u01202", 0.99), ("(", 0.99)])] == ["21/10/2026"]
 
 
-def test_certain_printed_text_is_not_flagged_by_a_garbled_second_reading():
-    assert _choose("City Care Clinic", 1.0, [("\u0120Lawrence", 0.2)])[0].confidence == 100
+def test_short_labels_and_certain_lines_skip_the_slow_second_reading():
+    assert not _needs_second_reading("C/C:", 0.9)
+    assert not _needs_second_reading("City Care Clinic", 1.0)
+    assert _needs_second_reading("Tab. Naproxen 500 mg", 0.98)
 
 
 def test_stray_quotes_from_the_handwriting_model_are_removed():
@@ -96,11 +98,23 @@ def test_blank_page_reads_nothing(monkeypatch):
     assert _engine(_Found([], []), monkeypatch).recognize(_png(), 30).words == []
 
 
-def test_running_out_of_time_stops_the_page(monkeypatch):
-    engine = _engine(_Found(["scrawl"], [0.5]), monkeypatch)
-    monkeypatch.setattr("app.documents.handwriting.time.monotonic", iter([0.0, 100.0]).__next__)
-    with pytest.raises(OcrTimeoutError):
-        engine.recognize(_png(), 30)
+def test_running_out_of_time_keeps_what_was_read_and_marks_it_unclear(monkeypatch):
+    engine = _engine(_Found(["scrawled line"], [0.5]), monkeypatch)
+    clock = itertools.count(0, 1000)
+    monkeypatch.setattr("app.documents.handwriting.time.monotonic", lambda: next(clock))
+    result = engine.recognize(_png(), 30)
+    assert result.text == "scrawled line" and all(w.confidence < 60 for w in result.words)
+    assert result.handwritten
+
+
+def test_the_same_page_is_only_read_once(monkeypatch):
+    found = _Found(["scrawled line"], [0.5])
+    reads = []
+    engine = LocalOcr("missing", 0.97)
+    monkeypatch.setattr(engine, "_models", lambda: (lambda _image: reads.append(1) or found, None, None, None))
+    monkeypatch.setattr(LocalOcr, "_read_line", staticmethod(lambda *_args: [("\u0120metformin", 0.9)]))
+    first = engine.recognize(_png(), 30)
+    assert engine.recognize(_png(), 30) is first and len(reads) == 1
 
 
 def test_a_missing_model_is_reported_as_unavailable():

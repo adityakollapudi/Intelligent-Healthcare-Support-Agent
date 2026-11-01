@@ -4,13 +4,19 @@ RapidOCR (PP-OCR, Apache-2.0) finds the text lines and reads them. On a page wit
 (microsoft/trocr-base-handwritten, MIT, run through ONNX Runtime) reads each line as well. RapidOCR
 does better on neat writing, labels and numbers, and TrOCR on cursive, so each line keeps whichever
 reading is more credible. A word the two readers disagree on is low confidence even if one of them
-was sure, so a misread medicine name gets flagged rather than passing as fact."""
+was sure, so a misread medicine name gets flagged rather than passing as fact.
+
+Reading a page takes up to a minute on a CPU, so one page is read at a time and the result stays in
+this process's memory for a few minutes (never on disk): analysis, the text panel and chat share it.
+If the time runs out, the remaining lines keep RapidOCR's reading, marked unclear, instead of failing."""
 
 from __future__ import annotations
 
+import hashlib
 import io
 import logging
 import time
+from collections import OrderedDict
 from pathlib import Path
 from threading import Lock
 
@@ -27,6 +33,8 @@ _TOKENIZER = "tokenizer.json"
 _INPUT_SIZE = 384
 _END_TOKEN = 2  # TrOCR uses </s> both to start and to end a line
 _MAX_TOKENS = 48
+_CACHED_PAGES = 8
+_CACHE_SECONDS = 600
 _WORD_START = "Ġ"
 _LINE_PADDING = 6
 _HANDWRITTEN_PAGE_SHARE = 0.25  # this share of unsure lines means the page has handwriting
@@ -91,17 +99,19 @@ def _key(word: str) -> str:
     return "".join(c for c in word.lower() if c.isalnum())
 
 
+def _needs_second_reading(printed: str, score: float) -> bool:
+    return len(printed) >= _MIN_TROCR_CHARS and score < _CERTAIN_SCORE
+
+
 def _choose(printed: str, score: float, tokens: list[tuple[str, float]]) -> list[OcrWord]:
     """Picks RapidOCR's or TrOCR's reading of one line and sets confidence from whether they agree."""
     first = [OcrWord(w, score * 100) for w in printed.split()]
     second = _words(tokens)
     mean = sum(p for _, p in tokens) / len(tokens) if tokens else 0.0
     digits = sum(c.isdigit() for c in printed) / max(len(printed), 1)
-    keep_first = len(printed) < _MIN_TROCR_CHARS or digits >= _MAX_TROCR_DIGIT_SHARE or mean < score - _TROCR_MARGIN
+    keep_first = digits >= _MAX_TROCR_DIGIT_SHARE or mean < score - _TROCR_MARGIN
     chosen, other = (first, second) if keep_first else (second, first)
     others = {_key(w.text) for w in other}
-    if keep_first and score >= _CERTAIN_SCORE:
-        return chosen
     chosen = [w for w in chosen if w.text not in _STRAY_MARKS]
     for word in chosen:
         key = _key(word.text)
@@ -119,7 +129,9 @@ class LocalOcr:
         self._dir = Path(model_dir)
         self._printed_min_score = printed_min_score
         self._lock = Lock()
+        self._page_lock = Lock()
         self._loaded: tuple | None = None
+        self._cache: OrderedDict[str, tuple[float, OcrResult]] = OrderedDict()
 
     def available(self) -> bool:
         return all((self._dir / name).is_file() for name in (_ENCODER, _DECODER, _TOKENIZER))
@@ -145,7 +157,25 @@ class LocalOcr:
             return self._loaded
 
     def recognize(self, png: bytes, timeout: float) -> OcrResult:
-        give_up = time.monotonic() + timeout
+        key = hashlib.sha256(png).hexdigest()
+        if not self._page_lock.acquire(timeout=timeout):
+            raise OcrTimeoutError()
+        try:
+            now = time.monotonic()
+            for stale in [k for k, (expires, _) in self._cache.items() if expires <= now]:
+                del self._cache[stale]
+            if key in self._cache:
+                return self._cache[key][1]
+            result, complete = self._read_page(png, now + timeout)
+            if complete:
+                self._cache[key] = (now + _CACHE_SECONDS, result)
+                while len(self._cache) > _CACHED_PAGES:
+                    self._cache.popitem(last=False)
+            return result
+        finally:
+            self._page_lock.release()
+
+    def _read_page(self, png: bytes, give_up: float) -> tuple[OcrResult, bool]:
         reader, encoder, decoder, tokenizer = self._models()
         image = _load_image(png)
         try:
@@ -154,12 +184,14 @@ class LocalOcr:
             logger.error("ocr_failed", extra={"error_type": type(exc).__name__})
             raise OcrFailedError(type(exc).__name__) from None
         if found.boxes is None or found.txts is None or found.scores is None:
-            return OcrResult()
+            return OcrResult(), True
 
         scores = [float(score) for score in found.scores]
         boxes = list(found.boxes)
         unsure = sum(score < self._printed_min_score for score in scores)
-        handwritten = unsure >= len(scores) * _HANDWRITTEN_PAGE_SHARE
+        whole_page = unsure >= len(scores) * _HANDWRITTEN_PAGE_SHARE
+        handwritten = whole_page
+        complete = True
         lines: list[list[OcrWord]] = []
         for row in _rows(boxes):
             line: list[OcrWord] = []
@@ -172,16 +204,20 @@ class LocalOcr:
                     line = []
                 previous = box[:, 0].max()
                 printed = found.txts[index].replace("\uff1a", ":")
-                if scores[index] >= self._printed_min_score and not handwritten:
-                    line += [OcrWord(w, scores[index] * 100) for w in printed.split()]
+                first = [OcrWord(w, scores[index] * 100) for w in printed.split()]
+                unsure_line = whole_page or scores[index] < self._printed_min_score
+                if not unsure_line or not _needs_second_reading(printed, scores[index]):
+                    line += first
                     continue
-                if time.monotonic() > give_up:
-                    raise OcrTimeoutError()
                 handwritten = True
+                if time.monotonic() > give_up:
+                    complete = False
+                    line += [OcrWord(w.text, min(w.confidence, _DISAGREED_CONFIDENCE)) for w in first]
+                    continue
                 tokens = self._read_line(_crop(image, box), encoder, decoder, tokenizer)
                 line += _choose(printed, scores[index], tokens)
             lines.append(line)
-        return OcrResult([line for line in lines if line], handwritten=handwritten)
+        return OcrResult([line for line in lines if line], handwritten=handwritten), complete
 
     @staticmethod
     def _read_line(line: np.ndarray, encoder, decoder, tokenizer) -> list[tuple[str, float]]:

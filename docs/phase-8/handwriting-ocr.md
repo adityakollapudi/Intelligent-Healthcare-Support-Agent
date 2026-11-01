@@ -46,7 +46,7 @@ After the first release sent whole handwritten pages to TrOCR, printed headers a
 
 ## Checking what was read
 
-After analysis, the Documents screen shows "What we read from your document", with unclear words highlighted, so the customer can compare it with the original. It uses `GET /documents/{id}/text`, which follows the same access rule as `GET /documents/{id}` and is audited as `DOCUMENT_TEXT_VIEWED`. The text isn't stored, so scanned pages are read again each time the panel opens.
+After analysis, the Documents screen shows "What we read from your document", with unclear words highlighted, so the customer can compare it with the original. It uses `GET /documents/{id}/text`, which follows the same access rule as `GET /documents/{id}` and is audited as `DOCUMENT_TEXT_VIEWED`. The text is never stored on disk or in the database.
 
 On a fictional handwritten prescription, the body came out well, including the symptoms, Naproxen 500 mg and the MRI order. It still misread short labels (C/C as "clc."), the procedure code and the registration number, which is why the customer needs to see the text.
 
@@ -60,10 +60,11 @@ On a fictional handwritten prescription, the body came out well, including the s
 
 ## Limits
 
-- Chat reads the file again for each question, which took about 22 seconds on the 8-line test page.
+- A handwritten page can take a minute or more on a CPU. Pages are read one at a time, so a second read waits for the first.
+- A read page stays in the process's memory for 10 minutes, so analysis, the text panel and chat share it. It's never written to disk. After that, or after a restart, it's read again.
+- If `OCR_PAGE_TIMEOUT_SECONDS` runs out, the remaining lines keep RapidOCR's reading, marked unclear, rather than the page failing.
 - If one copy of a word is unclear, every copy on that page is marked, so common words like "a" can be marked needlessly.
 - English only. Telugu and Hindi handwriting won't be read.
-- Long pages can reach `OCR_PAGE_TIMEOUT_SECONDS` (90) on a CPU.
 - The Docker image still uses Tesseract, because the model isn't included in the image.
 
 ## Setup
