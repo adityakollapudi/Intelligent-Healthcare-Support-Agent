@@ -1,6 +1,17 @@
 from fastapi import APIRouter
 
-from app.api.v1.routes import admin, auth, benefits, chat, claims, documents, health, requirements, support_cases
+from app.api.v1.routes import (
+    admin,
+    auth,
+    benefits,
+    chat,
+    claims,
+    documents,
+    health,
+    knowledge,
+    requirements,
+    support_cases,
+)
 
 api_router = APIRouter()
 api_router.include_router(admin.router)
@@ -12,3 +23,4 @@ api_router.include_router(health.router)
 api_router.include_router(auth.router)
 api_router.include_router(claims.router)
 api_router.include_router(benefits.router)
+api_router.include_router(knowledge.router)

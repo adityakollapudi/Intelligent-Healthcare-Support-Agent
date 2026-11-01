@@ -4,6 +4,7 @@ import { AppLayout } from "../components/layout/AppLayout";
 import { SessionProvider, useSession } from "../features/auth/session";
 import { ChatProvider } from "../features/chat/chat-state";
 import { BenefitsPage } from "../pages/BenefitsPage";
+import { PlanDocumentsPage } from "../pages/PlanDocumentsPage";
 import { ChatPage } from "../pages/ChatPage";
 import { ClaimsPage } from "../pages/ClaimsPage";
 import { DocumentsPage } from "../pages/DocumentsPage";
@@ -43,6 +44,7 @@ export function AppRoutes() {
         {guarded("/chat", <ChatPage />)}
         {guarded("/claims", <ClaimsPage />)}
         {guarded("/benefits", <BenefitsPage />)}
+        {guarded("/plan-documents", <PlanDocumentsPage />)}
         {guarded("/documents", <DocumentsPage />)}
         {guarded("/readiness", <ReadinessPage />)}
         {guarded("/cases", <CasesPage />)}

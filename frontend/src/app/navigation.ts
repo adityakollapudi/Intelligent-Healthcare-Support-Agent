@@ -14,6 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/chat", label: "Assistant", anyOf: ["chat:use"] },
   { path: "/claims", label: "My claims", anyOf: ["claims:read:own"] },
   { path: "/benefits", label: "Plan benefits", anyOf: ["benefits:read:own", "benefits:read:any"] },
+  { path: "/plan-documents", label: "Plan documents", anyOf: ["knowledge:read"] },
   { path: "/documents", label: "Documents", anyOf: ["documents:upload"] },
   { path: "/readiness", label: "PA readiness", anyOf: ["readiness:create"] },
   { path: "/cases", label: "Support cases", anyOf: ["cases:read:own"] },

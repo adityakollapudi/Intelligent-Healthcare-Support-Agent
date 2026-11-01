@@ -25,6 +25,8 @@ import {
   isSessionPage,
 } from "../lib/validators";
 import type {
+  PlanDocumentDetail,
+  PlanDocumentSummary,
   Language,
   TranslatedAnswer,
   AdminMetrics,
@@ -87,6 +89,19 @@ export const benefitsService = {
 };
 
 // Phase 4 chat API (doc 06 §3.3).
+export const knowledgeService = {
+  documents: (signal?: AbortSignal) =>
+    apiRequest<PlanDocumentSummary[]>("/knowledge/documents", {
+      signal,
+      validate: (v): v is PlanDocumentSummary[] => Array.isArray(v),
+    }),
+  document: (documentId: string, signal?: AbortSignal) =>
+    apiRequest<PlanDocumentDetail>(`/knowledge/documents/${encodeURIComponent(documentId)}`, {
+      signal,
+      validate: (v): v is PlanDocumentDetail => typeof v === "object" && v !== null && Array.isArray((v as { sections?: unknown }).sections),
+    }),
+};
+
 export const chatService = {
   send: (body: { session_id: string | null; client_message_id: string; message: string; language: Language }, signal?: AbortSignal) =>
     apiRequest<ChatResponse>("/chat", { method: "POST", body, signal, validate: isChatResponse }),

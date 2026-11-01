@@ -1,4 +1,6 @@
 // Renders only citations supplied by the backend; it never invents sources.
+import { Link, useInRouterContext } from "react-router-dom";
+
 import type { Citation } from "../types/api";
 import { formatDate } from "../lib/format";
 
@@ -19,6 +21,8 @@ export function SourceCitationList({ citations }: { citations: Citation[] }) {
 }
 
 export function SourceCitation({ citation }: { citation: Citation }) {
+  const inApp = useInRouterContext();
+  const check = `/plan-documents?doc=${encodeURIComponent(citation.document_id)}${citation.chunk_id ? `&chunk=${encodeURIComponent(citation.chunk_id)}` : ""}`;
   const pages =
     citation.page_start === null
       ? null
@@ -38,6 +42,7 @@ export function SourceCitation({ citation }: { citation: Citation }) {
       </p>
       {/* Plain text rendering: excerpts are untrusted document content. */}
       <blockquote className="citation-excerpt">{citation.excerpt}</blockquote>
+      {inApp && <Link to={check}>Check this in the document</Link>}
     </article>
   );
 }

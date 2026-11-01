@@ -203,6 +203,20 @@ export interface GuidedOption {
   message: string;
 }
 
+export interface PlanDocumentSummary {
+  document_id: string;
+  title: string;
+  version: string;
+  document_type: string;
+  effective_date: string | null;
+  plan_name: string | null;
+  is_my_plan: boolean;
+}
+
+export interface PlanDocumentDetail extends PlanDocumentSummary {
+  sections: { heading: string | null; page: number | null; text: string; chunk_ids: string[] }[];
+}
+
 export interface TranslatedAnswer {
   message_id: string;
   language: Language;

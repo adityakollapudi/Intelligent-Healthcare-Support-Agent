@@ -299,13 +299,18 @@ function WelcomePanel() {
 function LanguageSelector() {
   const chat = useChat();
   return (
-    <div className="language-select" role="group" aria-label={CHAT_TEXT[chat.language].languageLabel}>
+    <select
+      className="language-select"
+      aria-label={CHAT_TEXT[chat.language].languageLabel}
+      value={chat.language}
+      onChange={(e) => chat.setLanguage(e.target.value as Language)}
+    >
       {ANSWER_LANGUAGES.map((l) => (
-        <button key={l.code} type="button" className="chip" lang={l.code} aria-pressed={chat.language === l.code} onClick={() => chat.setLanguage(l.code)}>
+        <option key={l.code} value={l.code} lang={l.code}>
           {l.name}
-        </button>
+        </option>
       ))}
-    </div>
+    </select>
   );
 }
 
@@ -377,9 +382,12 @@ export function ChatPage() {
           title={t.title}
           description={t.description}
           actions={
-            <Button variant="secondary" onClick={() => setConfirmReset(true)} disabled={chat.messages.length === 0 && !chat.draft}>
-              {t.newConversation}
-            </Button>
+            <>
+              <LanguageSelector />
+              <Button variant="secondary" onClick={() => setConfirmReset(true)} disabled={chat.messages.length === 0 && !chat.draft}>
+                {t.newConversation}
+              </Button>
+            </>
           }
         />
         {!chat.available && (
@@ -388,7 +396,6 @@ export function ChatPage() {
           </Alert>
         )}
 
-        <LanguageSelector />
         <section className="chat-panel" aria-label={t.conversation}>
           {chat.messages.length === 0 ? (
             <WelcomePanel />

@@ -94,6 +94,8 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 
 **Customer-friendly, multilingual answers.** `app/rag/friendly.py` runs after the pipeline and rewrites each result in plain language, in English, Telugu (`te`) and Hindi (`hi`), using wording from `friendly_text.py` and values only from tools and documents. `POST /chat` takes an optional `language`; text typed in Telugu or Hindi is answered in that language. Those questions are matched by keywords (`app/rag/language.py`) to questions the router already knows, and anything else gets guided help. `POST /chat/messages/{id}/translate` shows an earlier answer in another language. Passages quoted from documents stay in English unless `TRANSLATION_PROVIDER` is configured and approved (`app/services/translation.py`), which protects identifiers, dates and amounts. The Telugu and Hindi wording hasn't been reviewed by a medical or insurance translator.
 
+**Plan documents.** `GET /knowledge/documents` and `GET /knowledge/documents/{id}` let customers read the documents the assistant answers from, so they can check an answer. They use the same access rule as retrieval: members see general documents and their own plan, current versions only, and anything else returns 404. The text comes from the indexed passages. Citations in chat link to the exact section.
+
 **Errors** use one format everywhere:
 ```json
 {"error": {"code": "RESOURCE_NOT_FOUND", "message": "The requested item was not found.", "details": [], "request_id": "…"}}

@@ -43,7 +43,7 @@ The scope is the local, isolated test environment with synthetic data only. This
 | D8-09 | Overload reported as 500 | Low | **Fixed** (503 + Retry-After) |
 | S-1 | No malware scanning of uploads | Medium for any real use | **Open.** Files are parsed only by PyMuPDF/Pillow, never executed or served. An approved scanner is needed before real documents are handled |
 | S-2 | Audit log not tamper-evident (no hash chain or WORM store) | Medium for real use | **Open.** Append-only for the app role only |
-| S-3 | JWT in browser memory, no refresh/rotation; logout revocation list in the DB | Low (prototype) | Accepted for the prototype |
+| S-3 | JWT in `sessionStorage` so a refresh stays signed in, with no refresh/rotation; logout revocation list in the DB | Low (prototype), higher for real use | Accepted for the prototype. Unlike memory, script injection (XSS) on the page could read the token. It's erased when the tab closes and expires after 30 minutes. Real use should move to an HttpOnly cookie |
 | S-4 | No automated container or image scan; images never built here | — | **Open.** Run Trivy or a similar scanner in CI once images are built |
 | S-5 | Audit 365-day retention purge needs a maintenance DB role | Low | Open (NFR-021) |
 | S-6 | Live-LLM prompt-injection behavior unmeasured | Medium once an LLM is enabled | Open. Backend controls don't depend on the model, but answer content would need evaluation |
@@ -65,7 +65,7 @@ All data is synthetic, and no production or company data was used.
 - Extracted text is never persisted, and extracted field values are deleted at expiry.
 - The assistant can read only the caller's own uploads (`read_my_documents`). It reads the file for that request and stores no document text in tool logs. Statements quoted in an answer do stay in that conversation until its retention period ends. Instructions inside a document are treated as data (tested).
 - Conversations are deleted after their retention period.
-- The browser holds the token in memory only. No private data is written to localStorage or sessionStorage (verified in the bundle).
+- The browser keeps only the access token in `sessionStorage` (S-3). No other private data is written to browser storage.
 
 ## 6. Accessibility and responsive results (summary)
 

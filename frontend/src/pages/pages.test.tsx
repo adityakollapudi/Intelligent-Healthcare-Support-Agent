@@ -1,10 +1,10 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChatProvider, useChat } from "../features/chat/chat-state";
 import { apiError, authRoutes, chatAnswer, CLAIM_101, json, mockApi } from "../test/fetch-mock";
-import { renderSignedIn } from "../test/render";
+import { renderApp, renderSignedIn } from "../test/render";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -383,6 +383,28 @@ describe("readiness screen basics", () => {
   });
 });
 
+describe("staying signed in", () => {
+  it("restores the session after a refresh, and signing out forgets it", async () => {
+    mockApi({ ...authRoutes("MEMBER") });
+    const { user } = await renderSignedIn();
+    expect(sessionStorage.getItem("ihsa.session")).toBeTruthy();
+    cleanup(); // a refresh: all in-memory state is gone
+    renderApp("/chat");
+    expect(await screen.findByLabelText("Your question")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
+    await screen.findByRole("button", { name: "Sign in" });
+    expect(sessionStorage.getItem("ihsa.session")).toBeNull();
+  });
+
+  it("drops a token the backend rejects", async () => {
+    sessionStorage.setItem("ihsa.session", "stale");
+    mockApi({ "GET /auth/me": () => apiError(401, "UNAUTHENTICATED") });
+    renderApp("/chat");
+    await screen.findByRole("button", { name: "Sign in" });
+    expect(sessionStorage.getItem("ihsa.session")).toBeNull();
+  });
+});
+
 describe("customer-friendly assistant", () => {
   it("welcomes the customer and quick actions send real questions", async () => {
     const { calls } = mockApi({ ...authRoutes("MEMBER"), "POST /chat": () => json(200, chatAnswer()) });
@@ -404,7 +426,7 @@ describe("customer-friendly assistant", () => {
   it("switches the screen and the requested language", async () => {
     const { calls } = mockApi({ ...authRoutes("MEMBER"), "POST /chat": () => json(200, { ...chatAnswer(), language: "te" }) });
     const { user } = await renderSignedIn();
-    await user.click(await screen.findByRole("button", { name: "తెలుగు" }));
+    await user.selectOptions(await screen.findByLabelText("Language"), "te");
     expect(screen.getByText(/మీ హెల్త్‌కేర్ సపోర్ట్ పోర్టల్‌కు స్వాగతం/)).toBeInTheDocument();
     await user.type(screen.getByPlaceholderText("మీ ప్రశ్న టైప్ చేయండి…"), "hello");
     await user.keyboard("{Enter}");
@@ -440,5 +462,46 @@ describe("customer-friendly assistant", () => {
     await user.click(await screen.findByRole("button", { name: "What my plan covers" }));
     await waitFor(() => expect(calls.filter((c) => c.path === "/chat")).toHaveLength(2));
     expect(calls.filter((c) => c.path === "/chat")[1]!.body).toMatchObject({ message: "Show my plan benefits" });
+  });
+});
+
+describe("plan documents", () => {
+  const SUMMARY = { document_id: "d1", title: "Synthetic Gold Plan Benefit Guide", version: "1.0", document_type: "BENEFIT_GUIDE", effective_date: "2026-01-01", plan_name: "Synthetic Gold Plan", is_my_plan: true };
+  const DETAIL = {
+    ...SUMMARY,
+    sections: [
+      { heading: "Physical therapy", page: null, text: "PT has a $25 copay.", chunk_ids: ["c1"] },
+      { heading: "Imaging", page: null, text: "MRI needs approval.", chunk_ids: ["c2"] },
+    ],
+  };
+  const routes = { ...authRoutes("MEMBER"), "GET /knowledge/documents": () => json(200, [SUMMARY]), "GET /knowledge/documents/d1": () => json(200, DETAIL) };
+
+  it("lists the customer's plan and opens a document", async () => {
+    mockApi(routes);
+    const { user, navigate } = await renderSignedIn();
+    navigate("/plan-documents");
+    await user.click(await screen.findByRole("button", { name: /Gold Plan Benefit Guide/ }));
+    expect(await screen.findByText("PT has a $25 copay.")).toBeInTheDocument();
+    expect(screen.getByText("Your plan")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Find in this document"), "MRI");
+    expect(screen.queryByText("PT has a $25 copay.")).not.toBeInTheDocument();
+    expect(screen.getByText("MRI needs approval.")).toBeInTheDocument();
+  });
+
+  it("marks the section an answer cited", async () => {
+    mockApi(routes);
+    const { navigate } = await renderSignedIn();
+    navigate("/plan-documents?doc=d1&chunk=c2");
+    expect(await screen.findByText("The assistant used this section.")).toBeInTheDocument();
+    expect(screen.getByText("MRI needs approval.").closest("section")).toHaveClass("plan-section-cited");
+  });
+
+  it("shows a chat source's link to the document", async () => {
+    mockApi({ ...routes, "POST /chat": () => json(200, chatAnswer()) });
+    const { user } = await renderSignedIn();
+    await user.type(screen.getByLabelText("Your question"), "PT?");
+    await user.keyboard("{Enter}");
+    const link = await screen.findByRole("link", { name: "Check this in the document" });
+    expect(link.getAttribute("href")).toContain("/plan-documents?doc=");
   });
 });

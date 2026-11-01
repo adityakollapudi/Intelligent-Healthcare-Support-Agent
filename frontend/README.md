@@ -54,6 +54,6 @@ Open **http://localhost:5173** (not 127.0.0.1): the backend's default `CORS_ORIG
 | Blank page, console says `VITE_API_BASE_URL is not set` | Create `.env.local` from `.env.example` and restart `npm run dev` |
 | "Service unreachable" badge, or "Can't reach the IHSA service" | Start the backend. Check the URL in `.env.local` |
 | Requests blocked by CORS | Open `http://localhost:5173`, or add your origin to the backend's `CORS_ORIGINS` |
-| Signed out after refreshing the page | Expected: the access token is held only in memory (decision D-09). Sign in again |
+| Signed out unexpectedly | The token expires after 30 minutes and is erased when the tab closes (decision D-09, revised). Sign in again |
 | "Too many requests" on sign-in | The backend locks an email for 15 minutes after 5 failed attempts |
 | Port 5173 already in use | Stop the other process. The port is fixed to match the CORS setting |
