@@ -222,6 +222,7 @@ def _body(result: PipelineResult) -> Presented:
             return _requirements(result, record["data"])
     fixed = _fixed(result)
     if fixed:
+        fixed.suggestions = _options(result)
         return fixed
     if result.answer_type == "DOCUMENT_GROUNDED":
         return _quoted(result)

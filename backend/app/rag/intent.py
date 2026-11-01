@@ -220,7 +220,7 @@ def route(question: str, *, has_history: bool) -> tuple[Intent, Route]:
 
 def is_simple_visit_cost(question: str) -> bool:
     return (bool(_COST.search(question)) and benefit_category(question) in _RECORD_CATEGORIES
-            and len(_WORD.findall(question)) <= 10 and not _NOT_SIMPLE.search(question))
+            and len(_WORD.findall(question)) <= 12 and not _NOT_SIMPLE.search(question))
 
 
 def plan_limit_question(question: str) -> str:

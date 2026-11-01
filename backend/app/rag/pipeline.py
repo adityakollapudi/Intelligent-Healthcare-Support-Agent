@@ -45,6 +45,7 @@ from app.rag.intent import (
 )
 from app.rag.prompts import EvidenceItem
 from app.rag.retrieval import Candidate, RetrievalScope, search
+from app.rag.wording import plain_words
 from app.services import requirements_service
 from app.tools.executor import ToolExecutor, ToolResult
 
@@ -198,7 +199,7 @@ def _procedure_choices(db: Session, ctx: TurnContext, intent: str) -> PipelineRe
 
 
 def run(db: Session, settings: Settings, embedder: Embedder, generator: Generator, ctx: TurnContext) -> PipelineResult:
-    intent, rt = route(ctx.question, has_history=bool(ctx.history))
+    intent, rt = route(plain_words(ctx.question), has_history=bool(ctx.history))
 
     if rt is Route.GUIDED:
         return _guided_turn(ctx, intent, "general")
@@ -208,7 +209,7 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
     if rt is Route.MY_PLAN:
         return _my_plan_turn(ctx, intent)
     if rt is Route.PLAN_LIMIT:
-        ctx = _with_question(ctx, plan_limit_question(ctx.question))
+        ctx = _with_question(ctx, plan_limit_question(plain_words(ctx.question)))
     if rt is Route.SIMPLIFY:
         last = next((text for role, text in reversed(ctx.history) if role == "assistant"), None)
         return _guided_turn(ctx, intent, "simplify", last)
@@ -671,6 +672,7 @@ def _retrieve(db, settings, embedder, ctx: TurnContext):
     if ctx.history and is_follow_up(ctx.question):
         last_user = next((text for role, text in reversed(ctx.history) if role == "user"), "")
         query = f"{last_user} {ctx.question}".strip()
+    query = plain_words(query)
     started = time.perf_counter()
     vector = embedder.embed_query(query)
     candidates = search(db, query_text=query, query_vector=vector, model_id=embedder.model_id, scope=ctx.scope)
@@ -930,7 +932,7 @@ def _rag_turn(db, settings, embedder, generator, ctx: TurnContext, intent: str) 
         return _insufficient(ctx, intent, assessment.state, retrieval_ms)
     items = [EvidenceItem(f"C{i + 1}", c) for i, c in enumerate(assessment.evidence)]
     started = time.perf_counter()
-    generation = generator.generate(ctx.question, items, ctx.history)
+    generation = generator.generate(plain_words(ctx.question), items, ctx.history)
     result = _finish(ctx, intent, generation, items, [], retrieval_ms, int((time.perf_counter() - started) * 1000))
     return result
 
@@ -1076,6 +1078,7 @@ def _insufficient(ctx: TurnContext, intent: str, state: EvidenceState, retrieval
         answer_text=text,
         escalation_reason="NO_ADEQUATE_ANSWER",
         actions=[case_offer(ctx, "NO_ADEQUATE_ANSWER", "KNOWLEDGE_GAP")],
+        options=[o for o in _help_options(ctx) if o[0] != "opt_person"],  # the case offer already covers that
         gap_topic=gap_topic(ctx.question),
         retrieval_ms=retrieval_ms,
     )

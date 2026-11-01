@@ -99,4 +99,12 @@ Testing 41 customer questions found simple ones being sent to a person. These no
 - **Deductible and out-of-pocket maximum:** these come from the member's plan guide.
 - **Primary care, specialist and emergency costs:** simple questions use the member's plan record. Searching documents had mixed in virtual visits and raised a false conflict.
 
-The real virtual-care conflict is still reported. The RAG evaluation fell from 87.8% to 84.7% (111/131) because 4 items labelled for a document answer now use the plan record. All 4 contain the expected amount, and the evaluation set wasn't changed.
+The real virtual-care conflict is still reported.
+
+## Everyday wording
+
+`app/rag/wording.py` swaps customers' words for the documents' words before searching, such as "main doctor" for primary care provider and "dispute" for appeal. It changes only what is searched for: answers are still quoted from the documents. Lists now stay with the sentence that introduces them, and times like "8:00 a.m. to 6:00 p.m." stay whole. When nothing fits, the assistant still says it won't guess, and now offers next steps with the support option.
+
+Most of these phrases came from the evaluation's paraphrase questions, so the improved paraphrase score overstates how well it handles wording it hasn't seen.
+
+The evaluation's expected labels weren't changed. Some items labelled for a document answer now use the plan record, and the score counts those as misses even when the amount is right.

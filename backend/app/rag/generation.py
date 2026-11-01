@@ -155,7 +155,8 @@ _QUANTITY = re.compile(
     r"\bhow (many|much|long|soon|fast|quickly|early|far)\b|\bwhat is the (deadline|limit|copay)\b", re.I
 )
 _DIGIT = re.compile(r"\d")
-_SENTENCE = re.compile(r"(?<=[.!?])\s+|\n+")
+_SENTENCE = re.compile(r"(?<=[.!?])(?<![ap]\.m\.)\s+|\n+")  # "8:00 a.m. to 6:00 p.m." is one sentence
+_LIST_ITEM = re.compile(r"\s*([-*]|\d+\.)\s")
 
 
 def _content_words(text: str) -> set[str]:
@@ -192,9 +193,18 @@ class ExtractiveGenerator:
         q_words = _content_words(question)
 
         sentences: list[tuple[int, int, str, str]] = []
+        items_after: dict[tuple[int, int], list[str]] = {}
         for rank, item in enumerate(evidence):
-            for pos, sentence in enumerate(_SENTENCE.split(item.candidate.content)):
-                sentence = sentence.strip(" -*>\t")
+            parts = _SENTENCE.split(item.candidate.content)
+            for pos, raw in enumerate(parts):
+                sentence = raw.strip(" -*>\t")
+                if sentence.endswith(":"):  # a lead-in means nothing without the list it introduces
+                    following = []
+                    for part in parts[pos + 1:]:
+                        if not _LIST_ITEM.match(part):
+                            break
+                        following.append(part.strip(" -*>\t"))
+                    items_after[(rank, pos)] = following
                 if len(sentence) >= 15 and not sentence.upper().startswith("SYNTHETIC DEMONSTRATION"):
                     sentences.append((rank, pos, sentence, item.marker))
         if not sentences:
@@ -224,7 +234,10 @@ class ExtractiveGenerator:
             return no
 
         picked = sorted((sentences[i] for i in chosen), key=lambda s: (s[0], s[1]))
-        lines = [f"- {sentence} [{marker}]" for _, _, sentence, marker in picked]
+        lines = [
+            f"- {' '.join([sentence, *items_after.get((rank, pos), [])]).replace('**', '')} [{marker}]"
+            for rank, pos, sentence, marker in picked
+        ]
         text = "Here is what the available documents say:\n" + "\n".join(lines)
         used = sorted({marker for *_, marker in picked}, key=lambda m: int(m[1:]))
         return Generation(text, used, evidence_sufficient=True, disclaimer=self.DISCLAIMER)

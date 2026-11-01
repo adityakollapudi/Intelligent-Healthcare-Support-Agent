@@ -1,30 +1,30 @@
 # RAG evaluation — rag_eval_v1 (extractive)
 
-- Run: 2026-11-01T11:59:34+00:00 · items: 131 · embedding: `BAAI/bge-small-en-v1.5` · generator: `extractive`
+- Run: 2026-11-01T13:09:07+00:00 · items: 131 · embedding: `BAAI/bge-small-en-v1.5` · generator: `extractive`
 - Chunking: 160 words / 30 overlap · top_k: 5 · RAG_MIN_RELEVANCE: 0.7
 
 ## Headline metrics
 
 | Metric | Result |
 |---|---|
-| Expected behavior matched (all items) | 84.7% (111/131) |
+| Expected behavior matched (all items) | 90.8% (119/131) |
 | Retrieval recall@5 (expected source in top 5, answerable items) | 100.0% (81/81) |
 | MRR@5 | 0.992 |
 | Precision@5 (share of top-5 chunks from an expected source) | 0.519 |
-| Required facts present (answered, answerable items) | 78.7% (59/75) |
-| Answers with all required facts | 76.1% (51/67) |
-| Answers citing an expected source | 98.5% (66/67) |
+| Required facts present (answered, answerable items) | 83.3% (70/84) |
+| Answers with all required facts | 81.6% (62/76) |
+| Answers citing an expected source | 100.0% (75/75) |
 | Answers citing a superseded version | 0 |
 | Answers citing a forbidden (out-of-scope) source | 0 |
 | Items where an unauthorized document was even a candidate | 0 |
-| Pipeline latency p50 / p95 (local CPU, includes embedding) | 39 ms / 102 ms |
+| Pipeline latency p50 / p95 (local CPU, includes embedding) | 162 ms / 371 ms |
 
 ## Behavior by category
 
 | Category | Matched |
 |---|---|
-| strong | 90.0% (36/40) |
-| paraphrase | 50.0% (10/20) |
+| strong | 87.5% (35/40) |
+| paraphrase | 95.0% (19/20) |
 | multi-passage | 100.0% (8/8) |
 | partial | 50.0% (4/8) |
 | no-support | 100.0% (15/15) |
@@ -59,29 +59,19 @@ Answerable items: 77; partial/no-support items: 23.
 
 | Test | Category | Expected | Actual | Best sim | Facts | Cited |
 |---|---|---|---|---|---|---|
+| RAG-001 | strong | ANSWER | TOOL | 0.8996 | 1/1 |  |
 | RAG-002 | strong | ANSWER | TOOL | 0.8425 | 1/1 |  |
 | RAG-003 | strong | ANSWER | ANSWER | 0.895 | 0/1 | gold-plan-benefit-guide, pa-physical-therapy-guide |
 | RAG-005 | strong | ANSWER | TOOL | 0.8615 | 1/1 |  |
 | RAG-017 | strong | ANSWER | ANSWER | 0.8294 | 0/1 | claims-status-guide, claims-status-guide |
 | RAG-019 | strong | ANSWER | INSUFFICIENT | 0.6489 | 0/1 |  |
-| RAG-027 | strong | ANSWER | ANSWER | 0.8385 | 0/1 | claim-documentation-requirements, claim-documentation-requirements |
 | RAG-030 | strong | ANSWER | INSUFFICIENT | 0.7418 | 0/1 |  |
 | RAG-032 | strong | ANSWER | ANSWER | 0.8932 | 0/1 | pa-imaging-guide |
 | RAG-034 | strong | ANSWER | ANSWER | 0.8726 | 0/1 | pa-imaging-guide |
-| RAG-035 | strong | ANSWER | ANSWER | 0.8761 | 0/1 | pa-physical-therapy-guide |
 | RAG-041 | paraphrase | ANSWER | TOOL | 0.7457 | 1/1 |  |
-| RAG-042 | paraphrase | ANSWER | INSUFFICIENT | 0.7252 | 0/1 |  |
-| RAG-044 | paraphrase | ANSWER | INSUFFICIENT | 0.6848 | 0/1 |  |
-| RAG-046 | paraphrase | ANSWER | ANSWER | 0.7335 | 0/1 | claims-status-guide |
-| RAG-047 | paraphrase | ANSWER | INSUFFICIENT | 0.7315 | 0/1 |  |
-| RAG-048 | paraphrase | ANSWER | INSUFFICIENT | 0.6751 | 0/1 |  |
-| RAG-050 | paraphrase | ANSWER | INSUFFICIENT | 0.6381 | 0/1 |  |
-| RAG-051 | paraphrase | ANSWER | INSUFFICIENT | 0.6916 | 0/1 |  |
-| RAG-052 | paraphrase | ANSWER | INSUFFICIENT | 0.7046 | 0/1 |  |
-| RAG-053 | paraphrase | ANSWER | INSUFFICIENT | 0.6808 | 0/1 |  |
+| RAG-052 | paraphrase | ANSWER | ANSWER | 0.7046 | 0/1 | general-member-faq |
 | RAG-056 | paraphrase | ANSWER | ANSWER | 0.8051 | 0/1 | pa-imaging-guide |
-| RAG-057 | paraphrase | ANSWER | ANSWER | 0.7907 | 0/1 | pa-physical-therapy-guide, pa-physical-therapy-guide, gold-plan-benefit-guide |
-| RAG-059 | paraphrase | ANSWER | INSUFFICIENT | 0.712 | 0/1 |  |
+| RAG-057 | paraphrase | ANSWER | ANSWER | 0.7907 | 0/1 | gold-plan-benefit-guide, pa-physical-therapy-guide, bronze-plan-benefit-guide |
 | RAG-061 | multi-passage | ANSWER | ANSWER | 0.8844 | 1/2 | gold-plan-benefit-guide |
 | RAG-066 | multi-passage | ANSWER | ANSWER | 0.7889 | 1/2 | claims-status-guide, claims-status-guide |
 | RAG-067 | multi-passage | ANSWER | ANSWER | 0.8244 | 1/2 | provider-admin-faq |
@@ -94,4 +84,4 @@ Answerable items: 77; partial/no-support items: 23.
 | RAG-093 | incorrect-assumption | ANSWER | TOOL | 0.825 | 1/1 |  |
 | RAG-106 | conflict | CONFLICT | ANSWER | 0.7597 | 0/0 | virtual-care-policy-summary |
 | RAG-108 | outdated | ANSWER | ANSWER | 0.7921 | 0/1 | pa-imaging-guide |
-| RAG-116 | injection | ANSWER | ANSWER | 0.7954 | 0/1 | gold-plan-benefit-guide, gold-plan-benefit-guide |
+| RAG-116 | injection | ANSWER | ANSWER | 0.7954 | 0/1 | gold-plan-benefit-guide, pa-physical-therapy-guide |

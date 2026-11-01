@@ -7,18 +7,18 @@
     "chunking": "160 words / 30 overlap",
     "top_k": 5,
     "min_relevance": 0.7,
-    "run_at": "2026-11-01T11:59:34+00:00",
-    "behavior_accuracy": 0.8473282442748091,
+    "run_at": "2026-11-01T13:09:07+00:00",
+    "behavior_accuracy": 0.9083969465648855,
     "recall_at_k": 1.0,
     "mrr_at_k": 0.9917695473251029,
     "precision_at_k": 0.5185185185185185,
-    "fact_recall": 0.7866666666666666,
-    "citation_source_correct": 66,
+    "fact_recall": 0.8333333333333334,
+    "citation_source_correct": 75,
     "cited_superseded": 0,
     "cited_forbidden": 0,
     "unauthorized_candidates": 0,
-    "latency_ms_p50": 39.1,
-    "latency_ms_p95": 101.9
+    "latency_ms_p50": 162.3,
+    "latency_ms_p95": 370.9
   },
   "rows": [
     {
@@ -28,22 +28,20 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "ANSWER",
-      "behavior_ok": true,
+      "actual": "TOOL",
+      "behavior_ok": false,
       "retrieval_rank": 1,
       "precision_at_k": 0.6,
       "best_similarity": 0.8996,
       "best_expected_similarity": 0.8996,
-      "cited_keys": [
-        "gold-plan-benefit-guide"
-      ],
-      "cited_expected": true,
+      "cited_keys": [],
+      "cited_expected": false,
       "cited_superseded": false,
       "cited_forbidden": [],
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 843.6
+      "latency_ms": 10.8
     },
     {
       "test_id": "RAG-002",
@@ -65,7 +63,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 6.6
+      "latency_ms": 3.0
     },
     {
       "test_id": "RAG-003",
@@ -90,7 +88,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 59.0
+      "latency_ms": 180.2
     },
     {
       "test_id": "RAG-004",
@@ -114,7 +112,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 79.6
+      "latency_ms": 230.1
     },
     {
       "test_id": "RAG-005",
@@ -136,7 +134,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 2.1
+      "latency_ms": 3.1
     },
     {
       "test_id": "RAG-006",
@@ -160,7 +158,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 27.7
+      "latency_ms": 93.2
     },
     {
       "test_id": "RAG-007",
@@ -184,7 +182,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 47.2
+      "latency_ms": 143.9
     },
     {
       "test_id": "RAG-008",
@@ -208,7 +206,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 46.8
+      "latency_ms": 160.3
     },
     {
       "test_id": "RAG-009",
@@ -232,7 +230,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 60.5
+      "latency_ms": 224.2
     },
     {
       "test_id": "RAG-010",
@@ -257,7 +255,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 73.2
+      "latency_ms": 234.5
     },
     {
       "test_id": "RAG-011",
@@ -281,7 +279,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 48.3
+      "latency_ms": 162.3
     },
     {
       "test_id": "RAG-012",
@@ -305,7 +303,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 45.2
+      "latency_ms": 154.7
     },
     {
       "test_id": "RAG-013",
@@ -331,7 +329,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 72.8
+      "latency_ms": 252.8
     },
     {
       "test_id": "RAG-014",
@@ -356,7 +354,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 36.5
+      "latency_ms": 144.6
     },
     {
       "test_id": "RAG-015",
@@ -381,7 +379,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 45.6
+      "latency_ms": 160.2
     },
     {
       "test_id": "RAG-016",
@@ -405,7 +403,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 42.1
+      "latency_ms": 170.1
     },
     {
       "test_id": "RAG-017",
@@ -430,7 +428,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 67.0
+      "latency_ms": 362.3
     },
     {
       "test_id": "RAG-018",
@@ -454,7 +452,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 36.4
+      "latency_ms": 206.4
     },
     {
       "test_id": "RAG-019",
@@ -476,7 +474,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 14.8
+      "latency_ms": 64.4
     },
     {
       "test_id": "RAG-020",
@@ -500,7 +498,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 101.9
+      "latency_ms": 356.1
     },
     {
       "test_id": "RAG-021",
@@ -525,7 +523,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 61.3
+      "latency_ms": 250.9
     },
     {
       "test_id": "RAG-022",
@@ -549,7 +547,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 32.1
+      "latency_ms": 191.6
     },
     {
       "test_id": "RAG-023",
@@ -574,7 +572,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 58.6
+      "latency_ms": 369.2
     },
     {
       "test_id": "RAG-024",
@@ -598,7 +596,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 35.1
+      "latency_ms": 166.0
     },
     {
       "test_id": "RAG-025",
@@ -622,7 +620,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 33.4
+      "latency_ms": 170.7
     },
     {
       "test_id": "RAG-026",
@@ -646,7 +644,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 27.1
+      "latency_ms": 183.3
     },
     {
       "test_id": "RAG-027",
@@ -668,10 +666,10 @@
       "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 72.8
+      "latency_ms": 538.8
     },
     {
       "test_id": "RAG-028",
@@ -696,7 +694,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 103.7
+      "latency_ms": 730.3
     },
     {
       "test_id": "RAG-029",
@@ -720,7 +718,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 41.5
+      "latency_ms": 169.8
     },
     {
       "test_id": "RAG-030",
@@ -742,7 +740,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 81.2
+      "latency_ms": 358.7
     },
     {
       "test_id": "RAG-031",
@@ -767,7 +765,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 59.1
+      "latency_ms": 208.6
     },
     {
       "test_id": "RAG-032",
@@ -791,7 +789,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 133.8
+      "latency_ms": 433.1
     },
     {
       "test_id": "RAG-033",
@@ -815,7 +813,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 57.2
+      "latency_ms": 194.5
     },
     {
       "test_id": "RAG-034",
@@ -839,7 +837,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 124.8
+      "latency_ms": 411.1
     },
     {
       "test_id": "RAG-035",
@@ -860,10 +858,10 @@
       "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 76.3
+      "latency_ms": 374.4
     },
     {
       "test_id": "RAG-036",
@@ -889,7 +887,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 76.5
+      "latency_ms": 239.1
     },
     {
       "test_id": "RAG-037",
@@ -905,8 +903,8 @@
       "best_similarity": 0.8976,
       "best_expected_similarity": 0.8976,
       "cited_keys": [
-        "provider-admin-faq",
-        "claims-status-guide"
+        "claim-documentation-requirements",
+        "provider-admin-faq"
       ],
       "cited_expected": true,
       "cited_superseded": false,
@@ -914,7 +912,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 117.9
+      "latency_ms": 467.9
     },
     {
       "test_id": "RAG-038",
@@ -938,7 +936,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 83.9
+      "latency_ms": 602.8
     },
     {
       "test_id": "RAG-039",
@@ -962,7 +960,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 49.4
+      "latency_ms": 351.8
     },
     {
       "test_id": "RAG-040",
@@ -986,7 +984,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 38.2
+      "latency_ms": 254.7
     },
     {
       "test_id": "RAG-041",
@@ -1008,7 +1006,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 1.6
+      "latency_ms": 3.7
     },
     {
       "test_id": "RAG-042",
@@ -1017,20 +1015,23 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.6,
       "best_similarity": 0.7252,
       "best_expected_similarity": 0.7252,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "gold-plan-benefit-guide",
+        "pa-physical-therapy-guide"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 49.9
+      "latency_ms": 246.7
     },
     {
       "test_id": "RAG-043",
@@ -1054,7 +1055,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 46.4
+      "latency_ms": 162.8
     },
     {
       "test_id": "RAG-044",
@@ -1063,20 +1064,22 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.6,
       "best_similarity": 0.6848,
       "best_expected_similarity": 0.6848,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "gold-plan-benefit-guide"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 16.0
+      "latency_ms": 88.2
     },
     {
       "test_id": "RAG-045",
@@ -1092,6 +1095,7 @@
       "best_similarity": 0.7232,
       "best_expected_similarity": 0.7232,
       "cited_keys": [
+        "gold-plan-benefit-guide",
         "gold-plan-benefit-guide"
       ],
       "cited_expected": true,
@@ -1100,7 +1104,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 32.1
+      "latency_ms": 179.3
     },
     {
       "test_id": "RAG-046",
@@ -1116,15 +1120,17 @@
       "best_similarity": 0.7335,
       "best_expected_similarity": 0.7335,
       "cited_keys": [
-        "claims-status-guide"
+        "claims-appeal-process",
+        "claims-appeal-process",
+        "claims-appeal-process"
       ],
-      "cited_expected": false,
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 48.6
+      "latency_ms": 168.0
     },
     {
       "test_id": "RAG-047",
@@ -1133,20 +1139,23 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.8,
       "best_similarity": 0.7315,
       "best_expected_similarity": 0.7315,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "claims-status-guide",
+        "claims-status-guide"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 30.4
+      "latency_ms": 231.2
     },
     {
       "test_id": "RAG-048",
@@ -1155,20 +1164,22 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.2,
       "best_similarity": 0.6751,
       "best_expected_similarity": 0.6751,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "general-member-faq"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 22.2
+      "latency_ms": 117.5
     },
     {
       "test_id": "RAG-049",
@@ -1192,7 +1203,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 24.7
+      "latency_ms": 72.8
     },
     {
       "test_id": "RAG-050",
@@ -1201,20 +1212,22 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.2,
       "best_similarity": 0.6381,
       "best_expected_similarity": 0.6381,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "claim-documentation-requirements"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 15.6
+      "latency_ms": 145.9
     },
     {
       "test_id": "RAG-051",
@@ -1223,20 +1236,23 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.4,
       "best_similarity": 0.6916,
       "best_expected_similarity": 0.6916,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "claims-status-guide",
+        "claim-documentation-requirements"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 12.7
+      "latency_ms": 224.5
     },
     {
       "test_id": "RAG-052",
@@ -1245,20 +1261,22 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.2,
       "best_similarity": 0.7046,
       "best_expected_similarity": 0.7046,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "general-member-faq"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 35.4
+      "latency_ms": 242.5
     },
     {
       "test_id": "RAG-053",
@@ -1267,20 +1285,23 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 1,
       "precision_at_k": 0.8,
       "best_similarity": 0.6808,
       "best_expected_similarity": 0.6808,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "support-case-process",
+        "support-case-process"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 12.7
+      "latency_ms": 370.9
     },
     {
       "test_id": "RAG-054",
@@ -1304,7 +1325,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 44.7
+      "latency_ms": 303.2
     },
     {
       "test_id": "RAG-055",
@@ -1329,7 +1350,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 18.8
+      "latency_ms": 58.4
     },
     {
       "test_id": "RAG-056",
@@ -1353,7 +1374,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 53.2
+      "latency_ms": 242.1
     },
     {
       "test_id": "RAG-057",
@@ -1369,9 +1390,9 @@
       "best_similarity": 0.7907,
       "best_expected_similarity": 0.7907,
       "cited_keys": [
+        "gold-plan-benefit-guide",
         "pa-physical-therapy-guide",
-        "pa-physical-therapy-guide",
-        "gold-plan-benefit-guide"
+        "bronze-plan-benefit-guide"
       ],
       "cited_expected": true,
       "cited_superseded": false,
@@ -1379,7 +1400,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 75.0
+      "latency_ms": 300.8
     },
     {
       "test_id": "RAG-058",
@@ -1404,7 +1425,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 50.3
+      "latency_ms": 295.2
     },
     {
       "test_id": "RAG-059",
@@ -1413,20 +1434,22 @@
       "expected": [
         "ANSWER"
       ],
-      "actual": "INSUFFICIENT",
-      "behavior_ok": false,
+      "actual": "ANSWER",
+      "behavior_ok": true,
       "retrieval_rank": 3,
       "precision_at_k": 0.2,
       "best_similarity": 0.712,
       "best_expected_similarity": 0.6959,
-      "cited_keys": [],
-      "cited_expected": false,
+      "cited_keys": [
+        "provider-admin-faq"
+      ],
+      "cited_expected": true,
       "cited_superseded": false,
       "cited_forbidden": [],
-      "facts_found": 0,
+      "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 49.2
+      "latency_ms": 231.8
     },
     {
       "test_id": "RAG-060",
@@ -1451,7 +1474,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 100.1
+      "latency_ms": 315.7
     },
     {
       "test_id": "RAG-061",
@@ -1475,7 +1498,7 @@
       "facts_found": 1,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 84.4
+      "latency_ms": 254.8
     },
     {
       "test_id": "RAG-062",
@@ -1500,7 +1523,7 @@
       "facts_found": 2,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 58.0
+      "latency_ms": 173.3
     },
     {
       "test_id": "RAG-063",
@@ -1525,7 +1548,7 @@
       "facts_found": 2,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 39.8
+      "latency_ms": 118.9
     },
     {
       "test_id": "RAG-064",
@@ -1550,7 +1573,7 @@
       "facts_found": 2,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 107.8
+      "latency_ms": 265.1
     },
     {
       "test_id": "RAG-065",
@@ -1575,7 +1598,7 @@
       "facts_found": 2,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 76.7
+      "latency_ms": 222.1
     },
     {
       "test_id": "RAG-066",
@@ -1600,7 +1623,7 @@
       "facts_found": 1,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 81.3
+      "latency_ms": 223.6
     },
     {
       "test_id": "RAG-067",
@@ -1624,7 +1647,7 @@
       "facts_found": 1,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 94.2
+      "latency_ms": 239.7
     },
     {
       "test_id": "RAG-068",
@@ -1648,7 +1671,7 @@
       "facts_found": 1,
       "facts_total": 2,
       "unauthorized_candidates": [],
-      "latency_ms": 28.8
+      "latency_ms": 85.4
     },
     {
       "test_id": "RAG-069",
@@ -1670,7 +1693,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 27.3
+      "latency_ms": 85.2
     },
     {
       "test_id": "RAG-070",
@@ -1695,7 +1718,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 85.3
+      "latency_ms": 269.4
     },
     {
       "test_id": "RAG-071",
@@ -1717,7 +1740,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 36.0
+      "latency_ms": 120.1
     },
     {
       "test_id": "RAG-072",
@@ -1739,7 +1762,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 29.1
+      "latency_ms": 92.1
     },
     {
       "test_id": "RAG-073",
@@ -1764,7 +1787,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 60.3
+      "latency_ms": 151.1
     },
     {
       "test_id": "RAG-074",
@@ -1788,7 +1811,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 31.4
+      "latency_ms": 96.5
     },
     {
       "test_id": "RAG-075",
@@ -1812,7 +1835,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 157.2
+      "latency_ms": 355.7
     },
     {
       "test_id": "RAG-076",
@@ -1834,7 +1857,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 39.1
+      "latency_ms": 183.4
     },
     {
       "test_id": "RAG-077",
@@ -1856,7 +1879,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.6
+      "latency_ms": 33.9
     },
     {
       "test_id": "RAG-078",
@@ -1878,7 +1901,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.7
+      "latency_ms": 30.7
     },
     {
       "test_id": "RAG-079",
@@ -1900,7 +1923,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.8
+      "latency_ms": 53.2
     },
     {
       "test_id": "RAG-080",
@@ -1922,7 +1945,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 12.8
+      "latency_ms": 41.4
     },
     {
       "test_id": "RAG-081",
@@ -1944,7 +1967,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 12.9
+      "latency_ms": 27.8
     },
     {
       "test_id": "RAG-082",
@@ -1966,7 +1989,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 14.5
+      "latency_ms": 29.7
     },
     {
       "test_id": "RAG-083",
@@ -1988,7 +2011,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.4
+      "latency_ms": 33.1
     },
     {
       "test_id": "RAG-084",
@@ -2010,7 +2033,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 12.6
+      "latency_ms": 33.7
     },
     {
       "test_id": "RAG-085",
@@ -2032,7 +2055,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 14.1
+      "latency_ms": 31.0
     },
     {
       "test_id": "RAG-086",
@@ -2054,7 +2077,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.1
+      "latency_ms": 28.2
     },
     {
       "test_id": "RAG-087",
@@ -2076,7 +2099,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.4
+      "latency_ms": 34.0
     },
     {
       "test_id": "RAG-088",
@@ -2098,7 +2121,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.5
+      "latency_ms": 38.4
     },
     {
       "test_id": "RAG-089",
@@ -2120,7 +2143,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 13.8
+      "latency_ms": 36.2
     },
     {
       "test_id": "RAG-090",
@@ -2142,7 +2165,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 11.4
+      "latency_ms": 29.5
     },
     {
       "test_id": "RAG-091",
@@ -2164,7 +2187,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 12.0
+      "latency_ms": 28.7
     },
     {
       "test_id": "RAG-092",
@@ -2189,7 +2212,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 59.6
+      "latency_ms": 151.3
     },
     {
       "test_id": "RAG-093",
@@ -2211,7 +2234,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 2.1
+      "latency_ms": 3.2
     },
     {
       "test_id": "RAG-094",
@@ -2236,7 +2259,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 40.9
+      "latency_ms": 121.9
     },
     {
       "test_id": "RAG-095",
@@ -2260,7 +2283,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 50.7
+      "latency_ms": 152.0
     },
     {
       "test_id": "RAG-096",
@@ -2285,7 +2308,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 41.8
+      "latency_ms": 132.8
     },
     {
       "test_id": "RAG-097",
@@ -2310,7 +2333,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 56.1
+      "latency_ms": 163.1
     },
     {
       "test_id": "RAG-098",
@@ -2354,7 +2377,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-100",
@@ -2376,7 +2399,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-101",
@@ -2398,7 +2421,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-102",
@@ -2420,7 +2443,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-103",
@@ -2445,7 +2468,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 82.3
+      "latency_ms": 258.1
     },
     {
       "test_id": "RAG-104",
@@ -2472,7 +2495,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 74.2
+      "latency_ms": 287.0
     },
     {
       "test_id": "RAG-105",
@@ -2498,7 +2521,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 73.9
+      "latency_ms": 247.8
     },
     {
       "test_id": "RAG-106",
@@ -2522,7 +2545,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 86.1
+      "latency_ms": 254.5
     },
     {
       "test_id": "RAG-107",
@@ -2547,7 +2570,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 62.1
+      "latency_ms": 206.0
     },
     {
       "test_id": "RAG-108",
@@ -2571,7 +2594,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 63.4
+      "latency_ms": 169.4
     },
     {
       "test_id": "RAG-109",
@@ -2595,7 +2618,7 @@
       "facts_found": 1,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 53.0
+      "latency_ms": 168.4
     },
     {
       "test_id": "RAG-110",
@@ -2621,7 +2644,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 55.0
+      "latency_ms": 253.3
     },
     {
       "test_id": "RAG-111",
@@ -2643,7 +2666,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-112",
@@ -2665,7 +2688,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.2
     },
     {
       "test_id": "RAG-113",
@@ -2688,7 +2711,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-114",
@@ -2711,7 +2734,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 17.3
+      "latency_ms": 56.2
     },
     {
       "test_id": "RAG-115",
@@ -2733,7 +2756,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-116",
@@ -2750,7 +2773,7 @@
       "best_expected_similarity": 0.7954,
       "cited_keys": [
         "gold-plan-benefit-guide",
-        "gold-plan-benefit-guide"
+        "pa-physical-therapy-guide"
       ],
       "cited_expected": true,
       "cited_superseded": false,
@@ -2758,7 +2781,7 @@
       "facts_found": 0,
       "facts_total": 1,
       "unauthorized_candidates": [],
-      "latency_ms": 76.1
+      "latency_ms": 218.6
     },
     {
       "test_id": "RAG-117",
@@ -2782,7 +2805,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 76.8
+      "latency_ms": 202.2
     },
     {
       "test_id": "RAG-118",
@@ -2804,7 +2827,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 5.3
+      "latency_ms": 8.7
     },
     {
       "test_id": "RAG-119",
@@ -2826,7 +2849,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 1.4
+      "latency_ms": 2.6
     },
     {
       "test_id": "RAG-120",
@@ -2848,7 +2871,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 3.8
+      "latency_ms": 3.1
     },
     {
       "test_id": "RAG-121",
@@ -2870,7 +2893,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 1.5
+      "latency_ms": 2.4
     },
     {
       "test_id": "RAG-122",
@@ -2892,7 +2915,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-123",
@@ -2914,7 +2937,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-124",
@@ -2936,7 +2959,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-125",
@@ -2958,7 +2981,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.1
+      "latency_ms": 0.2
     },
     {
       "test_id": "RAG-126",
@@ -2980,7 +3003,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-127",
@@ -3002,7 +3025,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 0.0
+      "latency_ms": 0.1
     },
     {
       "test_id": "RAG-128",
@@ -3027,7 +3050,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 32.0
+      "latency_ms": 108.4
     },
     {
       "test_id": "RAG-129",
@@ -3054,7 +3077,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 86.0
+      "latency_ms": 359.4
     },
     {
       "test_id": "RAG-130",
@@ -3080,7 +3103,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 66.1
+      "latency_ms": 198.0
     },
     {
       "test_id": "RAG-131",
@@ -3103,7 +3126,7 @@
       "facts_found": 0,
       "facts_total": 0,
       "unauthorized_candidates": [],
-      "latency_ms": 31.7
+      "latency_ms": 95.7
     }
   ]
 }

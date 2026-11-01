@@ -1,11 +1,14 @@
 """Everyday customer questions get an answer instead of a referral to a person."""
 
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
 
 from app.core.config import get_settings
+from app.rag.generation import EvidenceItem, ExtractiveGenerator
 from app.rag.intent import Route, route
+from app.rag.wording import plain_words
 from tests.conftest import MEMBER_A, MEMBER_B, PROVIDER_A
 
 pytestmark = pytest.mark.postgres
@@ -59,6 +62,11 @@ def test_the_deductible_comes_from_the_members_plan(ask, question):
     assert "$750" in body["answer_text"] and "$3,000" not in body["answer_text"]
 
 
+def test_everyday_wording_finds_the_deductible_not_the_yearly_maximum(ask):
+    body = ask("how much do i owe before the plan starts paying")
+    assert "$750" in body["answer_text"] and "$4,000" not in body["answer_text"]
+
+
 def test_the_deductible_differs_by_plan(ask):
     assert "$3,000" in ask("What is my deductible?", MEMBER_B)["answer_text"]
 
@@ -80,6 +88,44 @@ def test_the_real_virtual_care_conflict_is_still_reported(ask):
 
 def test_answers_keep_the_customers_language(ask):
     assert "SYN-M-000001" in ask("What is my member ID?", language="hi")["answer_text"]
+
+
+@pytest.mark.parametrize(("question", "part"), [
+    ("how much do i owe before the plan starts paying", "deductible"),
+    ("is there a cap on PT sessions every year", "physical therapy"),
+    ("how do i find a doctor", "primary care provider"),
+    ("how do i file a claim", "reimbursement"),
+    ("they rejected my claim, what's the time limit to dispute it", "appeal"),
+    ("i lost my insurance card", "replacement printed member id card"),
+    ("how do i get my money back", "reimbursement claim"),
+    ("how do I pick a main doctor", "primary care provider"),
+])
+def test_everyday_words_become_the_documents_words(question, part):
+    assert part in plain_words(question).lower()
+
+
+def test_a_list_stays_with_its_lead_in_and_times_stay_whole():
+    content = "The claim must include:\n- A form.\n- A receipt.\nOpen 8:00 a.m. to 6:00 p.m. daily."
+    chunk = SimpleNamespace(content=content)
+    evidence = [EvidenceItem("C1", chunk)]
+    text = ExtractiveGenerator().generate("what must the claim include", evidence, []).answer_text
+    assert "The claim must include: A form. A receipt." in text
+    text = ExtractiveGenerator().generate("when is it open daily", evidence, []).answer_text
+    assert "8:00 a.m. to 6:00 p.m. daily." in text
+
+
+def test_ordinary_questions_are_left_alone():
+    question = "What is my physical therapy copay?"
+    assert plain_words(question) == question
+
+
+def test_a_gap_offers_next_steps_and_never_guesses(ask, app):
+    strict = {"chat_rate_limit_per_minute": 1000, "rag_min_relevance": 0.99}  # nothing is relevant enough
+    app.dependency_overrides[get_settings] = lambda: get_settings().model_copy(update=strict)
+    body = ask("Is acupuncture covered?")
+    assert body["evidence_status"] == "INSUFFICIENT" and "won't guess" in body["answer_text"]
+    assert body["proposed_actions"]
+    assert [r for r in body["records"] if r["kind"] == "suggestions"]
 
 
 @pytest.mark.parametrize(("question", "expected"), [

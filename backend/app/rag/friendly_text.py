@@ -200,7 +200,7 @@ GLOSSARY: tuple[tuple[str, dict[str, str]], ...] = (
 # Fixed assistant messages, matched by their English text. "en": None keeps the pipeline's own wording.
 FIXED: tuple[tuple[str, dict[str, str | None]], ...] = (
     (r"^I couldn't find information about this", {
-        "en": "I want to make sure you get the correct information. I couldn't confidently answer this using the information available, so I won't guess. I can help you contact our support team, and they won't need you to explain everything again.",
+        "en": "I want to make sure you get the correct information. I couldn't confidently answer this using the information available, so I won't guess. You can try one of the options here, or our support team can help, and they won't need you to explain everything again.",
         "te": "మీకు సరైన సమాచారం అందాలని నా ఉద్దేశం. అందుబాటులో ఉన్న సమాచారంతో నేను దీనికి నమ్మకంగా సమాధానం చెప్పలేకపోతున్నాను, అందుకే ఊహించి చెప్పను. మా సపోర్ట్ టీమ్‌ను సంప్రదించడంలో సహాయం చేస్తాను. మీరు అంతా మళ్లీ చెప్పాల్సిన అవసరం ఉండదు.",
         "hi": "मैं चाहता हूँ कि आपको सही जानकारी मिले। उपलब्ध जानकारी से मैं इसका भरोसेमंद जवाब नहीं दे पा रहा, इसलिए अनुमान नहीं लगाऊँगा। मैं सपोर्ट टीम से जुड़ने में मदद कर सकता हूँ। आपको सब कुछ दोबारा नहीं बताना पड़ेगा।",
     }),
