@@ -149,11 +149,11 @@ def test_readiness_question_checks_the_packet_against_its_stated_procedure(docs)
     answer = docs.ask(PROVIDER_A, "Check whether Zubin Testperson's uploaded documents contain the information "
                                   "required for authorization readiness.")
     text = answer["answer_text"]
-    assert "Lumbar spine MRI" in text and "Result: Documentation incomplete." in text
-    assert "Requested service date present: 2026-10-28" in text  # found, with its value
-    assert "Referral letter included" in text.split("Found:")[1].split("Missing:")[0]  # section heading counts
-    assert "Ordering provider identifier" in text.split("Missing:")[1]
-    assert "SYN-MBR-9001" in text.split("Needs a person to review:")[1]  # wrong format is flagged, not accepted
+    assert "Lumbar spine MRI" in text and "still missing" in text
+    assert "The date you want the service: 2026-10-28" in text  # found, with its value
+    assert "A referral letter" in text.split("Already there:")[1].split("Still needed:")[0]  # section heading counts
+    assert "10-digit provider number" in text.split("Still needed:")[1]
+    assert "SYN-MBR-9001" in text.split("A person needs to check:")[1]  # wrong format is flagged, not accepted
     assert "not an authorization approval" in answer["disclaimers"][0]
     assert [t["tool_name"] for t in answer["tool_executions"]] == ["read_my_documents", "check_document_readiness"]
     assert answer["proposed_actions"][0]["action_type"] == "START_READINESS_CHECK"
@@ -164,7 +164,7 @@ def test_readiness_question_checks_the_packet_against_its_stated_procedure(docs)
 def test_members_can_check_their_own_documents_without_creating_a_checklist(docs):
     docs.upload(MEMBER_A, PACKET_PAGE, "member_packet.pdf")
     answer = docs.ask(MEMBER_A, "Is my uploaded document member_packet.pdf ready for prior authorization?")
-    assert "Result: Documentation incomplete." in answer["answer_text"] and answer["proposed_actions"] == []
+    assert "still missing" in answer["answer_text"] and answer["proposed_actions"] == []
 
 
 def test_readiness_asks_which_procedure_when_the_document_doesnt_say(docs):
@@ -179,8 +179,8 @@ def test_a_standard_form_uses_the_same_result_as_the_checklist_rules(docs):
              "Ordering provider NPI: 1234567890", "Conservative therapy duration: 8 weeks"]
     docs.upload(PROVIDER_A, lines, "standard_form.pdf")
     answer = docs.ask(PROVIDER_A, "Is standard_form.pdf complete enough for lumbar MRI prior authorization?")
-    found, missing = answer["answer_text"].split("Found:")[1].split("Missing:")
-    assert "Referral letter included" in missing and "Member number present" in found
+    found, missing = answer["answer_text"].split("Already there:")[1].split("Still needed:")
+    assert "A referral letter" in missing and "Your member number" in found
 
 
 def test_reads_are_audited_and_no_document_text_is_stored_in_tool_logs(docs):

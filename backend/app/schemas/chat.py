@@ -14,6 +14,7 @@ AnswerType = Literal[
     "DOCUMENT_GROUNDED", "TOOL_RESULT", "CLARIFICATION", "INSUFFICIENT_EVIDENCE", "UNSUPPORTED_REQUEST", "ERROR"
 ]
 EvidenceStatus = Literal["SUPPORTED", "INSUFFICIENT", "CONFLICTING", "VERIFIED_RECORD", "NOT_APPLICABLE"]
+Language = Literal["en", "te", "hi"]
 ActionType = Literal["CREATE_SUPPORT_CASE", "UPLOAD_DOCUMENT", "START_READINESS_CHECK", "VIEW_CLAIM", "VIEW_CASE"]
 
 
@@ -21,6 +22,7 @@ class ChatRequest(RequestModel):
     session_id: UUID | None = None
     client_message_id: UUID
     message: str = Field(min_length=1, max_length=4000)
+    language: Language | None = Field(default=None, description="The customer's selected language.")
 
 
 class Citation(ApiModel):
@@ -63,7 +65,8 @@ class Record(ApiModel):
     claims | plan_benefits | requirements | support_case_proposal (a proposal is not a created case) |
     document_sources (the pages of the caller's own uploaded files that an answer quotes)."""
 
-    kind: Literal["claims", "plan_benefits", "requirements", "support_case_proposal", "document_sources"]
+    kind: Literal["claims", "plan_benefits", "requirements", "support_case_proposal", "document_sources",
+                  "suggestions", "translations"]
     data: dict[str, Any]
 
 
@@ -82,6 +85,7 @@ class ChatResponse(ApiModel):
     disclaimers: list[str]
     latency_ms: int
     created_at: UtcDatetime
+    language: Language = "en"
     data_environment: Literal["SYNTHETIC_PROTOTYPE"] = "SYNTHETIC_PROTOTYPE"
 
 
@@ -116,6 +120,18 @@ class SessionDetail(ApiModel):
     session_id: UUID
     title: str
     messages: list[HistoryMessage]
+
+class TranslateRequest(RequestModel):
+    language: Language
+
+
+class TranslateResponse(ApiModel):
+    message_id: UUID
+    language: Language
+    text: str
+    disclaimers: list[str]
+    complete: bool = Field(description="False when part of the text could only be shown in English.")
+
 
 class FeedbackRequest(RequestModel):
     rating: Literal["HELPFUL", "NOT_HELPFUL"]

@@ -89,13 +89,13 @@ All use the password you set as `SEED_USER_PASSWORD` in `backend/.env`.
 ## Tests and evaluation
 
 ```powershell
-cd backend;  .\.venv\Scripts\python -m pytest -ra    # 486 tests (needs the local PostgreSQL)
-cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 109 tests
+cd backend;  .\.venv\Scripts\python -m pytest -ra    # 525 tests (needs the local PostgreSQL)
+cd frontend; npm run lint; npx tsc --noEmit; npx vitest run   # 114 tests
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_rag         # RAG evaluation (131 items)
 cd backend;  .\.venv\Scripts\python -m scripts.evaluate_documents   # document AI evaluation
 ```
 
-Results recorded on 2026-10-27 (Phase 8): 486/486 backend tests (95% coverage), 109/109 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
+Results recorded on 2026-10-27 (Phase 8): 525/525 backend tests (95% coverage), 114/114 frontend tests, pip-audit and npm audit clean, secret scan 0 findings. RAG behavior accuracy is 87.8% (recall@5 100%), and document extraction and checklist correctness are 100% on the synthetic text-layer corpus. A bounded local load test (10 and 50 users) had 0% errors. Details and caveats: [docs/phase-8/test-report.md](docs/phase-8/test-report.md).
 
 ## Documentation
 
@@ -108,7 +108,7 @@ Results recorded on 2026-10-27 (Phase 8): 486/486 backend tests (95% coverage), 
 | 5 — Tool calling | [docs/phase-5/](docs/phase-5/): tool integration, API contracts, testing report |
 | 6 — Document AI and readiness | [docs/phase-6/](docs/phase-6/): architecture, processing guide, evaluation report |
 | 7 — Escalation, audit, dashboard | [docs/phase-7/](docs/phase-7/): case management, audit architecture, metric dictionary, testing report |
-| 8 — Verification and deployment | [docs/phase-8/](docs/phase-8/): requirements verification, test report, AI evaluation, security report, deployment guide, final demo guide |
+| 8 — Verification and deployment | [docs/phase-8/](docs/phase-8/): requirements verification, test report, AI evaluation, security report, deployment guide, final demo guide, [customer assistant](docs/phase-8/customer-assistant.md) |
 
 ## Known limitations
 

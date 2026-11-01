@@ -83,6 +83,7 @@ const RECORD_DATA: Record<ChatRecord["kind"], (d: Obj) => boolean> = {
   requirements: (d) => isStr(d.procedure_code) && isStr(d.disclaimer) && Array.isArray(d.requirements) && d.requirements.every(isRequirementItem),
   support_case_proposal: (d) =>
     (CASE_CATEGORIES as readonly string[]).includes(d.category as string) && isStr(d.summary) && isStr(d.idempotency_key),
+  suggestions: (d) => Array.isArray(d.options) && d.options.every((o) => isObj(o) && isStr(o.message) && isObj(o.label)),
   document_sources: (d) =>
     Array.isArray(d.sources) &&
     d.sources.every((s) => isObj(s) && isStr(s.marker) && isStr(s.filename) && isStr(s.excerpt) && typeof s.page === "number"),

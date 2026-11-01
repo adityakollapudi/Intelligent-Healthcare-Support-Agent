@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { SourceCitationList } from "../components/SourceCitation";
 import { ToolExecutionList, ToolRecords } from "../components/ToolRecords";
 import { EVIDENCE_STATUS_META, MetaBadge } from "../components/status";
 import { Alert, Button, ErrorState, PageHeader } from "../components/ui";
+import { ANSWER_LANGUAGES, CHAT_TEXT, QUICK_ACTIONS, WELCOME } from "../features/chat/chat-i18n";
 import { useSession } from "../features/auth/session";
 import { MAX_MESSAGE_LENGTH, useChat, validateMessage, type ChatMessage } from "../features/chat/chat-state";
 import { useRequest } from "../hooks/useRequest";
@@ -13,23 +14,7 @@ import { useWordReveal } from "../hooks/useWordReveal";
 import { features } from "../lib/features";
 import { formatDateTime, humanize } from "../lib/format";
 import { chatService, supportCasesService } from "../services";
-import { CASE_CATEGORIES, type CaseCategory, type CaseDetail, type CreateCaseRequest, type ProposedAction } from "../types/api";
-
-const SUGGESTIONS: Record<string, string[]> = {
-  MEMBER: [
-    "How many physical therapy visits does my plan cover?",
-    "What is the status of my claim SYN-CLM-2026-000101?",
-    "What does the claim status pending information mean?",
-    "How long do I have to appeal a denied claim?",
-    "Summarize my latest uploaded document",
-  ],
-  PROVIDER: [
-    "What documents are required for a lumbar MRI prior authorization?",
-    "Summarize my latest uploaded document",
-    "Within how many days must an in-network provider submit a claim?",
-  ],
-  default: ["How do I update my mailing address?", "What happens after a support case is created?"],
-};
+import { CASE_CATEGORIES, type CaseCategory, type CaseDetail, type ChatRecord, type CreateCaseRequest, type Language, type ProposedAction } from "../types/api";
 
 function proposalFrom(prefill: Record<string, unknown>): (CreateCaseRequest & { idempotency_key: string }) | null {
   const { category, summary, escalation_reason, related_session_id, idempotency_key } = prefill;
@@ -175,24 +160,95 @@ function AnswerFeedback({ messageId }: { messageId: string }) {
   );
 }
 
+/** Choices offered by the assistant; picking one sends its message through the normal chat path. */
+function GuidedOptions({ records }: { records: ChatRecord[] }) {
+  const chat = useChat();
+  const options = records.flatMap((r) => (r.kind === "suggestions" ? r.data.options : []));
+  if (options.length === 0) return null;
+  return (
+    <ul className="suggestions">
+      {options.map((o) => {
+        const label = o.label[chat.language] ?? o.label.en;
+        return (
+          <li key={o.message + label}>
+            <button type="button" className="chip" disabled={chat.pending} onClick={() => void chat.send({ label, message: o.message })}>
+              {label}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Copy and translate. The original answer stays available, and identifiers are never changed. */
+function MessageTools({ message, onTranslated }: { message: ChatMessage; onTranslated: (text: string, disclaimers: string[], complete: boolean) => void }) {
+  const chat = useChat();
+  const t = CHAT_TEXT[chat.language];
+  const [copied, setCopied] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.text);
+      setCopied(true);
+    } catch {
+      setFailed(true);
+    }
+  };
+  const translate = async (language: Language) => {
+    setBusy(true);
+    setFailed(false);
+    try {
+      const result = await chatService.translate(message.id, language);
+      onTranslated(result.text, result.disclaimers, result.complete);
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="message-tools" role="group" aria-label={t.answerTools}>
+      <button type="button" className="chip" onClick={() => void copy()}>
+        {copied ? t.copied : t.copy}
+      </button>
+      {ANSWER_LANGUAGES.map((l) => (
+        <button key={l.code} type="button" className="chip" disabled={busy} onClick={() => void translate(l.code)}>
+          {l.action}
+        </button>
+      ))}
+      {failed && <span className="field-error small" role="alert">{t.toolFailed}</span>}
+    </div>
+  );
+}
+
 function MessageBubble({ message, onReveal }: { message: ChatMessage; onReveal: () => void }) {
+  const chat = useChat();
   const isUser = message.sender === "USER";
+  const [translated, setTranslated] = useState<{ text: string; disclaimers: string[]; complete: boolean } | null>(null);
   const { shown, done } = useWordReveal(message.text, Boolean(message.reveal), onReveal);
+  const t = CHAT_TEXT[chat.language];
   const limited = message.answerType === "INSUFFICIENT_EVIDENCE" || message.answerType === "UNSUPPORTED_REQUEST";
   return (
     <li className={`message ${isUser ? "message-user" : "message-assistant"} ${limited ? "message-limited" : ""}`}>
-      <p className="message-sender">{isUser ? "You" : "Assistant"}</p>
+      <p className="message-sender">
+        {isUser ? t.you : t.assistant}
+        {message.createdAt && <time className="muted small" dateTime={message.createdAt}> · {formatDateTime(message.createdAt)}</time>}
+      </p>
       {/* Rendered as text: backend content is never interpreted as HTML. */}
       {/* Screen readers get the whole answer once, not every word as it appears. */}
       <p className="message-text" aria-hidden={!done}>
-        {shown}
+        {translated?.text ?? shown}
         {!done && <span className="reveal-caret" />}
       </p>
       {!done && <p className="sr-only">{message.text}</p>}
       {done && message.evidenceStatus && message.evidenceStatus !== "NOT_APPLICABLE" && (
         <MetaBadge meta={EVIDENCE_STATUS_META[message.evidenceStatus]} />
       )}
+      {translated && !translated.complete && <p className="muted small">{t.partlyEnglish}</p>}
       {done && message.toolExecutions && <ToolExecutionList executions={message.toolExecutions} />}
+      {done && message.records && <GuidedOptions records={message.records} />}
       {done && message.records && <ToolRecords records={message.records} />}
       {done && message.citations && <SourceCitationList citations={message.citations} />}
       {done && message.proposedActions && message.proposedActions.length > 0 && (
@@ -202,13 +258,54 @@ function MessageBubble({ message, onReveal }: { message: ChatMessage; onReveal: 
           ))}
         </div>
       )}
-      {done && message.disclaimers?.map((d) => (
+      {done && (translated?.disclaimers ?? message.disclaimers)?.map((d) => (
         <p key={d} className="muted small">
           {d}
         </p>
       ))}
+      {done && !isUser && <MessageTools message={message} onTranslated={(text, disclaimers, complete) => setTranslated({ text, disclaimers, complete })} />}
       {done && !isUser && <AnswerFeedback messageId={message.id} />}
     </li>
+  );
+}
+
+/** The first thing a customer sees: a greeting and the things they can do. */
+function WelcomePanel() {
+  const chat = useChat();
+  const { can } = useSession();
+  const navigate = useNavigate();
+  const actions = QUICK_ACTIONS.filter((a) => !a.permission || can(a.permission));
+  return (
+    <div className="chat-welcome">
+      <p className="welcome-text">{WELCOME[chat.language]}</p>
+      <ul className="quick-actions">
+        {actions.map((a) => (
+          <li key={a.id}>
+            <button
+              type="button"
+              className="quick-action"
+              disabled={chat.pending}
+              onClick={() => (a.path ? navigate(a.path) : void chat.send({ label: a.label[chat.language], message: a.message ?? "" }))}
+            >
+              {a.label[chat.language]}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function LanguageSelector() {
+  const chat = useChat();
+  return (
+    <div className="language-select" role="group" aria-label={CHAT_TEXT[chat.language].languageLabel}>
+      {ANSWER_LANGUAGES.map((l) => (
+        <button key={l.code} type="button" className="chip" lang={l.code} aria-pressed={chat.language === l.code} onClick={() => chat.setLanguage(l.code)}>
+          {l.name}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -249,8 +346,8 @@ function RecentConversations() {
 }
 
 export function ChatPage() {
-  const { user } = useSession();
   const chat = useChat();
+  const t = CHAT_TEXT[chat.language];
   const [touched, setTouched] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const listRef = useRef<HTMLOListElement>(null);
@@ -272,18 +369,16 @@ export function ChatPage() {
     if (!invalid) void chat.send();
   };
 
-  const suggestions = SUGGESTIONS[user?.role ?? ""] ?? SUGGESTIONS.default!;
-
   return (
     <div className="chat-layout">
       {chat.available && <RecentConversations />}
       <div className="chat-page">
         <PageHeader
-          title="Assistant"
-          description="Ask administrative questions about benefits, claims processes, documents and support. Answers come from synthetic plan documents and show their sources."
+          title={t.title}
+          description={t.description}
           actions={
             <Button variant="secondary" onClick={() => setConfirmReset(true)} disabled={chat.messages.length === 0 && !chat.draft}>
-              New conversation
+              {t.newConversation}
             </Button>
           }
         />
@@ -293,21 +388,10 @@ export function ChatPage() {
           </Alert>
         )}
 
-        <section className="chat-panel" aria-label="Conversation">
+        <LanguageSelector />
+        <section className="chat-panel" aria-label={t.conversation}>
           {chat.messages.length === 0 ? (
-            <div className="chat-empty">
-              <p className="state-title">Start a conversation</p>
-              <p className="muted">Try one of these:</p>
-              <ul className="suggestions">
-                {suggestions.map((s) => (
-                  <li key={s}>
-                    <button type="button" className="chip" onClick={() => chat.setDraft(s)}>
-                      {s}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <WelcomePanel />
           ) : (
             <ol ref={listRef} className="messages" aria-live="polite">
               {chat.messages.map((m) => (
@@ -316,8 +400,8 @@ export function ChatPage() {
             </ol>
           )}
           {chat.pending && (
-            <p className="muted" role="status">
-              Working on it…
+            <p className="typing-indicator muted" role="status">
+              <span className="typing-dots" aria-hidden="true" /> {t.typing}
             </p>
           )}
         </section>
@@ -344,7 +428,7 @@ export function ChatPage() {
             rows={3}
             value={chat.draft}
             maxLength={MAX_MESSAGE_LENGTH + 1}
-            placeholder="Type your question…"
+            placeholder={t.placeholder}
             aria-invalid={validation ? true : undefined}
             aria-describedby="chat-help"
             disabled={chat.pending}
@@ -358,25 +442,25 @@ export function ChatPage() {
           />
           <div className="composer-footer">
             <p id="chat-help" className={validation ? "field-error" : "muted small"}>
-              {validation ?? `Enter to send · Shift+Enter for a new line · ${chat.draft.trim().length}/${MAX_MESSAGE_LENGTH}`}
+              {validation ?? `${t.composerHelp} · ${chat.draft.trim().length}/${MAX_MESSAGE_LENGTH}`}
             </p>
             <Button type="submit" busy={chat.pending}>
-              Send
+              {t.send}
             </Button>
           </div>
         </form>
 
         <ConfirmDialog
           open={confirmReset}
-          title="Start a new conversation?"
-          confirmLabel="Start new"
+          title={t.clearTitle}
+          confirmLabel={t.clearConfirm}
           onCancel={() => setConfirmReset(false)}
           onConfirm={() => {
             chat.reset();
             setConfirmReset(false);
           }}
         >
-          The current conversation is cleared from this screen. It stays available under Recent conversations.
+          {t.clearBody}
         </ConfirmDialog>
       </div>
     </div>

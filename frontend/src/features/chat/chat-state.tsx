@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 import { features } from "../../lib/features";
 import { chatService } from "../../services";
-import type { AnswerType, ChatRecord, Citation, EvidenceStatus, HistoryMessage, ProposedAction, ToolExecution } from "../../types/api";
+import type { AnswerType, ChatRecord, Citation, EvidenceStatus, HistoryMessage, Language, ProposedAction, ToolExecution } from "../../types/api";
 import { useSession } from "../auth/session";
 
 export const MAX_MESSAGE_LENGTH = 4000;
@@ -22,6 +22,7 @@ export interface ChatMessage {
   toolExecutions?: ToolExecution[];
   /** A new answer, revealed word by word. Reopened history appears at once. */
   reveal?: boolean;
+  createdAt?: string;
 }
 
 interface ChatValue {
@@ -32,7 +33,9 @@ interface ChatValue {
   pending: boolean;
   error: unknown;
   unavailableNotice: boolean;
-  send: () => Promise<void>;
+  send: (choice?: { label: string; message: string }) => Promise<void>;
+  language: Language;
+  setLanguage: (language: Language) => void;
   reset: () => void;
   openSession: (sessionId: string) => Promise<void>;
   sessionsVersion: number;
@@ -60,6 +63,7 @@ function fromHistory(m: HistoryMessage): ChatMessage {
     disclaimers: m.disclaimers,
     records: m.records ?? [],
     toolExecutions: m.tool_executions ?? [],
+    createdAt: m.created_at,
   };
 }
 
@@ -68,6 +72,7 @@ export function ChatProvider({ children, available = features.chat.available }: 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [language, setLanguage] = useState<Language>("en");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [unavailableNotice, setUnavailableNotice] = useState(false);
@@ -90,29 +95,31 @@ export function ChatProvider({ children, available = features.chat.available }: 
   // A different (or no) user must never see the previous user's conversation.
   useEffect(() => reset(), [user?.id, reset]);
 
-  const send = useCallback(async () => {
-    if (pending || validateMessage(draft)) return;
+  const send = useCallback(async (choice?: { label: string; message: string }) => {
+    if (pending || (!choice && validateMessage(draft))) return;
     if (!available) {
       setUnavailableNotice(true); // the draft is kept; nothing is sent or invented
       return;
     }
-    const text = draft.trim();
+    const text = choice?.message ?? draft.trim();
     const clientMessageId = retryId.current?.text === text ? retryId.current.id : crypto.randomUUID();
     retryId.current = { text, id: clientMessageId };
     const controller = new AbortController();
     inFlight.current = controller;
     setPending(true);
     setError(null);
-    setMessages((m) => [...m, { id: clientMessageId, sender: "USER", text }]);
-    setDraft("");
+    const now = new Date().toISOString();
+    setMessages((m) => [...m, { id: clientMessageId, sender: "USER", text: choice?.label ?? text, createdAt: now }]);
+    if (!choice) setDraft("");
     try {
       const response = await chatService.send(
-        { session_id: sessionId, client_message_id: clientMessageId, message: text },
+        { session_id: sessionId, client_message_id: clientMessageId, message: text, language },
         controller.signal,
       );
       retryId.current = null;
       if (response.session_id !== sessionId) setSessionsVersion((v) => v + 1);
       setSessionId(response.session_id);
+      if (response.language) setLanguage(response.language); // typing in Telugu or Hindi switches the conversation
       setMessages((m) => [
         ...m,
         {
@@ -127,13 +134,14 @@ export function ChatProvider({ children, available = features.chat.available }: 
           records: response.records ?? [],
           toolExecutions: response.tool_executions ?? [],
           reveal: true,
+          createdAt: response.created_at ?? new Date().toISOString(),
         },
       ]);
     } catch (err) {
       if (controller.signal.aborted) return;
       // Put the question back so the user can retry without retyping (same id → no duplicate on the server).
       setMessages((m) => m.filter((msg) => msg.id !== clientMessageId));
-      setDraft(text);
+      if (!choice) setDraft(text);
       setError(err);
     } finally {
       if (inFlight.current === controller) {
@@ -141,7 +149,7 @@ export function ChatProvider({ children, available = features.chat.available }: 
         setPending(false);
       }
     }
-  }, [available, draft, pending, sessionId]);
+  }, [available, draft, language, pending, sessionId]);
 
   const openSession = useCallback(
     async (id: string) => {
@@ -163,9 +171,9 @@ export function ChatProvider({ children, available = features.chat.available }: 
   const value = useMemo(
     () => ({
       messages, sessionId, draft, setDraft, pending, error, unavailableNotice, send, reset, openSession,
-      sessionsVersion, available,
+      sessionsVersion, available, language, setLanguage,
     }),
-    [messages, sessionId, draft, pending, error, unavailableNotice, send, reset, openSession, sessionsVersion, available],
+    [messages, sessionId, draft, pending, error, unavailableNotice, send, reset, openSession, sessionsVersion, available, language],
   );
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

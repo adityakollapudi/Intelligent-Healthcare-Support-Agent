@@ -382,3 +382,63 @@ describe("readiness screen basics", () => {
     for (const label of ["Satisfied", "Missing", "Unreadable", "Needs manual review"]) expect(screen.getAllByText(label).length).toBeGreaterThan(0);
   });
 });
+
+describe("customer-friendly assistant", () => {
+  it("welcomes the customer and quick actions send real questions", async () => {
+    const { calls } = mockApi({ ...authRoutes("MEMBER"), "POST /chat": () => json(200, chatAnswer()) });
+    const { user } = await renderSignedIn();
+    expect(await screen.findByText(/Welcome to your healthcare support portal/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Check My Claim Status" }));
+    await screen.findAllByText(/limited to 20 visits/);
+    expect(calls.find((c) => c.path === "/chat")!.body).toMatchObject({ message: "Show my claims", language: "en" });
+  });
+
+  it("hides quick actions the role can't use", async () => {
+    mockApi({ ...authRoutes("PROVIDER") });
+    const { navigate } = await renderSignedIn();
+    navigate("/chat");
+    await screen.findByRole("button", { name: "Understand My Health Benefits" });
+    expect(screen.queryByRole("button", { name: "Check My Claim Status" })).not.toBeInTheDocument();
+  });
+
+  it("switches the screen and the requested language", async () => {
+    const { calls } = mockApi({ ...authRoutes("MEMBER"), "POST /chat": () => json(200, { ...chatAnswer(), language: "te" }) });
+    const { user } = await renderSignedIn();
+    await user.click(await screen.findByRole("button", { name: "తెలుగు" }));
+    expect(screen.getByText(/మీ హెల్త్‌కేర్ సపోర్ట్ పోర్టల్‌కు స్వాగతం/)).toBeInTheDocument();
+    await user.type(screen.getByPlaceholderText("మీ ప్రశ్న టైప్ చేయండి…"), "hello");
+    await user.keyboard("{Enter}");
+    await screen.findAllByText(/limited to 20 visits/);
+    expect(calls.find((c) => c.path === "/chat")!.body).toMatchObject({ language: "te" });
+  });
+
+  it("translates an answer without asking again, and says when part stays in English", async () => {
+    const { calls } = mockApi({
+      ...authRoutes("MEMBER"),
+      "POST /chat": () => json(200, chatAnswer({ message_id: "fixed-1" })),
+      "POST /chat/messages/fixed-1/translate": () =>
+        json(200, { message_id: "fixed-1", language: "hi", text: "अनुवादित जवाब", disclaimers: [], complete: false }),
+    });
+    const { user } = await renderSignedIn();
+    await user.type(screen.getByLabelText("Your question"), "PT visits?");
+    await user.keyboard("{Enter}");
+    await user.click(await screen.findByRole("button", { name: "हिन्दी में दिखाएँ" }));
+    expect(await screen.findByText("अनुवादित जवाब")).toBeInTheDocument();
+    expect(screen.getByText(/still in English/)).toBeInTheDocument();
+    expect(calls.filter((c) => c.path === "/chat")).toHaveLength(1);
+  });
+
+  it("guided choices send their message and show the customer's words", async () => {
+    const options = [{ label: { en: "What my plan covers", te: "ప్లాన్", hi: "प्लान" }, message: "Show my plan benefits" }];
+    const { calls } = mockApi({
+      ...authRoutes("MEMBER"),
+      "POST /chat": () => json(200, { ...chatAnswer(), records: [{ kind: "suggestions", data: { options } }] }),
+    });
+    const { user } = await renderSignedIn();
+    await user.type(screen.getByLabelText("Your question"), "I'm lost");
+    await user.keyboard("{Enter}");
+    await user.click(await screen.findByRole("button", { name: "What my plan covers" }));
+    await waitFor(() => expect(calls.filter((c) => c.path === "/chat")).toHaveLength(2));
+    expect(calls.filter((c) => c.path === "/chat")[1]!.body).toMatchObject({ message: "Show my plan benefits" });
+  });
+});

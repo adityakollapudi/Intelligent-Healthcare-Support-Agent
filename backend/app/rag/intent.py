@@ -17,6 +17,7 @@ class Intent(StrEnum):
     CLAIM_STATUS = "CLAIM_STATUS"  # own claim records (get_claim_status)
     REQUIRED_DOCUMENTS = "REQUIRED_DOCUMENTS"  # configured requirement sets (get_required_documents)
     UPLOADED_DOCUMENT = "UPLOADED_DOCUMENT"  # the caller's own uploaded files (read_my_documents)
+    GUIDED_HELP = "GUIDED_HELP"  # the customer isn't sure what to ask
     SUPPORT_CASE_CREATE = "SUPPORT_CASE_CREATE"  # create_support_case (proposal + user confirmation)
     SUPPORT_CASE_TRACK = "SUPPORT_CASE_TRACK"
     ACCOUNT_SPECIFIC = "ACCOUNT_SPECIFIC"  # balances, accumulators, authorization decisions: no tool exists
@@ -30,6 +31,8 @@ class Route(StrEnum):
     BENEFITS_TOOL = "BENEFITS_TOOL"
     REQUIREMENTS = "REQUIREMENTS"  # tool if a configured procedure matches, otherwise RAG
     UPLOADED_DOCUMENT = "UPLOADED_DOCUMENT"
+    GUIDED = "GUIDED"  # offer simple choices instead of an answer
+    SIMPLIFY = "SIMPLIFY"  # explain the previous answer in simpler words
     CASE_CREATE = "CASE_CREATE"
     CASE_TRACK = "CASE_TRACK"
     ACCOUNT_LOOKUP_UNAVAILABLE = "ACCOUNT_LOOKUP_UNAVAILABLE"
@@ -89,6 +92,17 @@ _MY_UPLOAD = re.compile(
     r"\.pdf\b",
     re.I,
 )
+_GUIDED = re.compile(
+    r"(do not|don'?t|dont) (really )?(understand|get) (my|the|this)? ?(health )?(insurance|plan|coverage|benefits?|policy)|"
+    r"\bconfus(ed|ing)\b|not sure what to ask|where do i (start|begin)|what can you (do|help)|how can you help|"
+    r"^\s*(hi|hello|hey|namaste|help|help me|i need help)\W*$",
+    re.I,
+)
+_SIMPLIFY = re.compile(
+    r"^\s*(sorry,? )?(i )?(still )?(do not|don'?t|dont) (understand|get it)\W*$|in simple(r)? (words|terms)|"
+    r"explain .{0,20}simply|too (complicated|technical)|^\s*simpler\W*$|what does that mean",
+    re.I,
+)
 _READINESS = re.compile(
     r"\b(readiness|ready for|ready to submit|checklist|requirements?|required|anything missing|what('s| is) missing|"
     r"complete enough|is .{0,30}complete)\b",
@@ -140,6 +154,10 @@ def route(question: str, *, has_history: bool) -> tuple[Intent, Route]:
     q = question.strip()
     if _DISCLOSURE.search(q) or _OTHER_PEOPLE.search(q):
         return Intent.UNSUPPORTED_OR_AMBIGUOUS, Route.PROMPT_DISCLOSURE
+    if _SIMPLIFY.search(q):
+        return Intent.GUIDED_HELP, Route.SIMPLIFY
+    if _GUIDED.search(q):
+        return Intent.GUIDED_HELP, Route.GUIDED
     howto = _UPLOAD_HOWTO.search(q) and not (wants_readiness(q) and re.search(r"\b(uploaded|my|this|\w+'s)\b", q))
     if _MY_UPLOAD.search(q) and not howto and not _ADVICE.search(q):
         return Intent.UPLOADED_DOCUMENT, Route.UPLOADED_DOCUMENT
@@ -157,12 +175,23 @@ def route(question: str, *, has_history: bool) -> tuple[Intent, Route]:
         return Intent.CLAIM_STATUS, Route.CLAIM_TOOL
     if PLAN_CODE.search(q) or _BENEFITS_TOOL.search(q):
         return Intent.BENEFITS_INFO, Route.BENEFITS_TOOL
+    if is_generic_documents(q) or is_authorization_process(q):
+        return Intent.REQUIRED_DOCUMENTS, Route.REQUIREMENTS
     content = [w for w in _WORD.findall(q.lower()) if w not in _STOP]
     if len(content) < 2 and not (has_history and is_follow_up(q)):
         return Intent.UNSUPPORTED_OR_AMBIGUOUS, Route.CLARIFY  # e.g. "the form": too little to route on
     if _REQUIREMENT_WORDS.search(q):
         return Intent.REQUIRED_DOCUMENTS, Route.REQUIREMENTS
     return Intent.GENERAL_FAQ, Route.RAG
+
+
+def is_authorization_process(question: str) -> bool:
+    return bool(re.fullmatch(r"\s*(how does (prior )?authori[sz]ation work|(prior )?authori[sz]ation process)\W*",
+                             question, re.I))
+
+
+def is_generic_documents(question: str) -> bool:
+    return bool(re.fullmatch(r"\s*(which|what) documents do i need\W*", question, re.I))
 
 
 def wants_readiness(question: str) -> bool:

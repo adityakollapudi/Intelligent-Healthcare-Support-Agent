@@ -18,7 +18,7 @@ from app.core.config import Settings
 from app.core.exceptions import AppError, NotFoundError, RateLimitedError
 from app.models import ConversationMessage, ConversationSession, MessageCitation
 from app.models.enums import AuditOutcome
-from app.rag import pipeline
+from app.rag import friendly, language, pipeline
 from app.rag.embeddings import Embedder
 from app.rag.errors import AIServiceUnavailableError
 from app.rag.generation import Generator
@@ -35,8 +35,10 @@ from app.schemas.chat import (
     SessionPage,
     SessionSummary,
     ToolExecution,
+    TranslateResponse,
 )
 from app.services.audit_service import AuditService
+from app.services.translation import TranslationUnavailable, Translator
 from app.tools.executor import ToolContext, ToolExecutor
 
 logger = logging.getLogger(__name__)
@@ -93,6 +95,23 @@ def _citation(c: MessageCitation) -> Citation:
     )
 
 
+def _translate(translator: Translator, text: str, lang: str) -> str | None:
+    """None when no translation is available; the caller keeps what it has (safe fallback)."""
+    try:
+        return translator.translate(text, lang)
+    except TranslationUnavailable as exc:
+        logger.info("translation_unavailable", extra={"reason": str(exc)})
+        return None
+
+
+def _visible_records(msg: ConversationMessage) -> list[Record]:
+    return [Record(**r) for r in msg.records if r["kind"] != "translations"]
+
+
+def _language_of(msg: ConversationMessage) -> str:
+    return next((r["data"]["language"] for r in msg.records if r["kind"] == "translations"), "en")
+
+
 def _response(session_id: UUID, msg: ConversationMessage, intent: str) -> ChatResponse:
     return ChatResponse(
         session_id=session_id,
@@ -103,12 +122,13 @@ def _response(session_id: UUID, msg: ConversationMessage, intent: str) -> ChatRe
         answer_text=msg.content,
         citations=[_citation(c) for c in msg.citations],
         tool_executions=[ToolExecution(**t) for t in msg.tool_executions],
-        records=[Record(**r) for r in msg.records],
+        records=_visible_records(msg),
         proposed_actions=[ProposedAction(**a) for a in msg.proposed_actions],
         escalation=Escalation(offered=msg.escalation_offered, reason=msg.escalation_reason),
         disclaimers=list(msg.disclaimers),
         latency_ms=msg.latency_ms or 0,
         created_at=msg.created_at,
+        language=_language_of(msg),
     )
 
 
@@ -120,9 +140,11 @@ def handle_message(
     generator: Generator,
     principal: Principal,
     body: ChatRequest,
+    translator: Translator,
 ) -> ChatResponse:
     started = time.perf_counter()
     now = datetime.now(UTC)
+    reply_language = language.resolve(body.language, body.message)
 
     if body.session_id:
         session = _owned_session(db, audit, principal, body.session_id)
@@ -180,7 +202,7 @@ def handle_message(
         requested_by="llm" if generator.name == "anthropic" else "router",
     )
     ctx = pipeline.TurnContext(
-        question=body.message,
+        question=language.understand(body.message, reply_language),
         history=history,
         scope=RetrievalScope.for_user(principal.role, principal.plan_id),
         executor=executor,
@@ -205,12 +227,20 @@ def handle_message(
         )
         raise
 
+    presented = friendly.present(result)
+    complete = {lang: not presented.partial for lang in language.SUPPORTED}
+    complete["en"] = True
+    if reply_language != "en" and presented.partial:
+        translated = _translate(translator, presented.text["en"], reply_language)
+        if translated:
+            presented.text[reply_language], complete[reply_language] = translated, True
+
     latency_ms = int((time.perf_counter() - started) * 1000)
     user_msg.intent = result.intent
     reply = ConversationMessage(
         session_id=session.id,
         sender="ASSISTANT",
-        content=result.answer_text,
+        content=presented.text[reply_language],
         reply_to_id=user_msg.id,
         intent=result.intent,
         answer_type=result.answer_type,
@@ -219,12 +249,17 @@ def handle_message(
         escalation_offered=result.escalation_reason is not None,
         escalation_reason=result.escalation_reason,
         proposed_actions=[a.__dict__ for a in result.actions],
-        disclaimers=result.disclaimers,
+        disclaimers=presented.disclaimers[reply_language],
         gap_topic=result.gap_topic,
         latency_ms=latency_ms,
         tool_executions=[{"tool_name": t.tool_name, "result_status": t.status, "summary": t.summary}
                          for t in result.tool_results],
-        records=result.records,
+        records=[
+            *result.records,
+            *([{"kind": "suggestions", "data": {"options": presented.suggestions}}] if presented.suggestions else []),
+            {"kind": "translations", "data": {"language": reply_language, "texts": presented.text, "complete": complete,
+                                              "disclaimers": presented.disclaimers}},
+        ],
     )
     reply.citations = [
         MessageCitation(
@@ -283,6 +318,29 @@ def handle_message(
     return _response(session.id, reply, result.intent)
 
 
+def translate_message(db: Session, audit: AuditService, principal: Principal, translator: Translator,
+                      message_id: UUID, target: str) -> TranslateResponse:
+    """One of my answers in another language, without asking again. Wording written for this app is
+    instant; other text uses the translator when one is configured and otherwise stays in English."""
+    msg = db.get(ConversationMessage, message_id)
+    session = db.get(ConversationSession, msg.session_id) if msg else None
+    if msg is None or msg.sender != "ASSISTANT" or session is None or session.user_id != principal.user_id:
+        audit.record("ACCESS_DENIED", AuditOutcome.DENIED, actor=principal, resource_type="conversation_message",
+                     resource_ref=str(message_id), reason_code="NOT_OWNER")
+        raise NotFoundError()
+    stored = next((r["data"] for r in msg.records if r["kind"] == "translations"), None)
+    if stored is None:  # answers from before this feature exist in English only
+        stored = {"texts": {"en": msg.content}, "complete": {"en": True}, "disclaimers": {"en": list(msg.disclaimers)}}
+    text = stored["texts"].get(target, stored["texts"]["en"])
+    complete = stored["complete"].get(target, False)
+    if not complete:
+        translated = _translate(translator, stored["texts"]["en"], target)
+        if translated:
+            text, complete = translated, True
+    disclaimers = stored["disclaimers"].get(target, stored["disclaimers"]["en"])
+    return TranslateResponse(message_id=msg.id, language=target, text=text, disclaimers=disclaimers, complete=complete)
+
+
 def list_sessions(db: Session, principal: Principal, limit: int) -> SessionPage:
     rows = db.scalars(
         select(ConversationSession)
@@ -319,7 +377,7 @@ def get_session(db: Session, audit: AuditService, principal: Principal, session_
                 evidence_status=m.evidence_status,
                 citations=[_citation(c) for c in m.citations],
                 tool_executions=[ToolExecution(**t) for t in m.tool_executions],
-                records=[Record(**r) for r in m.records],
+                records=_visible_records(m),
                 proposed_actions=[ProposedAction(**a) for a in m.proposed_actions],
                 disclaimers=list(m.disclaimers),
                 created_at=m.created_at,

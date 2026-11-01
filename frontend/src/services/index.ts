@@ -25,6 +25,8 @@ import {
   isSessionPage,
 } from "../lib/validators";
 import type {
+  Language,
+  TranslatedAnswer,
   AdminMetrics,
   AgentSummary,
   AuditEvent,
@@ -86,12 +88,19 @@ export const benefitsService = {
 
 // Phase 4 chat API (doc 06 §3.3).
 export const chatService = {
-  send: (body: { session_id: string | null; client_message_id: string; message: string }, signal?: AbortSignal) =>
+  send: (body: { session_id: string | null; client_message_id: string; message: string; language: Language }, signal?: AbortSignal) =>
     apiRequest<ChatResponse>("/chat", { method: "POST", body, signal, validate: isChatResponse }),
   sessions: (signal?: AbortSignal) =>
     apiRequest<{ items: SessionSummary[] }>("/chat/sessions", { query: { limit: 20 }, signal, validate: isSessionPage }),
   session: (sessionId: string, signal?: AbortSignal) =>
     apiRequest<SessionDetail>(`/chat/sessions/${encodeURIComponent(sessionId)}`, { signal, validate: isSessionDetail }),
+  /** One of my answers in another language, without asking again. */
+  translate: (messageId: string, language: Language) =>
+    apiRequest<TranslatedAnswer>(`/chat/messages/${encodeURIComponent(messageId)}/translate`, {
+      method: "POST",
+      body: { language },
+      validate: (v): v is TranslatedAnswer => typeof v === "object" && v !== null && typeof (v as { text?: unknown }).text === "string",
+    }),
   /** FR-034: rate one of my assistant answers; re-rating replaces the earlier rating. */
   feedback: (messageId: string, rating: "HELPFUL" | "NOT_HELPFUL") =>
     apiRequest<{ message_id: string; rating: string; updated_at: string }>(

@@ -10,10 +10,20 @@ from app.core.config import Settings, get_settings
 from app.db.session import get_db
 from app.rag.embeddings import Embedder, get_embedder
 from app.rag.generation import Generator, get_generator
-from app.schemas.chat import ChatRequest, ChatResponse, FeedbackRequest, FeedbackResponse, SessionDetail, SessionPage
+from app.schemas.chat import (
+    ChatRequest,
+    ChatResponse,
+    FeedbackRequest,
+    FeedbackResponse,
+    SessionDetail,
+    SessionPage,
+    TranslateRequest,
+    TranslateResponse,
+)
 from app.schemas.common import ErrorResponse
 from app.services import chat_service, feedback_service
 from app.services.audit_service import AuditService, get_audit_service
+from app.services.translation import Translator, get_translator
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -41,8 +51,22 @@ def post_chat(
     settings: Annotated[Settings, Depends(get_settings)],
     embedder: Annotated[Embedder, Depends(get_embedder)],
     generator: Annotated[Generator, Depends(get_generator)],
+    translator: Annotated[Translator, Depends(get_translator)],
 ) -> ChatResponse:
-    return chat_service.handle_message(db, settings, audit, embedder, generator, principal, body)
+    return chat_service.handle_message(db, settings, audit, embedder, generator, principal, body, translator)
+
+
+@router.post("/messages/{message_id}/translate", response_model=TranslateResponse, responses=_ERRORS,
+             summary="Show one of my answers in another language")
+def translate_message(
+    message_id: UUID,
+    body: TranslateRequest,
+    db: Db,
+    audit: Audit,
+    principal: ChatUser,
+    translator: Annotated[Translator, Depends(get_translator)],
+) -> TranslateResponse:
+    return chat_service.translate_message(db, audit, principal, translator, message_id, body.language)
 
 
 @router.get("/sessions", response_model=SessionPage, summary="My recent conversations", responses=_ERRORS)

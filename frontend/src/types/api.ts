@@ -192,7 +192,24 @@ export type ChatRecord =
   | { kind: "plan_benefits"; data: BenefitsResponse }
   | { kind: "requirements"; data: RequirementSet }
   | { kind: "support_case_proposal"; data: SupportCaseProposal }
-  | { kind: "document_sources"; data: { sources: DocumentSource[] } };
+  | { kind: "document_sources"; data: { sources: DocumentSource[] } }
+  | { kind: "suggestions"; data: { options: GuidedOption[] } };
+
+export type Language = "en" | "te" | "hi";
+
+/** A choice the assistant offers; `message` is what gets sent when the customer picks it. */
+export interface GuidedOption {
+  label: Record<Language, string>;
+  message: string;
+}
+
+export interface TranslatedAnswer {
+  message_id: string;
+  language: Language;
+  text: string;
+  disclaimers: string[];
+  complete: boolean;
+}
 
 /** A page of the caller's own uploaded file that an answer quotes. */
 export interface DocumentSource {
@@ -392,6 +409,7 @@ export interface ChatResponse {
   tool_executions: ToolExecution[];
   records: ChatRecord[];
   proposed_actions: ProposedAction[];
+  language?: Language;
   escalation: { offered: boolean; reason: string | null };
   disclaimers: string[];
   latency_ms: number;

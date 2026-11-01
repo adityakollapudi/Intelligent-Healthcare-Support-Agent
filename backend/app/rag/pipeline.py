@@ -34,7 +34,9 @@ from app.rag.intent import (
     Intent,
     Route,
     benefit_category,
+    is_authorization_process,
     is_follow_up,
+    is_generic_documents,
     route,
     wants_advice,
     wants_readiness,
@@ -87,6 +89,11 @@ class PipelineResult:
     generation_ms: int = 0
     tool_results: list[ToolResult] = field(default_factory=list)
     records: list[dict[str, Any]] = field(default_factory=list)
+    # Read by the customer-friendly layer (app.rag.friendly): which guided reply to show, its choices as
+    # (label, message to send), and the earlier answer to simplify.
+    guide: str | None = None
+    options: list[tuple[str, str]] = field(default_factory=list)
+    source_text: str | None = None
 
 
 @dataclass
@@ -131,9 +138,13 @@ def _case_category(intent: str, history: list[tuple[str, str]]) -> str:
 
 
 def _case_summary(question: str, history: list[tuple[str, str]]) -> str:
+    """Written for the support agent, so the customer doesn't have to explain everything again."""
     previous = next((t for r, t in reversed(history) if r == "user" and len(t) > 15), None)
     base = previous if previous and len(question) < 60 else question
     summary = f"Support requested from the assistant. User's question: {base}".strip()
+    earlier = [t for r, t in history if r == "user" and t != base][-3:]
+    if earlier:
+        summary += " Earlier in this conversation they asked: " + " | ".join(earlier)
     return summary[:1000]
 
 
@@ -157,9 +168,37 @@ def case_offer(ctx: TurnContext, reason: str, category: str) -> Action:
     )
 
 
+def _help_options(ctx: TurnContext) -> list[tuple[str, str]]:
+    options = [("opt_covers", "Show my plan benefits"), ("opt_pay", "How much will I pay? Show my plan benefits")]
+    if ctx.can_view_claims:
+        options.append(("opt_claim", "Show my claims"))
+    options.append(("opt_documents", "Which documents do I need?"))
+    if ctx.can_create_cases:
+        options.append(("opt_person", "I want to talk to a person"))
+    return options
+
+
+def _guided_turn(ctx: TurnContext, intent: str, guide: str, source: str | None = None) -> PipelineResult:
+    return PipelineResult(intent, "CLARIFICATION", "NOT_APPLICABLE", "Here are some things I can help with.",
+                          guide=guide, options=_help_options(ctx), source_text=source)
+
+
+def _procedure_choices(db: Session, ctx: TurnContext, intent: str) -> PipelineResult:
+    sets = requirements_service.active_sets(db)
+    options = [(s.display_name.replace(" (fictional requirement set)", ""),
+                f"What documents are required for {s.aliases[0]} prior authorization?") for s in sets]
+    return PipelineResult(intent, "CLARIFICATION", "NOT_APPLICABLE", "Which procedure is it for?",
+                          guide="procedures", options=options)
+
+
 def run(db: Session, settings: Settings, embedder: Embedder, generator: Generator, ctx: TurnContext) -> PipelineResult:
     intent, rt = route(ctx.question, has_history=bool(ctx.history))
 
+    if rt is Route.GUIDED:
+        return _guided_turn(ctx, intent, "general")
+    if rt is Route.SIMPLIFY:
+        last = next((text for role, text in reversed(ctx.history) if role == "assistant"), None)
+        return _guided_turn(ctx, intent, "simplify", last)
     named_upload = None
     if rt is Route.UPLOADED_DOCUMENT:
         if ctx.can_read_documents:
@@ -220,6 +259,8 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
             "Could you tell me a bit more about what you'd like to know? For example: \"What is the "
             'status of claim SYN-CLM-2026-000101?", "Show my plan benefits" or "What does a '
             'lumbar MRI prior authorization request need?"',
+            guide="general",
+            options=_help_options(ctx),
         )
     if rt is Route.CASE_TRACK:
         actions = [Action("VIEW_CASE", "Open Support cases", False, True)] if ctx.can_read_cases else []
@@ -254,6 +295,12 @@ def run(db: Session, settings: Settings, embedder: Embedder, generator: Generato
             )
         if matches:
             return _requirements_turn(db, ctx, intent, matches[0].procedure_code)
+        if is_authorization_process(ctx.question):
+            result = _procedure_choices(db, ctx, intent)
+            result.guide = "authorization"
+            return result
+        if is_generic_documents(ctx.question):
+            return _procedure_choices(db, ctx, intent)
         # No configured set matches: answer from documents (grounded), never invent a checklist.
     return _rag_turn(db, settings, embedder, generator, ctx, intent)
 
@@ -486,7 +533,7 @@ def _requirements_turn(db: Session, ctx: TurnContext, intent: str, procedure_cod
                 {"procedure_code": data["procedure_code"]},
             )
         ],
-        disclaimers=[SYNTHETIC_NOTE],
+        disclaimers=[SYNTHETIC_NOTE, data["disclaimer"]],
     )
 
 
@@ -928,6 +975,7 @@ def _finish(
         escalation_reason="CONFLICTING_INFORMATION" if conflict else None,
         actions=[case_offer(ctx, "CONFLICTING_INFORMATION", "KNOWLEDGE_GAP")] if conflict else [],
         disclaimers=disclaimers + ([RECORD_NOTE] if succeeded else []),
+        source_text=ctx.question,
         gap_topic=gap_topic(ctx.question) if conflict else None,
         retrieved_document_ids=sorted({str(i.candidate.document_id) for i in items}),
         retrieval_ms=retrieval_ms,

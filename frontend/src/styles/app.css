@@ -233,3 +233,16 @@ table.bars .bar { display: block; height: 12px; background: var(--teal-700); bor
 /* Phase 8 (D8-08): a <select> sizes to its longest option; keep every control within its container (360 px). */
 select, input, textarea { max-width: 100%; }
 .field:not(.field-inline) select { width: 100%; }
+
+/* Customer-friendly assistant */
+.language-select { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
+.language-select .chip[aria-pressed="true"] { font-weight: 600; }
+.chat-welcome { padding: var(--space-3); }
+.welcome-text { font-size: 1.05rem; line-height: 1.6; margin-bottom: var(--space-3); }
+.quick-actions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-2); }
+.quick-action { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); text-align: left; font: inherit; color: inherit; background: transparent; border: 1px solid currentColor; border-radius: 8px; cursor: pointer; }
+.quick-action:hover:not(:disabled) { font-weight: 600; }
+.message-tools { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; margin-top: var(--space-2); }
+.typing-indicator { display: flex; align-items: center; gap: var(--space-2); }
+.typing-dots { width: 1.5em; height: 0.5em; background: radial-gradient(circle closest-side, currentColor 90%, transparent) 0 50% / 33% 100% repeat-x; }
+.message-text { line-height: 1.6; }

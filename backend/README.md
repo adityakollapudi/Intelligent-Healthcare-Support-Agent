@@ -92,6 +92,8 @@ Interactive docs: `http://127.0.0.1:8000/docs`. OpenAPI JSON: `/api/v1/openapi.j
 
 **Readiness questions in chat.** "Is my uploaded document ready for prior authorization?" runs `check_document_readiness`: the same requirements and rules as a checklist, on the caller's own documents, read-only (nothing is saved). The procedure comes from the question or from the code stated in the document, and the assistant asks if neither gives one. Combined packets are recognised by their section headings. Reviewable checklists are still created on the PA readiness screen by providers.
 
+**Customer-friendly, multilingual answers.** `app/rag/friendly.py` runs after the pipeline and rewrites each result in plain language, in English, Telugu (`te`) and Hindi (`hi`), using wording from `friendly_text.py` and values only from tools and documents. `POST /chat` takes an optional `language`; text typed in Telugu or Hindi is answered in that language. Those questions are matched by keywords (`app/rag/language.py`) to questions the router already knows, and anything else gets guided help. `POST /chat/messages/{id}/translate` shows an earlier answer in another language. Passages quoted from documents stay in English unless `TRANSLATION_PROVIDER` is configured and approved (`app/services/translation.py`), which protects identifiers, dates and amounts. The Telugu and Hindi wording hasn't been reviewed by a medical or insurance translator.
+
 **Errors** use one format everywhere:
 ```json
 {"error": {"code": "RESOURCE_NOT_FOUND", "message": "The requested item was not found.", "details": [], "request_id": "…"}}
