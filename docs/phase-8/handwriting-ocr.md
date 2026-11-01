@@ -7,7 +7,7 @@ Customers can upload a photo or scan of a handwritten note. The system reads it 
 | Part | Project | Licence | Job |
 |---|---|---|---|
 | Line finding and printed text | [RapidOCR](https://github.com/RapidAI/RapidOCR) 3.10.0 | Apache-2.0 | Finds each line and reads it. Models ship inside the package. |
-| Handwriting | [TrOCR base handwritten](https://huggingface.co/microsoft/trocr-base-handwritten) | MIT | Reads any line RapidOCR scored below 0.97. If that's at least a quarter of the page's lines, it reads the whole page, because RapidOCR can be confident and wrong on handwriting. |
+| Handwriting | [TrOCR base handwritten](https://huggingface.co/microsoft/trocr-base-handwritten) | MIT | Reads the lines of any page with handwriting. RapidOCR is better on neat writing, labels and numbers, and TrOCR on cursive, so each line keeps the more credible reading. |
 
 The ONNX files come from [Xenova/trocr-base-handwritten](https://huggingface.co/Xenova/trocr-base-handwritten), pinned to revision `e301d1c`. That conversion has no licence tag of its own; the upstream model is MIT. Replace it with your own export before any use beyond this prototype.
 
@@ -36,6 +36,8 @@ Measured on 2026-11-01 on an Intel Core i5-1335U with no GPU. "Error" is mean ch
 
 The stacked-page row used the full decoder and the earlier line-by-line routing, so its error rate wasn't re-measured for the final setup. An end-to-end run through the API with the final setup completed with mean confidence 93.75, and it corrected misreadings such as "thinu" for "think".
 
+After the first release sent whole handwritten pages to TrOCR, printed headers and dates got worse, so each line now keeps the better reading. With the final setup, the same 8-line page has 3.5% error.
+
 ### What these numbers do not show
 
 - IAM is neat English handwriting. Doctors' handwriting is much harder, with abbreviations and medicine names the model wasn't trained on. Expect far worse results.
@@ -50,7 +52,7 @@ On a fictional handwritten prescription, the body came out well, including the s
 
 ## Safety behaviour
 
-- A word's confidence is its least likely token. Words below `OCR_MIN_WORD_CONFIDENCE` are marked `[?]` in chat answers and treated as illegible by field extraction.
+- A word's confidence is its least likely token, and a word the two readers disagree on counts as unclear, unless RapidOCR is almost certain of it. Words below `OCR_MIN_WORD_CONFIDENCE` are marked `[?]` in chat answers and treated as illegible by field extraction.
 - Every page with handwriting gets a warning, `OCR_HANDWRITING_NEEDS_CHECK` or `OCR_LOW_CONFIDENCE`, even when confidence is high, because a confident reading can still be the wrong word.
 - Chat answers tell the customer to check medicine names, doses and dates with a doctor or pharmacist. The Telugu and Hindi wording needs human review.
 - Extracted text stays in memory only, as for other documents.

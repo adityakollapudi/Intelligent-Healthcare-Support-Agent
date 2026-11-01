@@ -1,9 +1,10 @@
 """Reads printed and handwritten pages on this machine, so no page leaves it (doc 07 §5.2 step 3).
 
-RapidOCR (PP-OCR, Apache-2.0) finds the text lines and reads the printed ones. A line it isn't sure of
-goes to TrOCR (microsoft/trocr-base-handwritten, MIT), run through ONNX Runtime. TrOCR reads one line
-at a time and reports how likely each token was; a word's confidence is its least likely token, so a
-guessed medicine name can't hide behind the words around it."""
+RapidOCR (PP-OCR, Apache-2.0) finds the text lines and reads them. On a page with handwriting, TrOCR
+(microsoft/trocr-base-handwritten, MIT, run through ONNX Runtime) reads each line as well. RapidOCR
+does better on neat writing, labels and numbers, and TrOCR on cursive, so each line keeps whichever
+reading is more credible. A word the two readers disagree on is low confidence even if one of them
+was sure, so a misread medicine name gets flagged rather than passing as fact."""
 
 from __future__ import annotations
 
@@ -28,7 +29,14 @@ _END_TOKEN = 2  # TrOCR uses </s> both to start and to end a line
 _MAX_TOKENS = 48
 _WORD_START = "Ġ"
 _LINE_PADDING = 6
-_HANDWRITTEN_PAGE_SHARE = 0.25  # this share of unsure lines means the whole page is treated as handwriting
+_HANDWRITTEN_PAGE_SHARE = 0.25  # this share of unsure lines means the page has handwriting
+_ROW_GAP = 1.5  # pieces on one row closer than this many line heights are one line
+_MIN_TROCR_CHARS = 8  # TrOCR squashes each crop to a square, which ruins short labels
+_MAX_TROCR_DIGIT_SHARE = 0.3  # and it reads dates and identifiers poorly
+_TROCR_MARGIN = 0.05  # RapidOCR's scores run high, so TrOCR wins when it's within this of them
+_DISAGREED_CONFIDENCE = 55.0  # below the default OCR_MIN_WORD_CONFIDENCE
+_CERTAIN_SCORE = 0.995  # printed text scores this high, and TrOCR's garbled reading of it proves nothing
+_STRAY_MARKS = {"'", '"'}  # TrOCR adds these around words that have none
 
 
 def _load_image(png: bytes) -> np.ndarray:
@@ -53,8 +61,8 @@ def _crop(image: np.ndarray, box: np.ndarray) -> np.ndarray:
     return image[top:bottom, left:right]
 
 
-def _reading_order(boxes: list[np.ndarray]) -> list[int]:
-    """Top to bottom, then left to right among lines sitting on the same row (such as two-column headers)."""
+def _rows(boxes: list[np.ndarray]) -> list[list[int]]:
+    """Top to bottom, then left to right among lines sitting on the same row."""
     rows: list[list[int]] = []
     for index in sorted(range(len(boxes)), key=lambda i: boxes[i][:, 1].mean()):
         height = boxes[index][:, 1].max() - boxes[index][:, 1].min()
@@ -62,7 +70,7 @@ def _reading_order(boxes: list[np.ndarray]) -> list[int]:
             rows[-1].append(index)
         else:
             rows.append([index])
-    return [i for row in rows for i in sorted(row, key=lambda i: boxes[i][:, 0].min())]
+    return [sorted(row, key=lambda i: boxes[i][:, 0].min()) for row in rows]
 
 
 def _words(tokens: list[tuple[str, float]]) -> list[OcrWord]:
@@ -77,6 +85,31 @@ def _words(tokens: list[tuple[str, float]]) -> list[OcrWord]:
             words[-1].text += text
             words[-1].confidence = min(words[-1].confidence, probability * 100)
     return [w for w in words if w.text]
+
+
+def _key(word: str) -> str:
+    return "".join(c for c in word.lower() if c.isalnum())
+
+
+def _choose(printed: str, score: float, tokens: list[tuple[str, float]]) -> list[OcrWord]:
+    """Picks RapidOCR's or TrOCR's reading of one line and sets confidence from whether they agree."""
+    first = [OcrWord(w, score * 100) for w in printed.split()]
+    second = _words(tokens)
+    mean = sum(p for _, p in tokens) / len(tokens) if tokens else 0.0
+    digits = sum(c.isdigit() for c in printed) / max(len(printed), 1)
+    keep_first = len(printed) < _MIN_TROCR_CHARS or digits >= _MAX_TROCR_DIGIT_SHARE or mean < score - _TROCR_MARGIN
+    chosen, other = (first, second) if keep_first else (second, first)
+    others = {_key(w.text) for w in other}
+    if keep_first and score >= _CERTAIN_SCORE:
+        return chosen
+    chosen = [w for w in chosen if w.text not in _STRAY_MARKS]
+    for word in chosen:
+        key = _key(word.text)
+        if key in others:
+            word.confidence = max(word.confidence, score * 100)
+        elif key:
+            word.confidence = min(word.confidence, _DISAGREED_CONFIDENCE)
+    return chosen
 
 
 class LocalOcr:
@@ -123,21 +156,31 @@ class LocalOcr:
         if found.boxes is None or found.txts is None or found.scores is None:
             return OcrResult()
 
+        scores = [float(score) for score in found.scores]
+        boxes = list(found.boxes)
+        unsure = sum(score < self._printed_min_score for score in scores)
+        handwritten = unsure >= len(scores) * _HANDWRITTEN_PAGE_SHARE
         lines: list[list[OcrWord]] = []
-        handwritten = False
-        # RapidOCR can be confident and wrong on handwriting, so a mostly handwritten page skips it entirely.
-        unsure = sum(float(s) < self._printed_min_score for s in found.scores)
-        all_handwritten = unsure >= len(found.scores) * _HANDWRITTEN_PAGE_SHARE
-        for index in _reading_order(list(found.boxes)):
-            score = float(found.scores[index])
-            if score >= self._printed_min_score and not all_handwritten:
-                lines.append([OcrWord(w, score * 100) for w in found.txts[index].split()])
-                continue
-            if time.monotonic() > give_up:
-                raise OcrTimeoutError()
-            handwritten = True
-            tokens = self._read_line(_crop(image, found.boxes[index]), encoder, decoder, tokenizer)
-            lines.append(_words(tokens))
+        for row in _rows(boxes):
+            line: list[OcrWord] = []
+            previous = None
+            for index in row:
+                box = boxes[index]
+                height = box[:, 1].max() - box[:, 1].min()
+                if previous is not None and box[:, 0].min() - previous > height * _ROW_GAP:
+                    lines.append(line)
+                    line = []
+                previous = box[:, 0].max()
+                printed = found.txts[index].replace("\uff1a", ":")
+                if scores[index] >= self._printed_min_score and not handwritten:
+                    line += [OcrWord(w, scores[index] * 100) for w in printed.split()]
+                    continue
+                if time.monotonic() > give_up:
+                    raise OcrTimeoutError()
+                handwritten = True
+                tokens = self._read_line(_crop(image, box), encoder, decoder, tokenizer)
+                line += _choose(printed, scores[index], tokens)
+            lines.append(line)
         return OcrResult([line for line in lines if line], handwritten=handwritten)
 
     @staticmethod

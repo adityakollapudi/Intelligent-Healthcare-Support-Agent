@@ -11,7 +11,7 @@ from PIL import Image
 
 from app.core.config import get_settings
 from app.documents.extraction import LOW_QUALITY, OK, extract_pages
-from app.documents.handwriting import LocalOcr, _reading_order, _words
+from app.documents.handwriting import LocalOcr, _choose, _rows, _words
 from app.documents.ocr import OcrResult, OcrTimeoutError, OcrUnavailableError, OcrWord
 from app.rag.uploaded import mark_unclear
 
@@ -45,14 +45,41 @@ def test_a_word_is_as_trustworthy_as_its_least_likely_token():
 
 
 def test_clear_lines_stay_printed_and_unsure_lines_go_to_the_handwriting_model(monkeypatch):
-    texts = ["Patient: Test", "Plan: Gold", "Date: today", "Doctor: Rao", "scrawl"]
+    texts = ["Patient: Test", "Plan: Gold", "Date: today", "Doctor: Rao", "scrawled line"]
     result = _engine(_Found(texts, [0.99, 0.99, 0.99, 0.99, 0.5]), monkeypatch).recognize(_png(), 30)
     assert result.text == "\n".join([*texts[:4], "metformin 500"]) and result.handwritten
 
 
-def test_a_mostly_handwritten_page_ignores_the_printed_reader(monkeypatch):
-    result = _engine(_Found(["confident misread", "scrawl"], [0.99, 0.5]), monkeypatch).recognize(_png(), 30)
-    assert result.text == "metformin 500\nmetformin 500"
+def test_a_handwritten_page_is_read_by_both_and_keeps_the_better_line(monkeypatch):
+    tokens = (("\u0120metformin", 0.99), ("\u0120daily", 0.99))
+    engine = _engine(_Found(["metf0rmin daily", "scrawled line"], [0.98, 0.5]), monkeypatch, tokens)
+    result = engine.recognize(_png(), 30)
+    assert result.text == "metformin daily\nmetformin daily" and result.handwritten
+
+
+def test_short_labels_and_numbers_stay_with_the_printed_reader():
+    assert _choose("C/C:", 0.9, [("\u0120clc", 0.99)])[0].text == "C/C:"
+    assert [w.text for w in _choose("21/10/2026", 0.9, [("\u01202", 0.99), ("(", 0.99)])] == ["21/10/2026"]
+
+
+def test_certain_printed_text_is_not_flagged_by_a_garbled_second_reading():
+    assert _choose("City Care Clinic", 1.0, [("\u0120Lawrence", 0.2)])[0].confidence == 100
+
+
+def test_stray_quotes_from_the_handwriting_model_are_removed():
+    tokens = [("\u0120'", 0.95), ("\u0120low", 0.95), ("\u0120back", 0.95), ("\u0120pain", 0.95)]
+    assert [w.text for w in _choose("low back pain", 0.97, tokens)] == ["low", "back", "pain"]
+
+
+def test_a_much_less_certain_reading_loses():
+    tokens = [("\u0120something", 0.7), ("\u0120else", 0.7)]
+    assert [w.text for w in _choose("Tab. Naproxen daily", 0.98, tokens)] == ["Tab.", "Naproxen", "daily"]
+
+
+def test_words_the_readers_disagree_on_are_unclear_and_agreed_words_are_not():
+    tokens = [("\u0120Tab", 0.8), (".", 0.3), ("\u0120parac", 0.7), ("tonid", 0.7)]
+    words = _choose("Tab. Paracetamd", 0.98, tokens)
+    assert {w.text: w.confidence < 60 for w in words} == {"Tab.": False, "Paracetamd": True}
 
 
 def test_printed_page_is_not_flagged_as_handwriting(monkeypatch):
@@ -62,7 +89,7 @@ def test_printed_page_is_not_flagged_as_handwriting(monkeypatch):
 
 def test_two_column_rows_read_left_to_right():
     box = lambda x, y: np.array([[x, y], [x + 100, y], [x + 100, y + 30], [x, y + 30]], dtype=np.float32)  # noqa: E731
-    assert _reading_order([box(500, 12), box(10, 10), box(10, 80)]) == [1, 0, 2]
+    assert _rows([box(500, 12), box(10, 10), box(10, 80)]) == [[1, 0], [2]]
 
 
 def test_blank_page_reads_nothing(monkeypatch):
